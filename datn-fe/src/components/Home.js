@@ -1,12 +1,12 @@
-import addidas from "../static/images/adidas.jpg";
-import nike from "../static/images/nike.jpg";
-import puma from "../static/images/puma.jpg";
-import fila from "../static/images/fila.jpg";
+import addidas from "../static/images/operation/op_01.png";
+import nike from "../static/images/operation/op_02.png";
+import puma from "../static/images/operation/op_03.png";
+import fila from "../static/images/operation/op_04.png";
 import { NavLink } from "react-router-dom";
-import first from "../static/images/slider_1_image.jpg";
-import second from "../static/images/slider_2_image.jpg";
-import third from "../static/images/slider_4_image.jpg";
-import fourth from "../static/images/slider_5_image.jpg";
+import first from "../static/images/slide_Bar.jpg";
+import second from "../static/images/slide_Bar.jpg";
+import third from "../static/images/slide_Bar.jpg";
+import fourth from "../static/images/slide_Bar.jpg";
 import React, { useState, useEffect } from "react";
 import { getAllProducts } from "../api/ProductApi";
 
