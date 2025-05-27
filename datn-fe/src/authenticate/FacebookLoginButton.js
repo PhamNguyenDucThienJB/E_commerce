@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { toast } from "react-toastify";
 import { getMe, getAccountDetailByAccountId } from "../api/AccountApi";
 import axios from 'axios';
-import { FaFacebookF } from 'react-icons/fa';
+import { FaFacebook } from 'react-icons/fa';
 
 const FacebookLoginButton = ({ userHandler }) => {
   const history = useHistory();
@@ -74,7 +74,7 @@ const FacebookLoginButton = ({ userHandler }) => {
       className="btn-social btn-facebook"
       onClick={handleFacebookLogin}
     >
-      <FaFacebookF className="social-icon" />
+      <FaFacebook className="social-icon" />
     </button>
   );
 };

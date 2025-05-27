@@ -1,4 +1,4 @@
-package com.example.config;
+package com.poly.datn.be.config;
 
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -10,6 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.tcp.TcpClient;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
@@ -27,7 +28,7 @@ public class WebClientConfig {
         HttpClient httpClient = HttpClient.from(tcpClient)
                 .wiretap(true)
                 .keepAlive(true)
-                .responseTimeout(java.time.Duration.ofMillis(60000));
+                .responseTimeout(Duration.ofMillis(60000));
 
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))

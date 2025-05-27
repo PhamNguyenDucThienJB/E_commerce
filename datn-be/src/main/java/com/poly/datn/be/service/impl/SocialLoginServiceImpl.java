@@ -16,18 +16,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.retry.support.RetryTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDate;
 import java.util.UUID;
-import java.time.Duration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Service
 public class SocialLoginServiceImpl implements SocialLoginService {
-
-    private static final Logger log = LoggerFactory.getLogger(SocialLoginServiceImpl.class);
 
     @Autowired
     private AccountRepo accountRepo;
@@ -45,49 +39,40 @@ public class SocialLoginServiceImpl implements SocialLoginService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private RetryTemplate retryTemplate;
-
+    private WebClient webClient;
     @Autowired
-    private WebClient oauth2WebClient;
-
+    private RetryTemplate retryTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public String authenticateWithGoogle(String idToken) throws Exception {
-        try {
-            return retryTemplate.execute(context -> {
-                // Xác thực token với Google API
-                String googleUrl = "https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken;
-                String response = oauth2WebClient.get()
+        // Xác thực token với Google API
+        String googleUrl = "https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken;
+        String response = retryTemplate.execute(context ->
+                webClient.get()
                         .uri(googleUrl)
                         .retrieve()
                         .bodyToMono(String.class)
-                        .timeout(Duration.ofSeconds(30))
-                        .retry(3)
-                        .block();
+                        .block()
+        );
 
-                // Parse response
-                JsonNode root = objectMapper.readTree(response);
-                String email = root.get("email").asText();
-                String name = root.has("name") ? root.get("name").asText() : "";
+        // Parse response
+        JsonNode root = objectMapper.readTree(response);
+        String email = root.get("email").asText();
+        String name = root.has("name") ? root.get("name").asText() : "";
 
-                // Tìm hoặc tạo tài khoản cho người dùng
-                Account account = findOrCreateAccount(email, name);
+        // Tìm hoặc tạo tài khoản cho người dùng
+        Account account = findOrCreateAccount(email, name);
 
-                // Tạo JWT token cho người dùng
-                return jwtTokenProvider.generateToken(account.getUsername());
-            });
-        } catch (Exception e) {
-            log.error("Error during Google authentication: ", e);
-            throw new RuntimeException("Failed to authenticate with Google: " + e.getMessage());
-        }
+        // Tạo JWT token cho người dùng
+        return jwtTokenProvider.generateToken(account.getUsername());
     }
 
     @Override
     public String authenticateWithFacebook(String accessToken) throws Exception {
         // Lấy thông tin người dùng từ Facebook API
         String facebookUrl = "https://graph.facebook.com/me?fields=email,name&access_token=" + accessToken;
-        String response = oauth2WebClient.get()
+        String response = webClient.get()
                 .uri(facebookUrl)
                 .retrieve()
                 .bodyToMono(String.class)
