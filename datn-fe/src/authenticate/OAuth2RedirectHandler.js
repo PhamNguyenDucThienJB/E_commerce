@@ -36,11 +36,15 @@ const OAuth2RedirectHandler = (props) => {
                     localStorage.setItem("username", res.data.username);
                     toast.success("Đăng nhập thành công!");
                     history.push("/");
+                    // Scroll to top after redirect
+                    window.scrollTo(0, 0);
                 })
                 .catch((error) => {
                     console.log(error);
                     toast.error("Đăng nhập thất bại!");
                     history.push("/sign-in");
+                    // Scroll to top on failure redirect
+                    window.scrollTo(0, 0);
                 });
         } else {
             toast.error("Đăng nhập thất bại!");
