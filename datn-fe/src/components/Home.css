@@ -1,0 +1,264 @@
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --accent-color: #ffc107;
+  --bg-light: #f8f9fa;
+}
+
+.product-section {
+  background-color: var(--bg-light);
+  padding: 60px 0;
+}
+
+.section-title {
+  font-size: 1.75rem;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  margin-bottom: 30px;
+  color: var(--secondary-color);
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  display: block;
+  width: 80px;
+  height: 4px;
+  background-color: var(--primary-color);
+  margin: 10px auto 0;
+}
+
+.product-grid .mini-pro {
+  border: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-grid .mini-pro:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.product-grid .mini-card img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.product-grid .card-body {
+  text-align: center;
+}
+
+/* Fashion card styling */
+.fashion-card {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: #fff;
+}
+
+.fashion-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+.fashion-card-img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  display: block;
+}
+
+.badge-new {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--accent-color);
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  text-transform: uppercase;
+}
+
+.badge-sale {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #dc3545;
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  text-transform: uppercase;
+}
+
+/* Hero carousel style similar to reference site */
+.hero-carousel {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+.hero-carousel .carousel-inner img {
+  width: 100%;
+  height: 600px;
+  object-fit: cover;
+}
+.hero-carousel .carousel-caption {
+  position: absolute;
+  bottom: 20%;
+  left: 10%;
+  background: rgba(0,0,0,0.5);
+  padding: 20px;
+  color: #fff;
+  max-width: 400px;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Updated product card for fashion site style */
+.product-card {
+  border: none;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+.product-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+.product-card-details {
+  padding: 15px;
+  text-align: center;
+}
+.product-card-title {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  margin: 10px 0 5px;
+  color: var(--secondary-color);
+}
+.product-card-price {
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+.product-card .btn {
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .hero-carousel .carousel-inner img {
+    height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-carousel .carousel-inner img {
+    height: 300px;
+  }
+  .section-title {
+    font-size: 1.25rem;
+    margin-bottom: 20px;
+  }
+  .product-image {
+    height: 200px;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-carousel .carousel-inner img {
+    height: 200px;
+  }
+  .section-title {
+    font-size: 1rem;
+    margin-bottom: 15px;
+  }
+  .product-image {
+    height: 150px;
+  }
+  .product-card-details {
+    padding: 10px;
+  }
+  .product-card-title {
+    font-size: 0.8rem;
+  }
+  .product-card-price {
+    font-size: 0.9rem;
+  }
+  /* Pagination scrollable on mobile */
+  .pagination {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 0 10px;
+  }
+  .pagination .page-item {
+    flex: 0 0 auto;
+  }
+}
+
+/* Center section titles */
+.row.welcome {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Pagination Styling */
+.pagination {
+  margin: 20px auto;
+}
+.pagination .page-item .page-link {
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 4px;
+  border: 1px solid #ddd;
+  color: var(--primary-color);
+  background-color: #fff;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.pagination .page-item.active .page-link {
+  background-color: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+}
+.pagination .page-item .page-link:hover {
+  background-color: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+}
+.pagination .page-item.disabled .page-link {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Ensure pagination is responsive horizontally */
+@media (max-width: 576px) {
+  .pagination {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 0 10px;
+  }
+  .pagination .page-item {
+    flex: 0 0 auto;
+  }
+} 
