@@ -15,8 +15,16 @@ const Register = () => {
   } = useForm();
 
   const onSubmitHandler = (data) => {
+    // Default address to 'Không có' if left blank to satisfy backend validation
+    const addressValue = data.address && data.address.trim() !== "" ? data.address : "Không có";
     const result = {
-      ...data,
+      username: data.username,
+      password: data.password,
+      fullName: data.fullName,
+      gender: data.gender,
+      phone: data.phone,
+      email: data.email,
+      address: addressValue,
       roleId: "3",
     };
     console.log(result);

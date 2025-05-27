@@ -24,6 +24,7 @@ import Blog from "../components/blog/Blog";
 import Chat from "../components/chat/Chat";
 import ForgotPassword from "../authenticate/ForgotPassword";
 import Profile from "../authenticate/Profile";
+import OAuth2RedirectHandler from "../authenticate/OAuth2RedirectHandler";
 
 const UserLayOut = () => {
   const [show, setShow] = useState(false);
@@ -214,6 +215,9 @@ const UserLayOut = () => {
         </Route>
         <Route path="/profile" exact>
           <Profile user={user} refresh={refresh} userHandler={userHandler}></Profile>
+        </Route>
+        <Route path="/oauth2/redirect" exact>
+          <OAuth2RedirectHandler userHandler={userHandler} />
         </Route>
       </Switch>
       <Footer></Footer>
