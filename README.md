@@ -23,8 +23,11 @@ Dự án xây dựng một website thương mại điện tử hỗ trợ ngư�
 
 ## ⚙️ Các chức năng chính
 - [x] Đăng ký / Đăng nhập người dùng
+- [x] Đăng nhập bằng Facebook
+- [x] Đăng nhập bằng Google
+- [x] Thanh toán trức tuyến bằng Paypal
 - [x] Quản lý sản phẩm
-- [x] Giỏ hàng và thanh toán
+- [x] Giỏ hàng 
 - [x] Mã giảm giá (Coupons)
 - [x] Gửi email xác nhận đơn hàng
 - [x] Trang quản trị (Admin Panel)
