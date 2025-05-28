@@ -6,8 +6,10 @@ import { Link, NavLink } from "react-router-dom";
 import {
   reportByProduct,
   reportAmountYear,
+  reportAmountMonth,
   countOrder,
   countOrderByName,
+  reportAmountCategory
 } from "../../api/OrderApi";
 import { countAccount } from "../../api/AccountApi";
 import { countProduct } from "../../api/ProductApi";
@@ -21,6 +23,16 @@ const Dashboard = () => {
   const [countPro, setCountPro] = useState();
   const [seri, setSeri] = useState([]);
   const [option, setOption] = useState({});
+  const [selectedYearBar, setSelectedYearBar] = useState(null);
+  const [barSeries, setBarSeries] = useState([]);
+  const [barOptions, setBarOptions] = useState({});
+  const [selectedYearCat, setSelectedYearCat] = useState(null);
+  const [selectedMonthCat, setSelectedMonthCat] = useState(new Date().getMonth() + 1);
+  const [catSeries, setCatSeries] = useState([]);
+  const [catOptions, setCatOptions] = useState({});
+  const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1);
+  const currentYear = new Date().getFullYear();
+  const [yearOptions, setYearOptions] = useState([]);
 
   useEffect(() => {
     reportByProduct(1, 8)
@@ -34,6 +46,17 @@ const Dashboard = () => {
         setYear(resp.data);
         const result = resp.data.reduce((price, item) => price + item.total, 0);
         setTotal(result);
+        // Build year options from earliest API year to current year
+        const apiYears = resp.data.map(item => item.year);
+        const minYear = Math.min(...apiYears, currentYear);
+        const options = [];
+        for (let y = minYear; y <= currentYear; y++) {
+          options.push(y);
+        }
+        setYearOptions(options);
+        // Default selections to current year
+        setSelectedYearBar(currentYear);
+        setSelectedYearCat(currentYear);
       })
       .catch((error) => console.log(error));
 
@@ -60,6 +83,34 @@ const Dashboard = () => {
       })
       .catch((error) => console.log(error));
   }, []);
+
+  useEffect(() => {
+    if (selectedYearBar) {
+      reportAmountMonth(selectedYearBar)
+        .then((resp) => {
+          const data = resp.data.sort((a, b) => a.month - b.month);
+          const categories = data.map((item) => `Tháng ${item.month}`);
+          const seriesData = data.map((item) => item.total);
+          setBarOptions({ chart: { id: 'bar-chart' }, xaxis: { categories } });
+          setBarSeries([{ name: 'Doanh thu', data: seriesData }]);
+        })
+        .catch((error) => console.log(error));
+    }
+  }, [selectedYearBar]);
+
+  useEffect(() => {
+    if (selectedYearCat && selectedMonthCat) {
+      reportAmountCategory(selectedYearCat, selectedMonthCat)
+        .then((resp) => {
+          const data = resp.data;
+          const labels = data.map((item) => item.categoryName);
+          const seriesData = data.map((item) => item.total);
+          setCatOptions({ labels });
+          setCatSeries(seriesData);
+        })
+        .catch((error) => console.log(error));
+    }
+  }, [selectedYearCat, selectedMonthCat]);
 
   return (
     <div>
@@ -170,6 +221,45 @@ const Dashboard = () => {
               <NavLink exact to={`/report-month/2022`}>
                 Xem chi tiết
               </NavLink>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col-6">
+          <div className="card">
+            <div className="card__header d-flex justify-content-between align-items-center">
+              <h3 className="text-primary">Doanh thu theo tháng</h3>
+              <select className="form-select w-auto" value={selectedYearBar} onChange={e => setSelectedYearBar(parseInt(e.target.value))}>
+                {yearOptions.map(y => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </div>
+            <div className="card__body">
+              <Chart options={barOptions} series={barSeries} type="bar" height="350" />
+            </div>
+          </div>
+        </div>
+        <div className="col-6">
+          <div className="card full-height">
+            <div className="card__header d-flex justify-content-between align-items-center">
+              <h3 className="text-primary">Doanh thu theo danh mục</h3>
+              <div className="d-flex">
+                <select className="form-select w-auto me-2" value={selectedYearCat} onChange={e => setSelectedYearCat(parseInt(e.target.value))}>
+                  {yearOptions.map(y => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
+                <select className="form-select w-auto" value={selectedMonthCat} onChange={e => setSelectedMonthCat(parseInt(e.target.value))}>
+                  {monthOptions.map(m => (
+                    <option key={m} value={m}>{`Tháng ${m}`}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="card__body">
+              <Chart options={catOptions} series={catSeries} type="donut" height="100%" />
             </div>
           </div>
         </div>

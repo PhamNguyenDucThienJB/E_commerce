@@ -556,13 +556,11 @@ const Checkout = (props) => {
                 <label className="form-check-label">Thanh toán qua PayPal</label>
 
         </div>
-                  <button
-                    className="btn btn-primary btn-lg mt-5 mb-5"
-              type="submit"
-              style={{ marginLeft: 680 }}
-            >
-              Đặt hàng
-            </button>
+                  <div className="d-flex justify-content-center mt-5 mb-5">
+                    <button className="btn btn-primary btn-lg" type="submit">
+                      Đặt hàng
+                    </button>
+                  </div>
           </form>
         </div>
       </div>

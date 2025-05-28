@@ -10,6 +10,7 @@ import {
   updateProcess,
   updateShip,
   updateSuccess,
+  deleteOrder
 } from "../../api/OrderApi";
 import "../table/table.css";
 import Badge from "../badge/Badge";
@@ -147,6 +148,10 @@ const Order = () => {
   const [to, setTo] = useState("");
   const [temp, setTemp] = useState();
   const [attribute, setAttribute] = useState([]);
+
+  // state for delete confirmation modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   var rows = new Array(total).fill(0).map((zero, index) => (
     <li
@@ -372,6 +377,13 @@ const Order = () => {
     const { checked } = e.target;
     setFlagSuccess(checked);
   };
+
+  const handleDelete = (id) => {
+    // open delete confirmation modal
+    setDeleteTarget(id);
+    setShowDeleteModal(true);
+  };
+
   return (
     <div className="col-12">
       <div className="card">
@@ -498,7 +510,7 @@ const Order = () => {
                           content={"Đã hủy"}
                         />
                       </th>
-                      <th scope="col">#</th>
+                      <th scope="col">Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -602,18 +614,21 @@ const Order = () => {
                             </div>
                           </th>
                           <th>
+                            {/* Edit button, only if editable */}
                             {item.orderStatus.id !== 4 &&
-                            item.orderStatus.id !== 3 &&
-                            item.orderStatus.id !== 5 ? (
+                             item.orderStatus.id !== 3 &&
+                             item.orderStatus.id !== 5 && (
                               <NavLink to={`/order-detail/${item.id}`} exact>
-                                <i
-                                  className="fa fa-pencil-square-o"
-                                  aria-hidden="true"
-                                ></i>
+                                <i className="fa fa-pencil-square-o fa-lg" aria-hidden="true"></i>
                               </NavLink>
-                            ) : (
-                              ""
                             )}
+                            {/* Delete button always shown */}
+                            <button
+                              className="btn btn-link text-danger p-0 ms-2"
+                              onClick={() => handleDelete(item.id)}
+                            >
+                              <i className="fa fa-trash fa-lg"></i>
+                            </button>
                           </th>
                         </tr>
                       ))}
@@ -841,6 +856,29 @@ const Order = () => {
           </Button>
           <Button variant="primary" onClick={handleCloseFouth}>
             Đóng
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      // delete confirmation modal
+      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Xác nhận xóa?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Bạn có chắc muốn xóa đơn hàng #OD{deleteTarget}?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="danger" onClick={() => {
+            deleteOrder(deleteTarget)
+              .then(() => { toast.success('Xóa đơn hàng thành công!'); onLoad(); })
+              .catch(() => toast.error('Xóa đơn hàng thất bại!'))
+              .finally(() => { setShowDeleteModal(false); setDeleteTarget(null); });
+          }}>
+            Xóa
+          </Button>
+          <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            Hủy
           </Button>
         </Modal.Footer>
       </Modal>
