@@ -221,11 +221,11 @@ const UserLayOut = () => {
 
       <div id="scroll">
         <Button variant="primary" onClick={handleShow}>
-          Hướng dẫn chọn size
+          Hướng dẫn chọn size áo
         </Button>
         <Modal show={show} onHide={handleClose}>
           <Modal.Header closeButton>
-            <Modal.Title>Hướng dẫn chọn size</Modal.Title>
+            <Modal.Title>Hướng dẫn chọn size áo</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <Form>
@@ -233,7 +233,7 @@ const UserLayOut = () => {
                 className="mb-3"
                 controlId="exampleForm.ControlInput1"
               >
-                <Form.Label>Nhập chiều dài bàn chân(mm)</Form.Label>
+                <Form.Label>Nhập chiều cao (cm)</Form.Label>
                 <Form.Control
                   type="number"
                   min={220}

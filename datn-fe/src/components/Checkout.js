@@ -538,7 +538,7 @@ const Checkout = (props) => {
                   <p>Ví dụ: 01234 - 0987654321</p>
                   <p>Thông tin tài khoản:</p>
                   <p>
-                    Phạm Nguyễn Đức Thiện - stk: 04136519801 - BIDV chi nhánh Hà Nội
+                    Phạm Nguyễn Đức Thiện - stk: 04136519801 - BIDV chi nhánh Đông Sài Gòn
                   </p>
                 </div>
               )}

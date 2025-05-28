@@ -5,114 +5,114 @@ import "./sidebar/sidebar.css";
 
 const brands = [
   {
-    display_name: "PUMA",
+    display_name: "Nam",
     value: "1",
     icon: "bx bx-category-alt",
   },
   {
-    display_name: "REEBOK",
+    display_name: "Nữ",
     value: "2",
     icon: "bx bx-category-alt",
   },
   {
-    display_name: "NIKE",
+    display_name: "Trẻ Em",
     value: "3",
     icon: "bx bx-category-alt",
   },
-  {
-    display_name: "ADIDAS",
-    value: "4",
-    icon: "bx bx-category-alt",
-  },
-  {
-    display_name: "FILA",
-    value: "5",
-    icon: "bx bx-category-alt",
-  },
-  {
-    display_name: "CONVERSE",
-    value: "6",
-    icon: "bx bx-category-alt",
-  },
-  {
-    display_name: "LI-NING",
-    value: "7",
-    icon: "bx bx-category-alt",
-  },
+  // {
+  //   display_name: "ADIDAS",
+  //   value: "4",
+  //   icon: "bx bx-category-alt",
+  // },
+  // {
+  //   display_name: "FILA",
+  //   value: "5",
+  //   icon: "bx bx-category-alt",
+  // },
+  // {
+  //   display_name: "CONVERSE",
+  //   value: "6",
+  //   icon: "bx bx-category-alt",
+  // },
+  // {
+  //   display_name: "LI-NING",
+  //   value: "7",
+  //   icon: "bx bx-category-alt",
+  // },
 ];
 const categories = [
   {
-    display_name: "Giày nam",
+    display_name: "Màu Đen",
     value: "1",
     icon: "bx bx-category-alt",
   },
   {
-    display_name: "Giày nữ",
+    display_name: "Màu Trắng",
     value: "2",
     icon: "bx bx-category-alt",
   },
   {
-    display_name: "Giày trẻ em",
+    display_name: "Phối Màu",
     value: "3",
     icon: "bx bx-category-alt",
   },
-  {
-    display_name: "Giày đá bóng",
-    value: "4",
-    icon: "bx bx-category-alt",
-  },
-  {
-    display_name: "Giày thời trang",
-    value: "5",
-    icon: "bx bx-category-alt",
-  },
-  {
-    display_name: "Giày bóng rổ",
-    value: "6",
-    icon: "bx bx-category-alt",
-  },
-  {
-    display_name: "Giày chạy bộ",
-    value: "7",
-    icon: "bx bx-category-alt",
-  },
+  // {
+  //   display_name: "Giày đá bóng",
+  //   value: "4",
+  //   icon: "bx bx-category-alt",
+  // },
+  // {
+  //   display_name: "Giày thời trang",
+  //   value: "5",
+  //   icon: "bx bx-category-alt",
+  // },
+  // {
+  //   display_name: "Giày bóng rổ",
+  //   value: "6",
+  //   icon: "bx bx-category-alt",
+  // },
+  // {
+  //   display_name: "Giày chạy bộ",
+  //   value: "7",
+  //   icon: "bx bx-category-alt",
+  // },
 ];
 
 const prices = [
+  // {
+  //   display_name: "Dưới 1 triệu",
+  //   value: "0",
+  //   icon: "bx bx-category-alt",
+  //   min: 0,
+  //   max: 1000000,
+  // },
   {
-    display_name: "Dưới 1 triệu",
+    display_name: "5000.000- 1.000.000",
     value: "0",
     icon: "bx bx-category-alt",
-    min: 0,
+    min: 500000,
     max: 1000000,
   },
   {
-    display_name: "1.000.000 - 2.000.000",
+    display_name: "300.000 - 500.000",
     value: "1",
     icon: "bx bx-category-alt",
-    min: 1000000,
-    max: 2000000,
+    min: 300000,
+    max: 500000,
   },
   {
-    display_name: "2.000.000 - 3.000.000",
+    display_name: "200.000 - 300.000",
     value: "2",
     icon: "bx bx-category-alt",
-    min: 2000000,
-    max: 3000000,
+    min: 200000,
+    max: 300000,
   },
   {
-    display_name: "3.000.000 - 4.000.000",
+    display_name: "Trên 1 triệu",
     value: "3",
     icon: "bx bx-category-alt",
-    min: 3000000,
-    max: 4000000,
-  },
-  {
-    display_name: "Trên 4 triệu",
-    value: "4",
-    icon: "bx bx-category-alt",
-    min: 4000000,
-    max: 10000000,
+    min: 1000000,
+    max: 100000000,
   },
 ];
 
@@ -143,6 +143,7 @@ const Product = (props) => {
   ));
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (category.length === 0 && brand.length === 0 && price.length === 0) {
       getAllProducts(page, count, true).then((response) => {
         setProducts(response.data.content);
@@ -215,9 +216,9 @@ const Product = (props) => {
     <div>
       <div className="mt-5">
         <div className="row">
-          <div className="col-2.5">
+          <div className="col-2.5" style={{ position: "sticky", top: "100px", zIndex: 10 }}>
             <div className="col mini-card">
-              <h4 className="text-danger fw-bolder">Thương hiệu</h4>
+              <h4 className="text-danger fw-bolder">Loại</h4>
               <ul className="list-group">
                 {brands.map((item, index) => (
                   <div
@@ -240,7 +241,7 @@ const Product = (props) => {
               </ul>
             </div>
             <div className="col mini-card">
-              <h4 className="text-danger fw-bolder">Loại sản phẩm</h4>
+              <h4 className="text-danger fw-bolder">Màu Sắc</h4>
               <ul className="list-group">
                 {categories.map((item, index) => (
                   <div

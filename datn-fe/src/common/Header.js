@@ -110,17 +110,21 @@ const Header = (props) => {
                 Sản phẩm
               </NavLink>
             </li>
-            <li
-              className={
-                props.header === 3
-                  ? "nav-item mr-2  mini-item active"
-                  : "nav-item mr-2  mini-item"
-              }
-            >
-              <NavLink className="nav-link" to="/cart" exact>
-                Giỏ hàng
-              </NavLink>
-            </li>
+              <li
+                className={
+                  props.header === 3
+                    ? "nav-item mr-2 mini-item active position-relative"
+                    : "nav-item mr-2 mini-item position-relative"
+                }
+              >
+                <NavLink className="nav-link position-relative" to="/cart" exact>
+                  <i className="fa fa-shopping-cart fa-lg"></i>
+                  {props.cartItems && props.cartItems.length > 0 && (
+                    <span className="cart-badge">{props.cartItems.length}</span>
+                  )}
+                </NavLink>
+              </li>
+           
             {props.user && (
               <li
                 className={
@@ -153,9 +157,9 @@ const Header = (props) => {
                   : "nav-item mr-2  mini-item"
               }
             >
-              <NavLink className="nav-link" to="/chat" exact>
+              {/* <NavLink className="nav-link" to="/chat" exact>
                 Hỏi đáp
-              </NavLink>
+              </NavLink> */}
             </li>
             )}
           </ul>

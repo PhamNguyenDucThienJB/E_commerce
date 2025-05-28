@@ -4,9 +4,9 @@ import puma from "../static/images/operation/op_03.png";
 import fila from "../static/images/operation/op_04.png";
 import { NavLink } from "react-router-dom";
 import first from "../static/images/slide_Bar.jpg";
-import second from "../static/images/slide_Bar.jpg";
-import third from "../static/images/slide_Bar.jpg";
-import fourth from "../static/images/slide_Bar.jpg";
+import second from "../static/images/slide_09.jpg";
+import third from "../static/images/slide_07.jpg";
+import fourth from "../static/images/slide_06.jpg";
 import React, { useState, useEffect } from "react";
 import { getAllProducts } from "../api/ProductApi";
 

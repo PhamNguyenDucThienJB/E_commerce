@@ -38,6 +38,7 @@ const ProductDetail = (props) => {
 
   useEffect(() => {
     onLoad();
+    window.scrollTo(0, 0);
   }, [id]);
 
   const onLoad = () => {
@@ -193,7 +194,7 @@ const ProductDetail = (props) => {
                     </h6>
                     <hr />
                     <div className="div">
-                      <label className="mr-5">Chọn size</label>
+                      <label className="mr-5">Chọn size áo</label>
                       {attributes.map((i, index) => (
                         <div
                           className="form-check form-check-inline"
@@ -216,9 +217,10 @@ const ProductDetail = (props) => {
                     <div className="mt-5">
                       <button
                         className="btn btn-outline-dark"
-                        onClick={() => addCount(count + 1)}
+                        onClick={() => addCount(count - 1)}
+                        disabled={count == 1}
                       >
-                        +
+                        -
                       </button>
                       <input
                       className="text-center"
@@ -231,10 +233,9 @@ const ProductDetail = (props) => {
                       />
                       <button
                         className="btn btn-outline-dark"
-                        onClick={() => addCount(count - 1)}
-                        disabled={count == 1}
+                        onClick={() => addCount(count + 1)}
                       >
-                        -
+                        +
                       </button>
                     </div>
                     <hr />
