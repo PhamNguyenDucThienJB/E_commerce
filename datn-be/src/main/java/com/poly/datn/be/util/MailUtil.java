@@ -30,7 +30,7 @@ public class MailUtil {
         StringBuilder sb = new StringBuilder()
                 .append("<div style='font-family: Arial, sans-serif; max-width: 500px; padding: 20px; border: 1px solid #ddd; border-radius: 8px;'>")
                 .append("<h2 style='color: #333; text-align: center;'>🛍️ Xác nhận đơn hàng</h2>")
-                .append("<p style='font-size: 16px;'>Cảm ơn bạn đã đặt hàng tại <b>SneakerHead</b>! Dưới đây là thông tin đơn hàng của bạn:</p>")
+                .append("<p style='font-size: 16px;'>Cảm ơn bạn đã đặt hàng tại <b>S&A (Sustainable fashion)</b>! Dưới đây là thông tin đơn hàng của bạn:</p>")
                 .append("<hr style='border: 1px solid #ddd;'/>")
                 .append("<p><b>Đơn hàng:</b> #" + order.getId() + "</p>")
                 .append("<p><b>Tổng tiền:</b> " + order.getTotal() + " VNĐ</p>")
@@ -73,7 +73,7 @@ public class MailUtil {
                 .append("Số lần sử dụng: " + voucher.getCount()).append("<br/>")
                 .append("Hạn sử dụng: " + voucher.getExpireDate()).append("<br/>")
                 .append("Giảm giá: " + voucher.getDiscount() + " %").append("<br/>");
-        msg.setSubject("Cửa hàng giày SneakerHead thông báo");
+        msg.setSubject("🛍️ Cửa hàng S&A (Sustainable fashion) thông báo");
         msg.setContent(sb.toString(), "text/html; charset=utf-8");
         msg.setSentDate(new Date());
         Transport.send(msg);
@@ -95,10 +95,51 @@ public class MailUtil {
         msg.setFrom(new InternetAddress("thienpham0712@gmail.com", false));
 
         msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(receive));
-        msg.setSubject("Công Minh Idol thông báo");
+        msg.setSubject("🛍️ Cửa hàng S&A (Sustainable fashion) thông báo");
         msg.setContent("New Pasword: " + password, "text/html");
         msg.setSentDate(new Date());
 
         Transport.send(msg);
     }
+    public static void sendVerificationEmail(String toEmail, String token) throws MessagingException {
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+
+        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication("thienpham0712@gmail.com", "neoa yxdj dsme xzbf");
+            }
+        });
+
+        Message msg = new MimeMessage(session);
+        msg.setFrom(new InternetAddress("thienpham0712@gmail.com", false));
+        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+        msg.setSubject("📧 Xác minh đăng ký tài khoản - S&A Fashion");
+
+        String verificationLink = "http://localhost:3000/verifyPage?token=" + token;
+
+        String content = "<div style='font-family: Arial, sans-serif; max-width: 500px; padding: 20px; border: 1px solid #ddd; border-radius: 8px;'>"
+                + "<h3 style='text-align: center;'>📧 Xác minh đăng ký tài khoản</h3>"
+                + "<p>Chào bạn,</p>"
+                + "<p>Bạn đã đăng ký tài khoản tại <b>S&A Fashion</b>. Vui lòng xác minh email bằng cách nhấn vào liên kết dưới đây:</p>"
+                + "<p style='text-align: center;'>"
+                + "<a href='" + verificationLink + "' style='background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;'>Xác minh tài khoản</a>"
+                + "</p>"
+                + "<p style='color: #d9534f; font-weight: bold; text-align: center;'>⚠️ Lưu ý: Liên kết xác minh sẽ hết hạn sau 30 phút kể từ thời điểm gửi.</p>"
+                + "<p>Nếu bạn không thực hiện yêu cầu này, hãy bỏ qua email này.</p>"
+                + "<hr style='border: none; border-top: 1px solid #eee;'/>"
+                + "<p style='font-size: 12px; color: #888;'>Email này được gửi tự động. Vui lòng không trả lời.</p>"
+                + "</div>";
+
+
+        msg.setContent(content, "text/html; charset=utf-8");
+        msg.setSentDate(new Date());
+
+        Transport.send(msg);
+    }
+
+
 }

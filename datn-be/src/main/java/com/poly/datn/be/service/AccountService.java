@@ -34,8 +34,13 @@ public interface AccountService {
 
     RespAccountDto register(ReqRegisterAccountDto reqRegisterAccountDto);
     Integer countAccount();
-
+//    Verify Email
+//    Account verifyEmailToken(String token);
+    void verifyTokenAndReturnEmail(String token);
+    void createVerificationToken(String email);
     @Transactional
     void forgotPassword(ReqForgotPasswordDto reqForgotPasswordDto) throws MessagingException;
     AccountDetail update(ReqUpdateAccountDetailDto reqUpdateAccountDetailDto);
+
+    String findUsernameByEmail(String email);
 }

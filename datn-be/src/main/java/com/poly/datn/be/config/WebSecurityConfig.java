@@ -30,7 +30,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String[] PUBLIC_MATCHERS = {
             "/api/site/**",
             "/api/payment/**",
-            "/api/site/pay/**"
+            "/api/site/pay/**",
+            "/api/verify-email/**"
+//            "api/site/product/get-all/**"
     };
     private static final String[] PRIVATE_ADMIN = {
             "/api/admin/**"
