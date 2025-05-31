@@ -1,18 +1,24 @@
-import React from "react";
+import React, { useState, useEffect }from "react";
 import "./register.css";
 import { NavLink, useHistory } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { registerAccount } from "../api/AuthenticateApi";
 
+
+
+
 const Register = () => {
   const history = useHistory();
+  const [savedEmail, setSavedEmail] = useState("");
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
+    const {
+      register,
+      handleSubmit,
+      formState: { errors },
+      setValue,
+    } = useForm();
+
 
   const onSubmitHandler = (data) => {
     const result = {
@@ -27,6 +33,15 @@ const Register = () => {
       })
       .catch((error) => toast.error(error.response.data.Errors));
   };
+useEffect(() => {
+  const emailFromStorage = localStorage.getItem("verifyEmail");
+  if (emailFromStorage) {
+    setSavedEmail(emailFromStorage);
+    setValue("email", emailFromStorage); // 🛠️ Quan trọng
+  }
+}, [setValue]);
+
+
   return (
     <div>
       {" "}
@@ -157,15 +172,15 @@ const Register = () => {
                       <div className="col-md-6 mb-4 pb-2">
                         <div className="form-outline">
                           <input
-                            type="text"
-                            id="emailAddress"
-                            className="form-control form-control-lg"
-                            {...register("email", {
-                              required: true,
-                              pattern:
-                                /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                            })}
-                          />
+                                type="text"
+                                id="emailAddress"
+                                className="form-control form-control-lg"
+                                readOnly
+                                {...register("email", {
+                                  required: true,
+                                  pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                })}
+                              />
                           <label className="form-label" htmlFor="emailAddress">
                             Email
                           </label>

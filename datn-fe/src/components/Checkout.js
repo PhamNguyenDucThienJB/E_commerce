@@ -4,7 +4,7 @@ import { getCartItemByAccountId } from "../api/CartApi";
 import { useForm } from "react-hook-form";
 import { createOrder } from "../api/OrderApi";
 import { toast } from "react-toastify";
-import { NavLink, useHistory } from "react-router-dom";
+import { NavLink, useHistory  } from "react-router-dom";
 import { getVoucherByCode } from "../api/VoucherApi";
 import Spinner from "./spinner/Spinner";
 import { Button } from "react-bootstrap";
@@ -27,7 +27,8 @@ const Checkout = (props) => {
   const [paypalPaid, setPaypalPaid] = useState(false);
   const exchangeRate = 25000;
   const amountUSD = amount ? (amount / exchangeRate).toFixed(2) : 0;
-  
+
+
 
   function formatVND(amount) {
     return Math.ceil(amount).toLocaleString("vi-VN", {
@@ -596,8 +597,9 @@ const Checkout = (props) => {
                             
                                 const totalUSD = details.purchase_units[0].amount.value; // Lấy số tiền USD
                             
-                                // Chuyển đổi USD sang VND
-                                const totalVND = await convertUSDtoVND(totalUSD);
+                            
+                                // ✅ Chuyển đổi và làm tròn VND
+                                const totalVND = Math.round((await convertUSDtoVND(totalUSD)) / 1000) * 1000;
                             
                                 // Chuẩn bị dữ liệu đơn hàng
                                 const orderData = {
@@ -628,7 +630,8 @@ const Checkout = (props) => {
                                 handleCloseFirst();
                                 console.log(`Số tiền PayPal (USD): ${totalUSD}`);
                                 console.log(`Số tiền lưu vào DB (VND): ${totalVND}`);
-
+                                history.push("/order");
+ 
                               } catch (error) {
                                 toast.error("Lỗi khi tạo đơn hàng!");
                                 console.error(error);

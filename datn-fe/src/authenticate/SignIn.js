@@ -59,10 +59,10 @@ const SignIn = (props) => {
                           type="text"
                           id="typeEmailX"
                           className="form-control form-control-lg"
-                          {...register("username", {
-                            required: true,
-                            pattern: /^\s*\S+.*/,
-                          })}
+                          {...register("email", {
+                              required: true,
+                              pattern: /^\s*\S+@\S+\.\S+$/, // Regex cơ bản cho email
+                            })}
                         />
                         <label className="form-label" htmlFor="typeEmailX">
                           Tài khoản
