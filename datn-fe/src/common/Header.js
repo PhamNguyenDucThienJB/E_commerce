@@ -1,4 +1,4 @@
-import React from "react";
+import React ,{ useState } from "react";
 import "../static/css/style.css";
 import logo from "../static/images/logo.jpg";
 import { NavLink, useHistory } from "react-router-dom";
@@ -28,7 +28,7 @@ const not_menu = [
   {
     icon: "bx bx-cog",
     content: "Đăng kí",
-    url: "/register",
+    url: "/verify",
   },
 ];
 
@@ -78,6 +78,11 @@ const Header = (props) => {
     localStorage.removeItem("password");
     props.userHandler(null);
   };
+const [cartItems, setCartItems] = useState([]);
+
+const handleCartUpdate = (items) => {
+  setCartItems(items);
+};
 
   return (
     <div className="mini-card">
@@ -110,20 +115,7 @@ const Header = (props) => {
                 Sản phẩm
               </NavLink>
             </li>
-              <li
-                className={
-                  props.header === 3
-                    ? "nav-item mr-2 mini-item active position-relative"
-                    : "nav-item mr-2 mini-item position-relative"
-                }
-              >
-                <NavLink className="nav-link position-relative" to="/cart" exact>
-                  <i className="fa fa-shopping-cart fa-lg"></i>
-                  {props.cartItems && props.cartItems.length > 0 && (
-                    <span className="cart-badge">{props.cartItems.length}</span>
-                  )}
-                </NavLink>
-              </li>
+          
            
             {props.user && (
               <li
@@ -162,6 +154,7 @@ const Header = (props) => {
               </NavLink> */}
             </li>
             )}
+            
           </ul>
           <form
             className="form-inline my-2 my-lg-0 mr-3"
@@ -204,7 +197,22 @@ const Header = (props) => {
               contentData={not_menu}
               renderItems={(item, index) => renderUserMenu(item, index)}
             />}
+            <li
+              className={
+                props.header === 3
+                  ? "nav-item mr-2 mini-item active position-relative"
+                  : "nav-item mr-2 mini-item position-relative"
+              }
+            >
+              <NavLink className="nav-link position-relative" to="/cart" exact>
+                <i className="fa fa-shopping-cart fa-lg"></i>
+                {props.cartItems && props.cartItems.length > 0 && (
+                  <span className="cart-badge">{props.cartItems.length}</span>
+                )}
+              </NavLink>
+            </li>      
         </div>
+            
       </nav>
     </div>
   );

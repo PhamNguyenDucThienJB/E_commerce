@@ -15,6 +15,7 @@ public class AccountConst {
     public static final String API_ACCOUNT_FIND_BY_ID = "/api/admin/account/{id}";
     public static final String API_ACCOUNT_FIND_BY_USERNAME = "/api/site/account/find-by-username";
     public static final String API_ACCOUNT_FIND_ME = "/api/site/me";
+    public static final String API_ACCOUNT_VERIFY_EMAIL = "/api/site/verify_email";
     public static final String API_ACCOUNT_FORGOT_PASSWORD= "/api/site/forgot-password";
     /* Account constant*/
     public static final String ACCOUNT_MSG_ERROR_NOT_EXIST = "Tài khoản không tồn tại!";

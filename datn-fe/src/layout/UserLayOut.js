@@ -24,7 +24,8 @@ import Blog from "../components/blog/Blog";
 import Chat from "../components/chat/Chat";
 import ForgotPassword from "../authenticate/ForgotPassword";
 import Profile from "../authenticate/Profile";
-
+import VerifyEmail from "../authenticate/VerifyEmail"; 
+import VerifyPage from "../authenticate/VerifyPage";
 const UserLayOut = () => {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -146,6 +147,7 @@ const UserLayOut = () => {
         </Route>
         <Route path="/cart" exact>
           <Cart
+          
             outStockHandler={outStockHandler}
             buyHandler={buyHandler}
             cancelBuyHandler={cancelBuyHandler}
@@ -155,6 +157,7 @@ const UserLayOut = () => {
             user={user}
             cartItem={cartItem}
             cartHandler={cartHandler}
+            
           ></Cart>
         </Route>
         <Route path="/checkout" exact>
@@ -169,6 +172,7 @@ const UserLayOut = () => {
             setCartItemHandler={setCartItemHandler}
           ></Checkout>
         </Route>
+
         <Route path="/order" exact>
           <Order changeHeaderHandler={changeHeaderHandler} user={user}></Order>
         </Route>
@@ -215,11 +219,15 @@ const UserLayOut = () => {
         <Route path="/profile" exact>
           <Profile user={user} refresh={refresh} userHandler={userHandler}></Profile>
         </Route>
+        <Route path="/verifyPage"  exact component={VerifyPage} />
       </Switch>
+       <Route path="/verify" exact component={VerifyEmail} />
+    
       <Footer></Footer>
       <ToastContainer></ToastContainer>
+       
 
-      <div id="scroll">
+      {/* <div id="scroll">
         <Button variant="primary" onClick={handleShow}>
           Hướng dẫn chọn size áo
         </Button>
@@ -251,7 +259,8 @@ const UserLayOut = () => {
             </Form>
           </Modal.Body>
         </Modal>
-      </div>
+      </div> */}
+    
     </div>
   );
 };

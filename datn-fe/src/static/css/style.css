@@ -6,6 +6,16 @@ body {
   height: 100%;
   font-family: Arial, Helvetica, sans-serif;
 }
+.cart-badge {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background-color: red;
+  color: white;
+  font-size: 12px;
+  border-radius: 50%;
+  padding: 3px 7px;
+}
 
 .navbar li a {
   color: black !important;
@@ -127,4 +137,14 @@ hr.light {
   border-radius: 50%;
   font-weight: bold;
   z-index: 10;
+}
+.cart-badge {
+  position: absolute;
+  top: -5px;
+  right: -10px;
+  background-color: red;
+  color: white;
+  font-size: 12px;
+  border-radius: 50%;
+  padding: 3px 7px;
 }

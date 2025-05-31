@@ -15,6 +15,9 @@ const Cart = (props) => {
   useEffect(() => {
     onLoad();
   }, []);
+  useEffect(() => {
+  props.cartHandler(cart); // Truyền cart lên cha khi thay đổi
+}, [cart]);
 
   const onLoad = () => {
     if (props.user) {

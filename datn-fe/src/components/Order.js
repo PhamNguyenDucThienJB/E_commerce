@@ -88,6 +88,15 @@ const Order = (props) => {
   useEffect(() => {
     onLoad();
   }, [page]);
+  useEffect(() => {
+    if (orderStatus.length > 0) {
+      const choXacNhan = orderStatus.find((item) => item.name === "Chờ xác nhận");
+      if (choXacNhan) {
+        setStatus(choXacNhan.id);
+        getAllOrderByStatus(choXacNhan.id); // Gọi API để lấy danh sách đơn hàng theo trạng thái mặc định
+      }
+    }
+  }, [orderStatus]);
 
   const onLoad = () => {
     if (props.user) {

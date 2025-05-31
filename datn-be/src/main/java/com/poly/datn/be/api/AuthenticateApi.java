@@ -36,15 +36,20 @@ public class AuthenticateApi {
 
     @PostMapping("/api/site/login")
     public LoginResponse authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        // Xác thực từ username và password.
         try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginRequest.getUsername(),
-                            loginRequest.getPassword()
-                    )
-            );
+            // Lấy email từ request
+            String email = loginRequest.getEmail();
 
+            // Tìm account detail qua email
+            String username = accountService.findUsernameByEmail(email);
+            if (username == null) {
+                throw new AppException("Email không tồn tại hoặc chưa được xác minh!");
+            }
+
+            // Xác thực với username lấy được từ email và password
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(username, loginRequest.getPassword())
+            );
             if(loginRequest.getAdmin()){
                 if(authentication.getAuthorities().toArray()[0].toString().equals(RoleConst.ROLE_CUSTOMER)){
                     throw new AppException(AccountConst.ACCOUNT_MSG_ERROR_ACCESS_DENIED);
