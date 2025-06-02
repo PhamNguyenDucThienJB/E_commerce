@@ -4,6 +4,7 @@ import com.poly.datn.be.domain.model.AmountMonth;
 import com.poly.datn.be.domain.model.AmountYear;
 import com.poly.datn.be.domain.model.CountOrder;
 import com.poly.datn.be.domain.model.ReportProduct;
+import com.poly.datn.be.domain.model.CategoryRevenue;
 import com.poly.datn.be.entity.Order;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.data.domain.Page;
@@ -42,4 +43,16 @@ public interface OrderRepo extends JpaRepository<Order, Long> {
     @Query("SELECT new com.poly.datn.be.domain.model.CountOrder(s.name, count(o.id)) FROM Order o INNER JOIN OrderStatus s on o.orderStatus.id = s.id GROUP BY s.name")
     List<CountOrder> countOrderByName();
     List<Order> findOrderBySeenEquals(Boolean seen);
+    @Query("SELECT new com.poly.datn.be.domain.model.CategoryRevenue(c.id, c.name, SUM(d.sellPrice * d.quantity)) " +
+           "FROM OrderDetail d " +
+           "JOIN d.order o " +
+           "JOIN d.attribute a " +
+           "JOIN a.product p " +
+           "JOIN p.productCategories pc " +
+           "JOIN pc.category c " +
+           "WHERE YEAR(o.createDate) = :year AND MONTH(o.createDate) = :month AND o.orderStatus.id = 4 " +
+           "GROUP BY c.id, c.name")
+    List<CategoryRevenue> reportAmountCategoryMonth(@Param("year") Integer year, @Param("month") Integer month);
+    void deleteByCode(String code);
+    Order findByCode(String code);
 }

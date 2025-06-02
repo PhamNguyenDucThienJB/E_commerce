@@ -30,6 +30,18 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    // Phương thức tạo JWT từ email (cho đăng nhập xã hội - Google hoặc Facebook)
+    public String generateToken(String email) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
+                .compact();
+    }
+
     // Lấy thông tin user từ jwt
     public String getUsernameFromJWT(String token) {
         Claims claims = Jwts.parser()

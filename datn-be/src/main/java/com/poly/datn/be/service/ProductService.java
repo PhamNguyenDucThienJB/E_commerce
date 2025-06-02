@@ -27,4 +27,8 @@ public interface ProductService {
     Page<ResponseProductDto> filterAllProducts(List<Long> category, List<Long> brand, Double min, Double max, Pageable pageable);
     Page<ResponseProductDto> relateProduct(Long id, Long brand, Pageable pageable);
     ResponseProductDto getProductDetail(Long id);
+
+    // Service methods for most-viewed and best-selling products
+    Page<ResponseProductDto> getMostViewedProducts(Pageable pageable);
+    Page<ResponseProductDto> getBestSellingProducts(Pageable pageable);
 }

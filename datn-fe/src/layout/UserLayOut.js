@@ -24,8 +24,13 @@ import Blog from "../components/blog/Blog";
 import Chat from "../components/chat/Chat";
 import ForgotPassword from "../authenticate/ForgotPassword";
 import Profile from "../authenticate/Profile";
+
 import VerifyEmail from "../authenticate/VerifyEmail"; 
 import VerifyPage from "../authenticate/VerifyPage";
+
+import OAuth2RedirectHandler from "../authenticate/OAuth2RedirectHandler";
+
+
 const UserLayOut = () => {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -219,7 +224,13 @@ const UserLayOut = () => {
         <Route path="/profile" exact>
           <Profile user={user} refresh={refresh} userHandler={userHandler}></Profile>
         </Route>
+
         <Route path="/verifyPage"  exact component={VerifyPage} />
+
+        <Route path="/oauth2/redirect" exact>
+          <OAuth2RedirectHandler userHandler={userHandler} />
+        </Route>
+
       </Switch>
        <Route path="/verify" exact component={VerifyEmail} />
     

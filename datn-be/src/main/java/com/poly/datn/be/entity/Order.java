@@ -57,10 +57,10 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "account_id")
     private Account account;
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private Collection<OrderDetail> orderDetails;
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private Collection<Notification> notifications;
     @ManyToOne

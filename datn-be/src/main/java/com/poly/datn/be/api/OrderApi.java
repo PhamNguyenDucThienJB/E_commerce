@@ -122,6 +122,16 @@ public class OrderApi {
     public ResponseEntity<?> reportAmountMonth(@RequestParam("year") Integer year){
         return new ResponseEntity<>(orderService.reportAmountMonth(year), HttpStatus.OK);
     }
+    @GetMapping(OrderConst.API_ORDER_LIST_AMOUNT_CATEGORY_MONTH)
+    public ResponseEntity<?> reportAmountCategoryMonth(@RequestParam("year") Integer year,
+                                                      @RequestParam("month") Integer month){
+        return new ResponseEntity<>(orderService.reportAmountCategoryMonth(year, month), HttpStatus.OK);
+    }
+    @DeleteMapping(OrderConst.API_ORDER_DELETE)
+    public ResponseEntity<?> deleteOrderById(@RequestParam("id") Long id) {
+        orderService.deleteOrderById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
     @GetMapping(OrderConst.API_ORDER_BASE64)
     public ResponseEntity<?> encode(@RequestParam("encodedUrl") String encodedUrl){
         return new ResponseEntity<>(new String(Base64.getUrlDecoder().decode(encodedUrl)), HttpStatus.OK);

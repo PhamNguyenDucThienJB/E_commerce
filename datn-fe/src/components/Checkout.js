@@ -10,6 +10,8 @@ import Spinner from "./spinner/Spinner";
 import { Button } from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
+import "./Checkout.css";
+
 const Checkout = (props) => {
   const [amount, setAmount] = useState();
   const [cart, setCart] = useState([]);
@@ -260,13 +262,13 @@ const Checkout = (props) => {
   
 
   return (
-    <div className="pb-3 container-fluid">
+    <div className="pb-3 container-fluid checkout-container">
       <div className="py-3 col-10 offset-1 text-center">
-        <h2 className="text-danger">Thông tin mua hàng</h2>
+        <h2 className="text-danger checkout-title">Thông tin mua hàng</h2>
         {loading && <Spinner></Spinner>}
       </div>
-      <div className="row">
-        <div className="col-md-5 col-lg-4 order-md-last">
+      <div className="row checkout-row">
+        <div className="col-md-5 col-lg-4 order-md-last checkout-cart">
           <h4 className="d-flex justify-content-between align-items-center mb-3">
             <span className="text-dark">Giỏ hàng của bạn</span>
             <span className="badge bg-primary rounded-pill">{cart.length}</span>
@@ -343,10 +345,10 @@ const Checkout = (props) => {
             Quay về giỏ hàng
           </NavLink>
         </div>
-        <div className="col-md-7 col-lg-8">
+        <div className="col-md-7 col-lg-8 checkout-address">
           <h4 className="mb-3">Địa chỉ nhận hàng</h4>
           <form
-            className="needs-validation"
+            className="needs-validation checkout-form"
             onSubmit={handleSubmit(handleShowFirst)}
           >
             <div className="row g-3">
@@ -555,13 +557,11 @@ const Checkout = (props) => {
                 <label className="form-check-label">Thanh toán qua PayPal</label>
 
         </div>
-                  <button
-                    className="btn btn-primary btn-lg mt-5 mb-5"
-              type="submit"
-              style={{ marginLeft: 680 }}
-            >
+                  <div className="d-flex justify-content-center mt-5 mb-5">
+                    <button className="btn btn-primary btn-lg" type="submit">
               Đặt hàng
             </button>
+                  </div>
           </form>
         </div>
       </div>
@@ -643,14 +643,83 @@ const Checkout = (props) => {
                   
                 />
               </PayPalScriptProvider>
+
+              {obj.payment === "paypal" ? (
+                <PayPalScriptProvider options={{ "client-id": "AeZ36kQifDQpEoJVWEME3Qp6y01B0niaqboOYJBg3JN3IQUcKpAmfcfcEALa-A9OwHxYT873i-2M6enl" }}>
+                  <PayPalButtons
+                    createOrder={(data, actions) => {
+                      return actions.order.create({
+                        purchase_units: [
+                          {
+                            amount: {
+                              currency_code: "USD",
+                              value: amountUSD,
+                            },
+                          },
+                        ],
+                      });
+                    }}
+                    onApprove={async (data, actions) => {
+                      try {
+                        const details = await actions.order.capture();
+                        toast.success("Thanh toán PayPal thành công!");
+                        const totalUSD = details.purchase_units[0].amount.value;
+                        const totalVND = await convertUSDtoVND(totalUSD);
+                        const orderData = {
+                          fullname: obj.name || "Tên mặc định",
+                          phone: obj.phone || "0000000000",
+                          address: `${obj.address}, ${obj.ward}, ${obj.district}, ${obj.province}`,
+                          email: obj.email || "example@email.com",
+                          total: totalVND,
+                          note: obj.note || "",
+                          isPending: true,
+                          payment: "paypal",
+                          accountId: props.user ? props.user.id : -1,
+                          code: obj.voucher || "",
+                          orderDetails: cart.map((item) => ({
+                            quantity: item.quantity,
+                            originPrice: item.price,
+                            sellPrice: (item.price * (100 - item.discount)) / 100,
+                            attribute: { id: item.id },
+                          })),
+                        };
+                        console.log("Dữ liệu đơn hàng gửi lên:", orderData);
+                        await createOrder(orderData);
+                        handleCloseFirst();
+                        console.log(`Số tiền PayPal (USD): ${totalUSD}`);
+                        console.log(`Số tiền lưu vào DB (VND): ${totalVND}`);
+                      } catch (error) {
+                        toast.error("Lỗi khi tạo đơn hàng!");
+                        console.error(error);
+                      }
+                    }}
+                  />
+                </PayPalScriptProvider>
+              ) : obj.payment === "Thanh toán khi giao hàng(COD)" ? (
+                <div className="confirmation-message">
+                  <p>Xác nhận đặt hàng với phương thức thanh toán COD?</p>
+                  <p>Tổng tiền: {amount && amount.toLocaleString()} VND</p>
+                  <p>Bạn sẽ thanh toán khi nhận được hàng</p>
+                </div>
+              ) : (
+                <div className="confirmation-message">
+                  <p>Xác nhận đặt hàng với phương thức chuyển khoản?</p>
+                  <p>Tổng tiền: {amount && amount.toLocaleString()} VND</p>
+                  <p>Thông tin chuyển khoản:</p>
+                  <p>Phạm Nguyễn Đức Thiện - STK: 04136519801</p>
+                  <p>BIDV chi nhánh Hà Nội</p>
+                  <p>Nội dung: [Mã đơn hàng] - [Số điện thoại]</p>
+                </div>
+              )}
+
             </Modal.Body>
             <Modal.Footer>
-            {paymentMethod !== "paypal" && (
-                    <Button variant="danger" onClick={() => onSubmitHandler(obj)}>
-                      Xác nhận
-                    </Button>
-                  )}
-              <Button variant="primary" onClick={handleCloseFirst}>
+              {obj.payment !== "paypal" && (
+                <Button variant="danger" onClick={() => onSubmitHandler(obj)}>
+                  Xác nhận đặt hàng
+                </Button>
+              )}
+              <Button variant="secondary" onClick={handleCloseFirst}>
                 Đóng
               </Button>
             </Modal.Footer>
@@ -661,3 +730,4 @@ const Checkout = (props) => {
 };
 
 export default Checkout;
+

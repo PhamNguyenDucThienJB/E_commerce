@@ -74,4 +74,26 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
     List<Product> getProductBySale_Id(Long id);
 
     Optional<Product> findProductByCode(String code);
+
+    // Repository methods for most-viewed products
+    @Query("SELECT new com.poly.datn.be.domain.dto.ResponseProductDto(p.id, p.name, p.code, p.description, p.view, a.price, i.imageLink, p.brand.name, p.sale.discount, p.isActive) FROM Product p " +
+            "join p.attributes a " +
+            "join p.images i " +
+            "where a.size = :size and i.name = :name and p.isActive = true " +
+            "order by p.view desc")
+    Page<ResponseProductDto> getMostViewedProducts(@Param("size") Integer size,
+                                                   @Param("name") String name,
+                                                   Pageable pageable);
+
+    // Repository methods for best-selling products
+    @Query("SELECT new com.poly.datn.be.domain.dto.ResponseProductDto(p.id, p.name, p.code, p.description, p.view, a.price, i.imageLink, p.brand.name, p.sale.discount, p.isActive) FROM OrderDetail od " +
+            "join od.attribute a " +
+            "join a.product p " +
+            "join p.images i " +
+            "where a.size = :size and i.name = :name and p.isActive = true " +
+            "group by p.id, p.name, p.code, p.description, p.view, a.price, i.imageLink, p.brand.name, p.sale.discount, p.isActive " +
+            "order by sum(od.quantity) desc")
+    Page<ResponseProductDto> getBestSellingProducts(@Param("size") Integer size,
+                                                    @Param("name") String name,
+                                                    Pageable pageable);
 }

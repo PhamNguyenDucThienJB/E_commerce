@@ -1,0 +1,61 @@
+.revenue-card {
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.08), 0 0 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.revenue-card:hover {
+  transform: scale(1.01);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
+}
+
+.chart-container {
+  padding: 0.5rem;
+  background-color: white;
+  border-radius: 0 0 10px 10px;
+  overflow: hidden;
+}
+
+/* Fix for vertical bar chart labels */
+.apexcharts-xaxis-label {
+  font-weight: 500 !important;
+}
+
+.apexcharts-datalabel {
+  font-weight: 500 !important;
+}
+
+.card__header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.text-primary {
+  color: #349eff !important;
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+.form-select {
+  border-radius: 6px;
+  border: 1px solid #cfd8dc;
+  padding: 0.375rem 1.75rem 0.375rem 0.75rem;
+  font-size: 0.9rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-select:focus {
+  border-color: #349eff;
+  box-shadow: 0 0 0 0.25rem rgba(52, 158, 255, 0.25);
+}
+
+/* Animation for chart loading */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.chart-container .apexcharts-canvas {
+  animation: fadeIn 0.6s ease-in-out;
+} 

@@ -96,3 +96,13 @@ export const updateCancel = (data) =>{
     const url = `/api/site/order/cancel-order`;
     return Instance.post(url, data);
 }
+
+export const reportAmountCategory = (year, month) =>{
+    const url = `/api/admin/order/amount-category-month?year=${year}&month=${month}`;
+    return Instance.get(url);
+}
+
+export const deleteOrder = (id) =>{
+    const url = `/api/admin/order/delete-order?id=${id}`;
+    return Instance.delete(url);
+}
