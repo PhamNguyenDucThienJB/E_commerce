@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
 import "./signin.css";
 import { useForm } from "react-hook-form";
@@ -7,30 +7,60 @@ import { signIn, getMe } from "../../api/AccountApi";
 
 const SignIn = (props) => {
   const history = useHistory();
+  const [isLoading, setIsLoading] = useState(false);
 
   const signInHandler = (data) => {
+    setIsLoading(true);
+    
+    // Send both username and email with the same value
     const userFlag = {
-      ...data,
+      username: data.username,
+      email: data.username, // Use the same value for email too
+      password: data.password,
       admin: true,
     };
+    
+    console.log("Login attempt with data:", userFlag);
+    
     signIn(userFlag)
       .then((res) => {
+        console.log("Login success response:", res);
         toast.success("Đăng nhập thành công!");
         localStorage.setItem("token", res.data.accessToken);
         getMe(res.data.accessToken)
           .then((res) => {
             props.userHandler(res.data);
-            localStorage.setItem("username", "admin");
-            localStorage.setItem("password", "123456");
+            localStorage.setItem("username", data.username);
+            localStorage.setItem("password", data.password);
             if (res.data.roleName === "ADMIN") {
               history.push("/");
             } else {
               history.push("/orders");
             }
+            setIsLoading(false);
           })
-          .catch((error) => console.log(error));
+          .catch((error) => {
+            console.error("Error getting user data:", error);
+            setIsLoading(false);
+          });
       })
-      .catch((error) => toast.error(error.response.data.Errors));
+      .catch((error) => {
+        console.error("Login error:", error);
+        console.error("Login error response:", error.response);
+        
+        // Display more specific error message if available
+        let errorMessage = "Đăng nhập thất bại";
+        if (error.response && error.response.data) {
+          if (error.response.data.message) {
+            errorMessage = error.response.data.message;
+          } else if (error.response.data.Errors) {
+            errorMessage = error.response.data.Errors;
+          }
+        }
+        
+        toast.error(errorMessage);
+        setIsLoading(false);
+      });
   };
 
   const {
@@ -64,6 +94,7 @@ const SignIn = (props) => {
                           type="text"
                           id="typeEmailX"
                           className="form-control form-control-lg"
+                          placeholder="Tài khoản"
                           {...register("username", {
                             required: true,
                             pattern: /^\s*\S+.*/,
@@ -105,8 +136,9 @@ const SignIn = (props) => {
                       <button
                         className="btn btn-outline-light btn-lg px-5"
                         type="submit"
+                        disabled={isLoading}
                       >
-                        Đăng nhập
+                        {isLoading ? "Đang xử lý..." : "Đăng nhập"}
                       </button>
                     </form>
                   </div>

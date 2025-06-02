@@ -20,6 +20,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.mail.MessagingException;
@@ -40,34 +41,58 @@ public class AuthenticateApi {
     private SocialLoginService socialLoginService;
 
     @PostMapping("/api/site/login")
-    public LoginResponse authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public LoginResponse authenticateUser(@RequestBody LoginRequest loginRequest) {
         try {
-            // Lấy email từ request
-            String email = loginRequest.getEmail();
-
-            // Tìm account detail qua email
-            String username = accountService.findUsernameByEmail(email);
-            if (username == null) {
-                throw new AppException("Email không tồn tại hoặc chưa được xác minh!");
+            System.out.println("Login request received: " + loginRequest);
+            String username;
+            
+            // Simplified login logic - directly use email and ignore validation
+            if (loginRequest.getEmail() != null) {
+                // Just try to authenticate directly with email as username
+                try {
+                    Authentication authentication = authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+                    );
+                    
+                    if (loginRequest.getAdmin() != null && loginRequest.getAdmin()) {
+                        if(authentication.getAuthorities().toArray()[0].toString().equals(RoleConst.ROLE_CUSTOMER)) {
+                            throw new AppException(AccountConst.ACCOUNT_MSG_ERROR_ACCESS_DENIED);
+                        }
+                    }
+                    
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    String jwt = tokenProvider.generateToken((CustomUserDetails) authentication.getPrincipal());
+                    return new LoginResponse(jwt);
+                } catch (Exception e) {
+                    // If direct authentication fails, try to find username by email
+                    username = accountService.findUsernameByEmail(loginRequest.getEmail());
+                    if (username == null) {
+                        throw new AppException("Email không tồn tại hoặc chưa được xác minh!");
+                    }
+                }
+            } else if (loginRequest.getUsername() != null) {
+                username = loginRequest.getUsername();
+            } else {
+                throw new AppException("Vui lòng cung cấp tên đăng nhập hoặc email!");
             }
 
-            // Xác thực với username lấy được từ email và password
+            // Authenticate with username
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, loginRequest.getPassword())
             );
-            if(loginRequest.getAdmin()){
+            
+            if(loginRequest.getAdmin() != null && loginRequest.getAdmin()){
                 if(authentication.getAuthorities().toArray()[0].toString().equals(RoleConst.ROLE_CUSTOMER)){
                     throw new AppException(AccountConst.ACCOUNT_MSG_ERROR_ACCESS_DENIED);
                 }
             }
-            // Nếu không xảy ra exception tức là thông tin hợp lệ
-            // Set thông tin authentication vào Security Context
+            
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            // Trả về jwt cho người dùng.
             String jwt = tokenProvider.generateToken((CustomUserDetails) authentication.getPrincipal());
             return new LoginResponse(jwt);
         } catch (Exception e) {
+            System.err.println("Login error: " + e.getMessage());
+            e.printStackTrace();
             throw new AppException(AccountConst.ACCOUNT_MSG_ERROR_SIGN_IN);
         }
     }
@@ -80,6 +105,7 @@ public class AuthenticateApi {
         }
         return null;
     }
+    
     @PostMapping(AccountConst.API_ACCOUNT_FORGOT_PASSWORD)
     public ResponseEntity<?> forgotPassword(@RequestBody ReqForgotPasswordDto reqForgotPasswordDto) throws MessagingException {
         accountService.forgotPassword(reqForgotPasswordDto);

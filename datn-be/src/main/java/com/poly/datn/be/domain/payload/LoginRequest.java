@@ -7,10 +7,12 @@ import javax.validation.constraints.NotBlank;
 
 @Data
 public class LoginRequest {
-    @NotBlank
-    @Email
     private String email;
-    @NotBlank
+    
+    private String username;
+    
+    @NotBlank(message = "Password không được để trống")
     private String password;
+    
     private Boolean admin;
 }
