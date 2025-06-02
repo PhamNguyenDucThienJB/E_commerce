@@ -1,4 +1,5 @@
 import "./App.css";
+import "./admin/button-fixes.css";
 import AdminLayOut from "./layout/AdminLayOut";
 
 function App() {

@@ -1,0 +1,136 @@
+/* Horizontal action icons styles */
+.order-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.order-actions .action-icon {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  background-color: #f8f9fa;
+  color: #455560;
+  cursor: pointer;
+}
+
+.order-actions .action-icon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.order-actions .action-icon.edit:hover {
+  background-color: #eff6ff;
+  color: #349eff;
+}
+
+.order-actions .action-icon.delete:hover {
+  background-color: #ffeeee;
+  color: #fb0b12;
+}
+
+/* Fix for radio button layout */
+.status-radios {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.status-radios .form-check {
+  margin-bottom: 0 !important;
+  margin-right: 8px;
+  position: relative;
+}
+
+.status-radios .form-check:last-child {
+  margin-right: 0;
+}
+
+/* Make the radio buttons visually distinctive */
+.status-radios .form-check-input {
+  margin-top: 0;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+/* Status colors */
+.status-radios .form-check:nth-child(1) .form-check-input {
+  border-color: #6c757d; /* secondary */
+}
+
+.status-radios .form-check:nth-child(2) .form-check-input {
+  border-color: #349eff; /* primary */
+}
+
+.status-radios .form-check:nth-child(3) .form-check-input {
+  border-color: #fca11a; /* warning */
+}
+
+.status-radios .form-check:nth-child(4) .form-check-input {
+  border-color: #019707; /* success */
+}
+
+.status-radios .form-check:nth-child(5) .form-check-input {
+  border-color: #fb0b12; /* danger */
+}
+
+/* Status colors for checked state */
+.status-radios .form-check:nth-child(1) .form-check-input:checked {
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.status-radios .form-check:nth-child(2) .form-check-input:checked {
+  background-color: #349eff;
+  border-color: #349eff;
+}
+
+.status-radios .form-check:nth-child(3) .form-check-input:checked {
+  background-color: #fca11a;
+  border-color: #fca11a;
+}
+
+.status-radios .form-check:nth-child(4) .form-check-input:checked {
+  background-color: #019707;
+  border-color: #019707;
+}
+
+.status-radios .form-check:nth-child(5) .form-check-input:checked {
+  background-color: #fb0b12;
+  border-color: #fb0b12;
+}
+
+/* Tooltip for status labels on hover */
+.status-radios .form-check {
+  position: relative;
+}
+
+.status-radios .form-check::after {
+  content: attr(data-status);
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+}
+
+.status-radios .form-check:hover::after {
+  opacity: 1;
+  visibility: visible;
+} 
