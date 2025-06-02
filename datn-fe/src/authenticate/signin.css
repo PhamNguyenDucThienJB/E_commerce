@@ -1,10 +1,249 @@
 .gradient-custom {
     /* fallback for old browsers */
-    background: #6a11cb;
+    background: #5a3f93;
     
     /* Chrome 10-25, Safari 5.1-6 */
-    background: -webkit-linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1));
+    background: -webkit-linear-gradient(to right, rgba(90, 63, 147, 1), rgba(45, 95, 207, 1));
     
     /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-    background: linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1))
+    background: linear-gradient(to right, rgba(90, 63, 147, 1), rgba(45, 95, 207, 1));
+}
+
+.card {
+  border-radius: 1rem !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  background-color: rgba(33, 37, 41, 0.9) !important;
+  border: none !important;
+}
+
+.card-body {
+  padding: 2.5rem !important;
+}
+
+.form-control {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 4px;
+  padding: 12px 15px;
+  color: #fff;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  background-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 2px rgba(82, 168, 236, 0.2);
+  color: #fff;
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.form-label {
+  color: rgba(255, 255, 255, 0.7) !important;
+  margin-top: 0.5rem;
+  transform-origin: left;
+  transition: all 0.3s ease;
+}
+
+.form-outline input:focus ~ label,
+.form-outline input:not(:placeholder-shown) ~ label {
+  transform: translateY(-1.5rem) scale(0.85);
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.btn-login {
+  width: 100%;
+  padding: 12px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-login:hover {
+  background-color: #0069d9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-login:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* CSS cho các nút đăng nhập xã hội */
+.social-login-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.btn-social {
+  width: 45px !important;
+  height: 45px !important;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 0 !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-social::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(0);
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.btn-social:hover::before {
+  transform: scale(1);
+}
+
+.btn-facebook {
+  background-color: #1877f2;
+  color: white;
+}
+
+.btn-facebook:hover {
+  background-color: #166fe5;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(24, 119, 242, 0.3);
+  color: white;
+}
+
+.btn-facebook:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(24, 119, 242, 0.2);
+}
+
+.social-icon {
+  font-size: 22px;
+  z-index: 1;
+}
+
+.google-btn-container {
+  transform: scale(1.12);
+  transition: all 0.3s ease;
+}
+
+.google-btn-container:hover {
+  transform: translateY(-2px) scale(1.12);
+}
+
+.google-btn-container:active {
+  transform: translateY(1px) scale(1.12);
+}
+
+/* Thêm hiệu ứng ripple khi click */
+@keyframes ripple {
+  to {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.btn-social:active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  animation: ripple 0.6s linear;
+}
+
+/* Cải thiện divider */
+.divider-section {
+  margin: 30px 0;
+  position: relative;
+  text-align: center;
+}
+
+.social-divider {
+  background-color: rgba(33, 37, 41, 0.9);
+  color: rgba(255, 255, 255, 0.8);
+  display: inline-block;
+  padding: 0 20px;
+  font-size: 14px;
+  position: relative;
+  z-index: 1;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.social-divider::before,
+.social-divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 100px;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+.social-divider::before {
+  right: 100%;
+}
+
+.social-divider::after {
+  left: 100%;
+}
+
+/* Ẩn nút Facebook gốc */
+.facebook-login-btn {
+  display: none;
+}
+
+.text-muted {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.register-link {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.register-link:hover {
+  color: white !important;
+  text-decoration: none !important;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+  animation: fadeIn 0.6s ease-out;
     }

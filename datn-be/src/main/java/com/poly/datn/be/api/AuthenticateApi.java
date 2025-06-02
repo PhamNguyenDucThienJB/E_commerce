@@ -4,6 +4,7 @@ import com.poly.datn.be.domain.constant.AccountConst;
 import com.poly.datn.be.domain.constant.AppConst;
 import com.poly.datn.be.domain.constant.RoleConst;
 import com.poly.datn.be.domain.dto.ReqForgotPasswordDto;
+import com.poly.datn.be.domain.dto.SocialLoginRequest;
 import com.poly.datn.be.domain.exception.AppException;
 import com.poly.datn.be.domain.model.CustomUserDetails;
 import com.poly.datn.be.domain.payload.LoginRequest;
@@ -11,6 +12,7 @@ import com.poly.datn.be.domain.payload.LoginResponse;
 import com.poly.datn.be.entity.Role;
 import com.poly.datn.be.jwt.JwtTokenProvider;
 import com.poly.datn.be.service.AccountService;
+import com.poly.datn.be.service.SocialLoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,9 @@ public class AuthenticateApi {
 
     @Autowired
     AccountService accountService;
+
+    @Autowired
+    private SocialLoginService socialLoginService;
 
     @PostMapping("/api/site/login")
     public LoginResponse authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -79,5 +84,25 @@ public class AuthenticateApi {
     public ResponseEntity<?> forgotPassword(@RequestBody ReqForgotPasswordDto reqForgotPasswordDto) throws MessagingException {
         accountService.forgotPassword(reqForgotPasswordDto);
         return new ResponseEntity<>("Mật khẩu mới đã được gửi về mail!", HttpStatus.OK);
+    }
+
+    @PostMapping("/api/site/oauth2/google")
+    public ResponseEntity<?> authenticateWithGoogle(@RequestBody SocialLoginRequest request) {
+        try {
+            String token = socialLoginService.authenticateWithGoogle(request.getToken());
+            return ResponseEntity.ok(new LoginResponse(token));
+        } catch (Exception e) {
+            throw new AppException("Lỗi đăng nhập từ Google: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/api/site/auth/facebook")
+    public ResponseEntity<?> authenticateWithFacebook(@RequestBody SocialLoginRequest request) {
+        try {
+            String token = socialLoginService.authenticateWithFacebook(request.getAccessToken());
+            return ResponseEntity.ok(new LoginResponse(token));
+        } catch (Exception e) {
+            throw new AppException("Lỗi đăng nhập từ Facebook: " + e.getMessage());
+        }
     }
 }

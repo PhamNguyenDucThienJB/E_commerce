@@ -236,4 +236,15 @@ public class ProductServiceImpl implements ProductService {
     public ResponseProductDto getProductDetail(Long id) {
         return productRepo.getProductDetail(ProductConst.PRODUCT_AVG_SIZE, ProductConst.PRODUCT_MAIN_IMAGE, id);
     }
+
+    // Service methods for most-viewed and best-selling products
+    @Override
+    public Page<ResponseProductDto> getMostViewedProducts(Pageable pageable) {
+        return productRepo.getMostViewedProducts(ProductConst.PRODUCT_AVG_SIZE, ProductConst.PRODUCT_MAIN_IMAGE, pageable);
+    }
+
+    @Override
+    public Page<ResponseProductDto> getBestSellingProducts(Pageable pageable) {
+        return productRepo.getBestSellingProducts(ProductConst.PRODUCT_AVG_SIZE, ProductConst.PRODUCT_MAIN_IMAGE, pageable);
+    }
 }

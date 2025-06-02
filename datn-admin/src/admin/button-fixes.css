@@ -1,0 +1,37 @@
+/* Override button hover styles to prevent stretching */
+.btn {
+  transition: background-color 0.3s, color 0.3s !important;
+  width: auto !important;
+  left: auto !important;
+}
+
+.btn:hover {
+  width: auto !important;
+  left: auto !important;
+  box-shadow: none !important;
+}
+
+/* Fix specifically for action buttons in tables */
+.btn-link {
+  position: relative;
+  z-index: 5;
+  display: inline-block;
+}
+
+/* Fix for buttons in card profile */
+button:hover {
+  width: auto !important;
+  left: auto !important;
+  box-shadow: none !important;
+}
+
+/* Override button styles in modals */
+.modal-footer .btn {
+  min-width: 80px;
+  width: auto !important;
+}
+
+.modal-footer .btn:hover {
+  width: auto !important;
+  left: auto !important;
+} 

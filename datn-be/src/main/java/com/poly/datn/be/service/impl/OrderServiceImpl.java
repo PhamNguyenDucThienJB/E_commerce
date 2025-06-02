@@ -6,10 +6,7 @@ import com.poly.datn.be.domain.dto.ReqOrderDto;
 import com.poly.datn.be.domain.dto.ReqUpdateOrderDto;
 import com.poly.datn.be.domain.dto.ReqUpdateStatusOrder;
 import com.poly.datn.be.domain.exception.AppException;
-import com.poly.datn.be.domain.model.AmountMonth;
-import com.poly.datn.be.domain.model.AmountYear;
-import com.poly.datn.be.domain.model.CountOrder;
-import com.poly.datn.be.domain.model.ReportProduct;
+import com.poly.datn.be.domain.model.*;
 import com.poly.datn.be.entity.*;
 import com.poly.datn.be.repo.OrderRepo;
 import com.poly.datn.be.service.*;
@@ -301,6 +298,21 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<CategoryRevenue> reportAmountCategoryMonth(Integer year, Integer month) {
+        return orderRepo.reportAmountCategoryMonth(year, month);
+    }
+
+    @Override
+    public void deleteOrderByCode(String code) {
+        Order order = orderRepo.findByCode(code);
+        if (order != null) {
+            orderRepo.delete(order);
+        } else {
+            throw new AppException("Đơn hàng với code " + code + " không tồn tại.");
+        }
+    }
+
+    @Override
     public Integer countOrder() {
         return orderRepo.findAll().size();
     }
@@ -458,5 +470,14 @@ public class OrderServiceImpl implements OrderService {
                 .toString();
 
         return generatedString;
+    }
+
+    @Override
+    public void deleteOrderById(Long id) {
+        if (orderRepo.existsById(id)) {
+            orderRepo.deleteById(id);
+        } else {
+            throw new AppException("Đơn hàng với id " + id + " không tồn tại.");
+        }
     }
 }

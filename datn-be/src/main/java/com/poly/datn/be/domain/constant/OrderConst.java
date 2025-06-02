@@ -10,6 +10,7 @@ public class OrderConst {
     public static final String API_ORDER_PAGE_ORDER = "/api/site/page-orders";
     public static final String API_ORDER_LIST_AMOUNT_YEAR = "/api/admin/order/amount-year";
     public static final String API_ORDER_LIST_AMOUNT_MONTH = "/api/admin/order/amount-month";
+    public static final String API_ORDER_LIST_AMOUNT_CATEGORY_MONTH = "/api/admin/order/amount-category-month";
     public static final String API_ORDER_PAGE_ORDER_BY_PRODUCT = "/api/admin/order/page-orders-by-product";
     public static final String API_ORDER_PAGE_REPORT_PRODUCT = "/api/admin/order/page-report-product";
     public static final String API_ORDER_PAGE_ORDER_BY_YEAR_AND_MONTH = "/api/admin/order/page-orders-by-year-and-month";
@@ -24,6 +25,7 @@ public class OrderConst {
     public static final String API_SHIP_ORDER = "/api/site/order/ship-order";
     public static final String API_SUCCESS_ORDER = "/api/site/order/success-order";
     public static final String API_CANCEL_ORDER = "/api/site/order/cancel-order";
+    public static final String API_ORDER_DELETE = "/api/admin/order/delete-order";
 
     /* Order constant*/
     public static final String CART_ITEM_MSG_ERROR_NOT_ENOUGH = "Sản phẩm còn lại không đủ!";

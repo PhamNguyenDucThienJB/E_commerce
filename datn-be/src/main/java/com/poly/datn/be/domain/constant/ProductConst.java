@@ -13,6 +13,8 @@ public class ProductConst {
     public static final String API_PRODUCT_COUNT = "/api/admin/product/count";
     public static final String API_PRODUCT_GET_BY_ID = "/api/site/product/detail/{id}";
     public static final String API_PRODUCT_TOTAL_PAGE = "/api/site/product/total-page";
+    public static final String API_PRODUCT_MOST_VIEWED = "/api/site/product/most-viewed";
+    public static final String API_PRODUCT_BEST_SELLERS = "/api/site/product/best-sellers";
 
     /* Product Constant */
     public static final Integer PRODUCT_AVG_SIZE = 39;

@@ -8,6 +8,7 @@ import com.poly.datn.be.domain.model.AmountMonth;
 import com.poly.datn.be.domain.model.AmountYear;
 import com.poly.datn.be.domain.model.CountOrder;
 import com.poly.datn.be.domain.model.ReportProduct;
+import com.poly.datn.be.domain.model.CategoryRevenue;
 import com.poly.datn.be.entity.Order;
 import com.poly.datn.be.entity.OrderDetail;
 import com.poly.datn.be.entity.Product;
@@ -35,6 +36,7 @@ public interface OrderService {
     Page<Order> findOrderByProduct(Long id, Pageable pageable);
     List<AmountYear> reportAmountYear();
     List<AmountMonth> reportAmountMonth(Integer year);
+    List<CategoryRevenue> reportAmountCategoryMonth(Integer year, Integer month);
 
     Integer countOrder();
     List<CountOrder> countOrderByName();
@@ -45,4 +47,6 @@ public interface OrderService {
     Order successOrder(ReqUpdateStatusOrder reqUpdateStatusOrder);
     Order cancelOrder(ReqUpdateStatusOrder reqUpdateStatusOrder);
     Order cancelOrder(ReqCancelOrder reqCancelOrder);
+    void deleteOrderByCode(String code);
+    void deleteOrderById(Long id);
 }

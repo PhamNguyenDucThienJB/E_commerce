@@ -27,3 +27,15 @@ export const relateProduct = (id, brand) =>{
     const url = `/api/site/product/relate?relate=${brand}&id=${id}`;
     return Instance.get(url);
 }
+
+// Fetch most-viewed products
+export const getMostViewedProducts = (page, size) =>{
+    const url = `/api/site/product/most-viewed?page=${page}&size=${size}`;
+    return Instance.get(url);
+};
+
+// Fetch best-selling products
+export const getBestSellingProducts = (page, size) =>{
+    const url = `/api/site/product/best-sellers?page=${page}&size=${size}`;
+    return Instance.get(url);
+};

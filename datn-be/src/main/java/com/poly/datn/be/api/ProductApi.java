@@ -94,4 +94,21 @@ public class ProductApi {
     public ResponseEntity<?> findAll() {
         return new ResponseEntity<>(productService.findAll(), HttpStatus.OK);
     }
+
+    // Endpoint to get most-viewed products
+    @GetMapping(ProductConst.API_PRODUCT_MOST_VIEWED)
+    public ResponseEntity<?> getMostViewedProducts(@RequestParam("page") Optional<Integer> page,
+                                                   @RequestParam("size") Optional<Integer> size) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "view");
+        Pageable pageable = PageRequest.of(page.orElse(1) - 1, size.orElse(8), sort);
+        return new ResponseEntity<>(productService.getMostViewedProducts(pageable), HttpStatus.OK);
+    }
+
+    // Endpoint to get best-selling products
+    @GetMapping(ProductConst.API_PRODUCT_BEST_SELLERS)
+    public ResponseEntity<?> getBestSellingProducts(@RequestParam("page") Optional<Integer> page,
+                                                    @RequestParam("size") Optional<Integer> size) {
+        Pageable pageable = PageRequest.of(page.orElse(1) - 1, size.orElse(8));
+        return new ResponseEntity<>(productService.getBestSellingProducts(pageable), HttpStatus.OK);
+    }
 }
