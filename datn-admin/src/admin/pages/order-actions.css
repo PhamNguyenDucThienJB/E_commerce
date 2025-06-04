@@ -3,19 +3,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .order-actions .action-icon {
   display: inline-flex;
+  flex: 0 0 auto;
   justify-content: center;
   align-items: center;
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  padding: 0;
+  border-radius: 4px;
+  background: transparent;
   transition: all 0.3s ease;
-  background-color: #f8f9fa;
-  color: #455560;
+  color: var(--txt-color);
   cursor: pointer;
 }
 
@@ -25,13 +27,13 @@
 }
 
 .order-actions .action-icon.edit:hover {
-  background-color: #eff6ff;
-  color: #349eff;
+  background-color: var(--second-color-blue);
+  color: var(--main-color-blue);
 }
 
 .order-actions .action-icon.delete:hover {
-  background-color: #ffeeee;
-  color: #fb0b12;
+  background-color: var(--second-color-red);
+  color: var(--main-color-red);
 }
 
 /* Fix for radio button layout */
