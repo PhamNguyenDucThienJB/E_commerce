@@ -20,18 +20,13 @@ public class ApplicationStartup implements ApplicationListener<ApplicationReadyE
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         System.out.println("Initializing file storage service...");
-        filesStorageService.init();
-        System.out.println("File storage service initialized");
-        
-        // Ensure uploads directory exists
         try {
-            Path uploadsDir = Paths.get("uploads");
-            if (!Files.exists(uploadsDir)) {
-                Files.createDirectory(uploadsDir);
-                System.out.println("Created uploads directory");
-            }
-        } catch (IOException e) {
-            System.err.println("Failed to create uploads directory: " + e.getMessage());
+            filesStorageService.init();
+            System.out.println("File storage service initialized");
+        } catch (Exception e) {
+            System.err.println("Error initializing file storage service: " + e.getMessage());
         }
+        
+        // Không cần tạo thư mục uploads lần nữa vì đã được xử lý trong filesStorageService.init()
     }
 } 
