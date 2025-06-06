@@ -24,6 +24,7 @@ import Blog from "../components/blog/Blog";
 import Chat from "../components/chat/Chat";
 import ForgotPassword from "../authenticate/ForgotPassword";
 import Profile from "../authenticate/Profile";
+import { getCartItemByAccountId } from "../api/CartApi";
 
 import VerifyEmail from "../authenticate/VerifyEmail"; 
 import VerifyPage from "../authenticate/VerifyPage";
@@ -49,6 +50,15 @@ const UserLayOut = () => {
     setBuy([]);
   }, [temp]);
 
+  useEffect(() => {
+    if (user) {
+      getCartItemByAccountId(user.id).then((resp) => {
+        const items = resp.data.map((item) => ({ ...item, checked: false }));
+        setCartItem(items);
+      });
+    }
+  }, [user]);
+
   const refresh = (data) => {
     setTemp(data);
   };
@@ -67,6 +77,10 @@ const UserLayOut = () => {
 
   const buyHandler = (id) => {
     setBuy([...buy, id]);
+  };
+
+  const setBuyNowHandler = (id) => {
+    setBuy([id]);
   };
 
   const cancelBuyHandler = (id) => {
@@ -124,6 +138,15 @@ const UserLayOut = () => {
     setCartItem(data);
   };
 
+  const fetchCartItems = () => {
+    if (user) {
+      getCartItemByAccountId(user.id).then((resp) => {
+        const items = resp.data.map((item) => ({ ...item, checked: false }));
+        setCartItem(items);
+      });
+    }
+  };
+
   return (
     <div className="col-10 offset-1">
       <Header
@@ -132,6 +155,7 @@ const UserLayOut = () => {
         user={user}
         userHandler={userHandler}
         refresh={refresh}
+        cartItems={cartItem}
       ></Header>
       <Switch>
         <Route path="/" exact>
@@ -148,6 +172,10 @@ const UserLayOut = () => {
             changeHeaderHandler={changeHeaderHandler}
             user={user}
             addHandler={addHandler}
+            updateCart={fetchCartItems}
+            buyHandler={buyHandler}
+            clearBuyHandler={clearBuyHandler}
+            setBuyNowHandler={setBuyNowHandler}
           ></ProductDetail>
         </Route>
         <Route path="/cart" exact>

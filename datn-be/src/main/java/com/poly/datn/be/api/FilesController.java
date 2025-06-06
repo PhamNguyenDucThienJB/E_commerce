@@ -7,11 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,10 +49,11 @@ public class FilesController {
   }
 
   @PostMapping("/api/site/upload-image")
-  public ResponseEntity<?> upload(@RequestParam("file") MultipartFile[] multipartFiles){
+  public ResponseEntity<?> upload(@RequestParam("file") MultipartFile[] multipartFiles) {
     System.out.println(multipartFiles);
     return new ResponseEntity<>(storageService.upload(multipartFiles), HttpStatus.OK);
   }
+
   @GetMapping("/files")
   public ResponseEntity<List<FileInfo>> getListFiles() {
     List<FileInfo> fileInfos = storageService.loadAll().map(path -> {
@@ -65,6 +71,25 @@ public class FilesController {
   public ResponseEntity<Resource> getFile(@PathVariable String filename) {
     Resource file = storageService.load(filename);
     return ResponseEntity.ok()
-        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"").body(file);
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
+        .body(file);
+  }
+
+  @GetMapping("/uploads/{filename:.+}")
+  public ResponseEntity<byte[]> getUploadedFile(@PathVariable String filename) throws IOException {
+    Path filePath = Paths.get("uploads").resolve(filename);
+    if (!Files.exists(filePath)) {
+      return ResponseEntity.notFound().build();
+    }
+    
+    byte[] fileContent = Files.readAllBytes(filePath);
+    String contentType = Files.probeContentType(filePath);
+    if (contentType == null) {
+      contentType = "application/octet-stream";
+    }
+    
+    return ResponseEntity.ok()
+        .contentType(MediaType.parseMediaType(contentType))
+        .body(fileContent);
   }
 }

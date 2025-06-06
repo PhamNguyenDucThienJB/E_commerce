@@ -23,8 +23,8 @@ public class Attribute {
     private Long id;
     @Column(name = "name", nullable = true, length = 50)
     private String name;
-    @Column(name = "size", nullable = false)
-    private Integer size;
+    @Column(name = "size", nullable = false, length = 10)
+    private String size;
     @Column(name = "price", nullable = false)
     private Double price;
     @Column(name = "stock", nullable = false)

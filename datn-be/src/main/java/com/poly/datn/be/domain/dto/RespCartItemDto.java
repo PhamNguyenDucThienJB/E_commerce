@@ -13,7 +13,7 @@ public class RespCartItemDto {
     private Long id;
     private String image;
     private String name;
-    private Integer size;
+    private String size;
     private Double price;
     private Integer quantity;
     private Integer stock;

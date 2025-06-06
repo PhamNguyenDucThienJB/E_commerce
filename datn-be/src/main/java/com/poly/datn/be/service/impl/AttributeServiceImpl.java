@@ -72,8 +72,8 @@ public class AttributeServiceImpl implements AttributeService {
     }
 
     @Override
-    public Attribute getByProductIdAndSize(Long productId, Integer size) {
-        return attributeRepo.findByProduct_IdAndSize(productId, size);
+    public Attribute getByProductIdAndSize(Long productId, String size) {
+        return attributeRepo.findFirstByProduct_IdAndSize(productId, size);
     }
 
     @Override
