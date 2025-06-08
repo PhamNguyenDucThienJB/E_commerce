@@ -14,9 +14,11 @@ Instance.interceptors.request.use(
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
         }
+        console.log('Request config:', config);
         return config;
     },
     error => {
+        console.error('Request error:', error);
         return Promise.reject(error);
     }
 );
@@ -24,6 +26,7 @@ Instance.interceptors.request.use(
 // Add a response interceptor
 Instance.interceptors.response.use(
     response => {
+        console.log('Response:', response);
         return response;
     },
     error => {
@@ -32,6 +35,7 @@ Instance.interceptors.response.use(
             console.log('Unauthorized request - but not logging out');
             // Don't clear token here to prevent automatic logout
         }
+        console.error('Response error:', error);
         return Promise.reject(error);
     }
 );

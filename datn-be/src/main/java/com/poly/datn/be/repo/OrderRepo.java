@@ -5,6 +5,7 @@ import com.poly.datn.be.domain.model.AmountYear;
 import com.poly.datn.be.domain.model.CountOrder;
 import com.poly.datn.be.domain.model.ReportProduct;
 import com.poly.datn.be.domain.model.CategoryRevenue;
+import com.poly.datn.be.entity.Account;
 import com.poly.datn.be.entity.Order;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface OrderRepo extends JpaRepository<Order, Long> {
@@ -55,4 +57,13 @@ public interface OrderRepo extends JpaRepository<Order, Long> {
     List<CategoryRevenue> reportAmountCategoryMonth(@Param("year") Integer year, @Param("month") Integer month);
     void deleteByCode(String code);
     Order findByCode(String code);
+
+    @Query("SELECT CASE WHEN COUNT(o) > 0 THEN true ELSE false END FROM Order o " +
+           "JOIN o.orderDetails od " +
+           "JOIN od.attribute a " +
+           "JOIN a.product p " +
+           "WHERE o.account.id = :accountId " +
+           "AND p.id = :productId " +
+           "AND o.orderStatus.name = 'Đã giao hàng'")
+    Boolean existsCompletedOrderWithProductForUser(Long accountId, Long productId);
 }

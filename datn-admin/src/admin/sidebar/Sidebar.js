@@ -7,26 +7,26 @@ import { Link } from "react-router-dom";
 const sidebar_items_1 = [
   {
       "display_name": "Dashboard",
-      "route": "/",
+      "route": "/dashboard",
       "icon": "bx bx-category-alt"
   },
   {
       "display_name": "Tài khoản",
-      "route": "/accounts",
+      "route": "/account",
       "add": "/add-account",
       "modify": "/account-detail",
       "icon": "bx bx-user-pin"
   },
   {
       "display_name": "Sản phẩm",
-      "route": "/products",
+      "route": "/product",
       "add": "/add-product",
       "modify": "/product-detail",
       "icon": "bx bx-package"
   },
   {
       "display_name": "Đơn hàng",
-      "route": "/orders",
+      "route": "/order",
       "add": "/add-order",
       "modify": "/order-detail",
       "sub": "/detail-order",
@@ -34,14 +34,14 @@ const sidebar_items_1 = [
   },
   {
       "display_name": "Voucher",
-      "route": "/vouchers",
+      "route": "/voucher",
       "add": "/add-voucher",
       "modify": "/voucher-detail",
       "icon": "bx bx-bar-chart-alt"
   },
   {
       "display_name": "Loại sản phẩm",
-      "route": "/categories",
+      "route": "/category",
       "add": "/add-category",
       "modify": "/category-detail",
       "icon": "bx bx-list-ol"
@@ -61,18 +61,28 @@ const sidebar_items_1 = [
       "icon": "bx bx-store-alt"
   },
   {
+      "display_name": "Đánh giá",
+      "route": "/reviews",
+      "icon": "bx bx-star"
+  },
+  {
+      "display_name": "Bình luận",
+      "route": "/comments",
+      "icon": "bx bx-message-dots"
+  },
+  {
       "display_name": "Hộp thoại",
       "route": "/chat",
       "add": "/chat",
       "modify": "/chat",
-      "icon": "bx bx-user-pin"
+      "icon": "bx bx-chat"
   }
 ]
 
 const sidebar_items_2 = [
   {
       "display_name": "Đơn hàng",
-      "route": "/orders",
+      "route": "/order",
       "add": "/add-order",
       "modify": "/order-detail",
       "sub": "/detail-order",
@@ -83,7 +93,7 @@ const sidebar_items_2 = [
       "route": "/chat",
       "add": "/chat",
       "modify": "/chat",
-      "icon": "bx bx-user-pin"
+      "icon": "bx bx-chat"
   }
 ]
 const SidebarItem = (props) => {

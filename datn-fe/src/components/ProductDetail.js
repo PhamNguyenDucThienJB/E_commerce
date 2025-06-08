@@ -10,6 +10,8 @@ import { Button } from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
 import Table from "react-bootstrap/Table";
 import { getCartItemByAccountId } from "../api/CartApi";
+import ProductComments from "./ProductComments";
+import ProductRatings from "./ProductRatings";
 
 const ProductDetail = (props) => {
   const { id } = useParams();
@@ -17,6 +19,7 @@ const ProductDetail = (props) => {
   const [item, setItem] = useState();
   const [attributes, setAttributes] = useState([]);
   const [price, setPrice] = useState();
+  const [fixedPrice, setFixedPrice] = useState(); // Giá cố định cho tất cả size
   const [stock, setStock] = useState();
   const [flag, setFlag] = useState();
   const [count, setCount] = useState(1);
@@ -41,9 +44,25 @@ const ProductDetail = (props) => {
   const productsPerSlide = 4;
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   
+  // Thêm state để quản lý tab đang active
+  const [activeTab, setActiveTab] = useState("description");
+  
+  // Add state for forcing ratings refresh
+  const [ratingsKey, setRatingsKey] = useState(0);
+  
   const handleClose = () => setShow(false);
   const handleSizeGuideClose = () => setShowSizeGuide(false);
   const handleSizeGuideShow = () => setShowSizeGuide(true);
+  
+  // Thêm hàm xử lý khi click vào tab
+  const handleTabClick = (tabId) => {
+    setActiveTab(tabId);
+    
+    // Khi click vào tab đánh giá, tải lại component ProductRatings
+    if (tabId === "ratings" && item) {
+      setRatingsKey(prev => prev + 1);
+    }
+  };
 
   // Handle window resize
   useEffect(() => {
@@ -52,8 +71,17 @@ const ProductDetail = (props) => {
     };
     
     window.addEventListener('resize', handleResize);
+    
+    // Add listener for rating refresh event
+    const handleRefreshRatings = () => {
+      setRatingsKey(prev => prev + 1);
+    };
+    
+    window.addEventListener('refreshRatings', handleRefreshRatings);
+    
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('refreshRatings', handleRefreshRatings);
     };
   }, []);
 
@@ -92,6 +120,9 @@ const ProductDetail = (props) => {
   useEffect(() => {
     onLoad();
     window.scrollTo(0, 0);
+    
+    // Force refresh of ratings when page loads
+    setRatingsKey(prev => prev + 1);
   }, [id]);
 
   const onLoad = () => {
@@ -99,6 +130,10 @@ const ProductDetail = (props) => {
       .then((res) => {
         setItem(res.data);
         setAttributes(res.data.attributes);
+        
+        // Thiết lập giá cố định từ sản phẩm thay vì từ attribute
+        setFixedPrice(res.data.price);
+        setPrice(res.data.price);
         
         // Filter out cloth_04 image for Doodle Backpack product
         if (res.data.code === "GV7412" && res.data.main && res.data.main.includes("cloth_04")) {
@@ -123,7 +158,8 @@ const ProductDetail = (props) => {
 
     getAttribute(id, "S")
       .then((res) => {
-        onModify(res.data.price, res.data.stock, res.data.id);
+        // Chỉ lấy stock và id, không thay đổi giá
+        onModify(res.data.stock, res.data.id);
       })
       .catch((error) => console.log(error));
     setStatus(stock > count);
@@ -174,10 +210,10 @@ const ProductDetail = (props) => {
     }
   }, [item]);
 
-  const onModify = (price, stock, flag) => {
+  const onModify = (stock, flag) => {
     setCount(1);
     setStatus(stock > count);
-    setPrice(price);
+    // Giữ nguyên giá cố định từ sản phẩm, không thay đổi theo size
     setStock(stock);
     setFlag(flag);
   };
@@ -277,7 +313,7 @@ const ProductDetail = (props) => {
       toast.warning("Mời chọn size.");
       return;
     }
-    const lastPriceValue = (price * (100 - item.discount)) / 100;
+    const lastPriceValue = (fixedPrice * (100 - item.discount)) / 100;
     if (props.user) {
       // Authenticated user: update server-side cart
       const data = {
@@ -361,8 +397,91 @@ const ProductDetail = (props) => {
     return relate.length > itemsToShow;
   };
 
+  // Phần render HTML của tabs
+  const renderTabNavigation = () => {
+    return (
+      <div className="row mt-5">
+        <div className="col-md-12">
+          <ul className="nav nav-tabs" id="productTabs" role="tablist">
+            <li className="nav-item" role="presentation">
+              <button 
+                className={`nav-link ${activeTab === "description" ? "active" : ""}`}
+                id="description-tab" 
+                onClick={() => handleTabClick("description")}
+                type="button" 
+                role="tab"
+                aria-controls="description" 
+                aria-selected={activeTab === "description"}
+              >
+                Mô tả sản phẩm
+              </button>
+            </li>
+            <li className="nav-item" role="presentation">
+              <button 
+                className={`nav-link ${activeTab === "ratings" ? "active" : ""}`}
+                id="ratings-tab" 
+                onClick={() => handleTabClick("ratings")}
+                type="button" 
+                role="tab"
+                aria-controls="ratings" 
+                aria-selected={activeTab === "ratings"}
+              >
+                Đánh giá
+              </button>
+            </li>
+            <li className="nav-item" role="presentation">
+              <button 
+                className={`nav-link ${activeTab === "comments" ? "active" : ""}`}
+                id="comments-tab" 
+                onClick={() => handleTabClick("comments")}
+                type="button" 
+                role="tab"
+                aria-controls="comments" 
+                aria-selected={activeTab === "comments"}
+              >
+                Bình luận
+              </button>
+            </li>
+          </ul>
+          <div className="tab-content" id="productTabsContent">
+            <div 
+              className={`tab-pane fade ${activeTab === "description" ? "show active" : ""}`}
+              id="description" 
+              role="tabpanel" 
+              aria-labelledby="description-tab"
+            >
+              <div className="p-4">
+                {item && <div dangerouslySetInnerHTML={{ __html: item.description }} />}
+              </div>
+            </div>
+            <div 
+              className={`tab-pane fade ${activeTab === "ratings" ? "show active" : ""}`}
+              id="ratings" 
+              role="tabpanel" 
+              aria-labelledby="ratings-tab"
+            >
+              <div className="p-4">
+                {item && <ProductRatings key={ratingsKey} productId={item.id} user={props.user} orderId={props.user ? props.user.orderId : null} />}
+              </div>
+            </div>
+            <div 
+              className={`tab-pane fade ${activeTab === "comments" ? "show active" : ""}`}
+              id="comments" 
+              role="tabpanel" 
+              aria-labelledby="comments-tab"
+            >
+              <div className="p-4">
+                {item && <ProductComments productId={item.id} user={props.user} />}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div>
+    <div className="container-fluid">
       {item && (
         <div className="col-12 mt-3">
           <nav aria-label="breadcrumb" className="mb-4">
@@ -391,15 +510,15 @@ const ProductDetail = (props) => {
                     </h2>
                     <p className="text-secondary mb-3">Mã SP: {item.code}</p>
                     <h4 className="fw-bold text-danger mb-2">
-                      {price &&
+                      {fixedPrice &&
                         (
-                          (price * (100 - item.discount)) /
+                          (fixedPrice * (100 - item.discount)) /
                           100
                         ).toLocaleString() + " đ"}
                     </h4>
                     <p className="text-secondary mb-4">
                       Giá gốc: {" "}
-                      <del>{price && price.toLocaleString() + " đ"}</del>
+                      <del>{fixedPrice && fixedPrice.toLocaleString() + " đ"}</del>
                     </p>
                     <div className="mb-4 border-top border-bottom py-4">
                       <label className="fw-bold mb-2 d-block">Kích thước <span className="text-primary ms-2 fw-normal" style={{cursor: 'pointer', fontSize: '14px'}} onClick={handleSizeGuideShow}>HƯỚNG DẪN CHỌN SIZE</span></label>
@@ -421,7 +540,7 @@ const ProductDetail = (props) => {
                               padding: "6px 12px",
                               fontWeight: flag == i.id ? "bold" : "normal"
                             }}
-                            onClick={() => onModify(i.price, i.stock, i.id)}
+                            onClick={() => onModify(i.stock, i.id)}
                             disabled={i.stock === 0}
                           >
                             {i.size}
@@ -513,7 +632,7 @@ const ProductDetail = (props) => {
                         onClick={() =>
                           onAddCartHandler(
                             flag,
-                            (price * (100 - item.discount)) / 100
+                            (fixedPrice * (100 - item.discount)) / 100
                           )
                         }
                         className="btn btn-primary text-white text-uppercase"
@@ -782,6 +901,8 @@ const ProductDetail = (props) => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {renderTabNavigation()}
     </div>
   );
 };

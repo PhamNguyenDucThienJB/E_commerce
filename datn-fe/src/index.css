@@ -162,3 +162,19 @@ input[type=number] {
     background-color: var(--main-color-orange);
     color: #fff;
 }
+
+/* Rating card wrapper adjustments */
+.rating-card {
+    padding: 0 !important;
+    margin-bottom: 1.5rem !important; /* preserve spacing */
+    background: transparent !important;
+    border: none !important;
+}
+
+/* Move box-shadow and border-radius to card-body */
+.rating-card .card-body {
+    background-color: #ffffff !important;
+    color: #212529 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
