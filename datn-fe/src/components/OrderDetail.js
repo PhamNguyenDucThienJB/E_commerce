@@ -8,16 +8,53 @@ import { FaStar, FaRegStar } from "react-icons/fa";
 import { getProductById } from "../api/ProductApi";
 import { getAttributeById } from "../api/AttributeApi";
 
+// Mapping mặc định từ attribute ID sang product ID
+// Được đưa ra khỏi hàm getAttributeProductMapping để có thể truy cập ở mọi nơi
+const defaultMapping = {
+  // AttributeID: ProductID - Product Name
+  4: 3,    // AttributeID 4 -> ProductID 3 ("Doodle Rain of Thoughts" Tee)
+  5: 3,    // AttributeID 5 -> ProductID 3 ("Doodle Rain of Thoughts" Tee)
+  6: 3,    // AttributeID 6 -> ProductID 3 ("Doodle Rain of Thoughts" Tee)
+  19: 5,   // AttributeID 19 -> ProductID 5 ("Pet All The Dogs" Tee)
+  20: 5,   // AttributeID 20 -> ProductID 5 ("Pet All The Dogs" Tee)
+  21: 5,   // AttributeID 21 -> ProductID 5 ("Pet All The Dogs" Tee)
+  22: 6,   // AttributeID 22 -> ProductID 6 ("Doodle Rain of Thoughts" Tee)
+  23: 6,   // AttributeID 23 -> ProductID 6 ("Doodle Rain of Thoughts" Tee)
+  24: 6,   // AttributeID 24 -> ProductID 6 ("Doodle Rain of Thoughts" Tee)
+  31: 10,  // AttributeID 31 -> ProductID 10 ("Doodle Dino Squad" T-Shirt)
+  32: 10,  // AttributeID 32 -> ProductID 10 ("Doodle Dino Squad" T-Shirt)
+  33: 10,  // AttributeID 33 -> ProductID 10 ("Doodle Dino Squad" T-Shirt)
+  34: 11,  // AttributeID 34 -> ProductID 11 ("No WiFi, Just Vibes" Tee)
+  35: 11,  // AttributeID 35 -> ProductID 11 ("No WiFi, Just Vibes" Tee)
+  36: 11,  // AttributeID 36 -> ProductID 11 ("No WiFi, Just Vibes" Tee)
+  67: 24,  // AttributeID 67 -> ProductID 24 ("Doodle City at Night" Tee)
+  68: 24,  // AttributeID 68 -> ProductID 24 ("Doodle City at Night" Tee)
+  69: 24,  // AttributeID 69 -> ProductID 24 ("Doodle City at Night" Tee)
+  76: 27,  // AttributeID 76 -> ProductID 27 ("Doodle City at Night" Tee)
+  77: 27,  // AttributeID 77 -> ProductID 27 ("Doodle City at Night" Tee)
+  78: 27,  // AttributeID 78 -> ProductID 27 ("Doodle City at Night" Tee)
+  82: 28,  // AttributeID 82 -> ProductID 28 ("Doodle Dino Squad" T-Shirt)
+  83: 28,  // AttributeID 83 -> ProductID 28 ("Doodle Dino Squad" T-Shirt)
+  84: 28,  // AttributeID 84 -> ProductID 28 ("Doodle Dino Squad" T-Shirt)
+  85: 29,  // AttributeID 85 -> ProductID 29 ("Doodle Rain of Thoughts" Tee)
+  86: 29,  // AttributeID 86 -> ProductID 29 ("Doodle Rain of Thoughts" Tee)
+  87: 29,  // AttributeID 87 -> ProductID 29 ("Doodle Rain of Thoughts" Tee)
+  88: 30,  // AttributeID 88 -> ProductID 30 ("Ctrl + Alt + Delete My Life" Tee)
+  89: 30,  // AttributeID 89 -> ProductID 30 ("Ctrl + Alt + Delete My Life" Tee)
+  90: 30,  // AttributeID 90 -> ProductID 30 ("Ctrl + Alt + Delete My Life" Tee)
+  91: 30,  // AttributeID 91 -> ProductID 30 ("Ctrl + Alt + Delete My Life" Tee)
+  92: 31,  // AttributeID 92 -> ProductID 31 ("Caffeine & Chaos" Tee)
+  93: 31,  // AttributeID 93 -> ProductID 31 ("Caffeine & Chaos" Tee)
+  94: 31,  // AttributeID 94 -> ProductID 31 ("Caffeine & Chaos" Tee)
+  95: 31,  // AttributeID 95 -> ProductID 31 ("Caffeine & Chaos" Tee)
+  96: 32,  // AttributeID 96 -> ProductID 32 ("Pet All The Dogs" Tee)
+  97: 32,  // AttributeID 97 -> ProductID 32 ("Pet All The Dogs" Tee)
+  98: 32,  // AttributeID 98 -> ProductID 32 ("Pet All The Dogs" Tee)
+  99: 32,  // AttributeID 99 -> ProductID 32 ("Pet All The Dogs" Tee)
+};
+
 // Khởi tạo mapping từ localStorage hoặc dùng mapping mặc định
 const getAttributeProductMapping = () => {
-  // Mapping mặc định là quan trọng nhất
-  const defaultMapping = {
-    4: 3,   // AttributeID 4 -> ProductID 3 ("Doodle Rain of Thoughts" Tee)
-    21: 5,  // AttributeID 21 -> ProductID 5 ("Pet All The Dogs" Tee)
-    22: 3,  // AttributeID 22 -> ProductID 3 ("Doodle Rain of Thoughts" Tee)
-    31: 10, // AttributeID 31 -> ProductID 10 (Doodle Dino Squad T-Shirt)
-  };
-  
   // Clear localStorage nếu cần - uncomment dòng này để reset mapping
   // localStorage.removeItem('attributeProductMapping');
   
@@ -69,6 +106,8 @@ const OrderDetail = (props) => {
   const [productNames, setProductNames] = useState({});  // Store product names by attribute ID
   const [attributeMapping, setAttributeMapping] = useState(getAttributeProductMapping());
   const location = useLocation();
+  const [isRefreshingMappings, setIsRefreshingMappings] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState(null);
 
   // Lấy orderId từ URL và xử lý an toàn để tránh lỗi khi có query params
   const getOrderIdFromUrl = () => {
@@ -95,6 +134,9 @@ const OrderDetail = (props) => {
 
   useEffect(() => {
     if (orderId) {
+      // Preload attribute-product mappings
+      preloadAttributeProductMappings();
+      
       onLoad();
 
       // Kiểm tra nếu có tham số rate=true từ trang Order
@@ -111,6 +153,100 @@ const OrderDetail = (props) => {
       toast.error("Không tìm thấy thông tin đơn hàng");
     }
   }, [location]);
+
+  // Hàm tải trước tất cả các mapping từ attribute đến product
+  const preloadAttributeProductMappings = async () => {
+    try {
+      console.log("Đang tải trước mapping cho tất cả attribute...");
+      
+      // Tạo bản sao của mapping hiện tại
+      let updatedMapping = {...attributeMapping};
+      let hasChanges = false;
+      
+      // Gọi API để lấy danh sách tất cả các attribute
+      // Thay thế phương pháp tạo danh sách cứng bằng việc gọi API
+      try {
+        // API call để lấy tất cả attribute - giả sử API này tồn tại
+        // Nếu không có API này, cần phải tạo một API endpoint mới
+        const allAttributesResp = await fetch('/api/site/attribute/get-all')
+          .then(res => res.json())
+          .catch(error => {
+            console.error("Không thể lấy danh sách attribute từ API:", error);
+            // Fallback: Sử dụng danh sách tĩnh nếu API không khả dụng
+            return { data: Array.from({length: 200}, (_, i) => ({id: i + 1})) };
+          });
+        
+        const attributesToCheck = allAttributesResp.data || [];
+        console.log(`Đã lấy được ${attributesToCheck.length} attribute từ API`);
+        
+        // Với mỗi attribute, kiểm tra và cập nhật mapping nếu cần
+        for (const attr of attributesToCheck) {
+          const attributeId = attr.id;
+          
+          // Bỏ qua các attribute ID đã có trong mapping
+          if (updatedMapping[attributeId]) continue;
+          
+          // Nếu attribute đã có product_id, sử dụng ngay
+          if (attr.product && attr.product.id) {
+            const productId = attr.product.id;
+            updatedMapping[attributeId] = productId;
+            hasChanges = true;
+            console.log(`Preload: Đã thêm mapping attributeId ${attributeId} -> productId ${productId}`);
+            continue;
+          }
+          
+          // Nếu không, gọi API riêng để lấy chi tiết attribute
+          try {
+            const attributeResp = await getAttributeById(attributeId);
+            
+            if (attributeResp.data && attributeResp.data.product && attributeResp.data.product.id) {
+              const productId = attributeResp.data.product.id;
+              updatedMapping[attributeId] = productId;
+              hasChanges = true;
+              console.log(`Preload: Đã thêm mapping attributeId ${attributeId} -> productId ${productId}`);
+            }
+          } catch (error) {
+            // Bỏ qua lỗi nếu attribute không tồn tại
+            // console.debug(`Attribute ID ${attributeId} không tồn tại hoặc lỗi: ${error.message}`);
+          }
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách attribute:", error);
+        
+        // Fallback: Kiểm tra một phạm vi ID attribute (1-200) nếu API không khả dụng
+        const attributeIdsToCheck = Array.from({length: 200}, (_, i) => i + 1);
+        
+        for (const attributeId of attributeIdsToCheck) {
+          // Bỏ qua các attribute ID đã có trong mapping
+          if (updatedMapping[attributeId]) continue;
+          
+          try {
+            // Gọi API để lấy thông tin attribute
+            const attributeResp = await getAttributeById(attributeId);
+            
+            // Kiểm tra nếu API trả về product object
+            if (attributeResp.data && attributeResp.data.product && attributeResp.data.product.id) {
+              const productId = attributeResp.data.product.id;
+              updatedMapping[attributeId] = productId;
+              hasChanges = true;
+              console.log(`Preload fallback: Đã thêm mapping attributeId ${attributeId} -> productId ${productId}`);
+            }
+          } catch (error) {
+            // Bỏ qua lỗi nếu attribute không tồn tại
+          }
+        }
+      }
+      
+      // Nếu có thay đổi, cập nhật mapping trong localStorage và state
+      if (hasChanges) {
+        localStorage.setItem('attributeProductMapping', JSON.stringify(updatedMapping));
+        setAttributeMapping(updatedMapping);
+        console.log(`Preload: Đã cập nhật ${Object.keys(updatedMapping).length} mappings`);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải trước mappings:", error);
+    }
+  };
 
   // Hàm tiện ích để lấy tên sản phẩm từ attributeId
   const getProductNameFromAttributeId = (attributeId) => {
@@ -175,6 +311,24 @@ const OrderDetail = (props) => {
                     // Cập nhật mapping và lưu vào localStorage
                     updatedMapping = addToMapping(attributeId, productId);
                     console.log(`Đã thêm mapping mới: attributeId ${attributeId} -> productId ${productId}`);
+                  } 
+                  // Kiểm tra nếu API trả về product_id dưới dạng giá trị riêng
+                  else if (attributeResp.data && attributeResp.data.productId) {
+                    productId = attributeResp.data.productId;
+                    updatedMapping = addToMapping(attributeId, productId);
+                    console.log(`Đã thêm mapping mới từ productId: attributeId ${attributeId} -> productId ${productId}`);
+                  }
+                  // Xử lý trường hợp không có product_id trong response
+                  else {
+                    console.warn(`Không tìm thấy product_id trong response cho attribute ${attributeId}`);
+                    
+                    // Nếu có tên sản phẩm, tìm kiếm product_id từ SQL data
+                    if (attributeResp.data && attributeResp.data.name) {
+                      const productName = attributeResp.data.name;
+                      // Lưu tên sản phẩm để hiển thị
+                      names[attributeId] = productName;
+                      console.log(`Đã lưu tên sản phẩm "${productName}" cho attribute ${attributeId}`);
+                    }
                   }
                 } catch (error) {
                   console.error(`Lỗi khi lấy thông tin attribute ${attributeId}:`, error);
@@ -508,11 +662,79 @@ const OrderDetail = (props) => {
     return stars;
   };
 
+  // Hàm làm mới mappings theo yêu cầu của người dùng
+  const refreshMappings = async () => {
+    try {
+      setIsRefreshingMappings(true);
+      
+      // Xóa tất cả mappings từ localStorage (trừ những mapping cố định)
+      const currentMapping = getAttributeProductMapping();
+      const defaultMappingKeys = Object.keys(defaultMapping).map(k => parseInt(k));
+      
+      // Giữ lại các mapping mặc định, xóa các mapping đã lưu khác
+      const preservedMapping = {};
+      for (const key of defaultMappingKeys) {
+        preservedMapping[key] = currentMapping[key];
+      }
+      
+      // Lưu lại mapping đã làm sạch
+      localStorage.setItem('attributeProductMapping', JSON.stringify(preservedMapping));
+      setAttributeMapping(preservedMapping);
+      
+      // Chạy lại quá trình tải mapping
+      await preloadAttributeProductMappings();
+      
+      // Cập nhật thời gian làm mới cuối cùng
+      const now = new Date();
+      setLastRefreshTime(now.toLocaleString());
+      
+      toast.success("Đã làm mới dữ liệu mapping thành công!");
+      
+      // Tải lại dữ liệu đơn hàng để cập nhật giao diện
+      onLoad();
+    } catch (error) {
+      console.error("Lỗi khi làm mới mappings:", error);
+      toast.error("Lỗi khi làm mới dữ liệu: " + error.message);
+    } finally {
+      setIsRefreshingMappings(false);
+    }
+  };
+  
+  // Nút làm mới mapping có thể được thêm vào giao diện
+  const RefreshMappingButton = () => (
+    <Button 
+      variant="outline-secondary" 
+      size="sm" 
+      onClick={refreshMappings}
+      disabled={isRefreshingMappings}
+      className="ml-2"
+      title="Làm mới dữ liệu mapping giữa attribute và sản phẩm"
+    >
+      {isRefreshingMappings ? (
+        <>
+          <i className="fa fa-spinner fa-spin mr-1"></i> Đang làm mới...
+        </>
+      ) : (
+        <>
+          <i className="fa fa-refresh mr-1"></i> Làm mới dữ liệu
+        </>
+      )}
+    </Button>
+  );
+
   return (
     <div className="container-fluid row padding mb-5">
       <div className="col-10 offset-1 text ">
         <p className="display-4 text-primary" style={{ fontSize: "34px", fontWeight: "bolder" }}>
           Đơn hàng #{order?.id || ""}
+          <span style={{ float: "right", fontSize: "16px" }}>
+            <RefreshMappingButton />
+            {lastRefreshTime && (
+              <small className="text-muted ml-2">
+                Đã làm mới: {lastRefreshTime}
+              </small>
+            )}
+          </span>
         </p>
       </div>
       <div className="col-8 welcome mb-5 mt-5">
@@ -538,16 +760,32 @@ const OrderDetail = (props) => {
                 const attributeId = item?.attribute?.id;
                 
                 if (attributeId) {
+                  // 1. Sử dụng productInfo nếu có
                   if (item.productInfo && item.productInfo.productId) {
                     productId = item.productInfo.productId;
-                  } else if (attributeMapping[attributeId]) {
+                  } 
+                  // 2. Sử dụng mapping từ attributeId -> productId
+                  else if (attributeMapping[attributeId]) {
                     productId = attributeMapping[attributeId];
+                  }
+                  // 3. Sử dụng product.id từ attribute object nếu có
+                  else if (item?.attribute?.product?.id) {
+                    productId = item.attribute.product.id;
+                    // Thêm mapping mới tìm được vào localStorage để sử dụng sau này
+                    addToMapping(attributeId, productId);
+                  }
+                  // 4. Log lỗi để debug
+                  else {
+                    console.warn(`Không thể xác định productId cho attributeId=${attributeId}. Sử dụng attributeId làm mã sản phẩm.`);
                   }
                 }
                 
+                // Nếu không tìm được productId, sử dụng attributeId làm mã sản phẩm
+                const displayProductId = productId || (attributeId ? `ATT-${attributeId}` : 'N/A');
+                
                 return (
                   <tr key={index}>
-                    <th scope="row">{productId || 'N/A'}</th>
+                    <th scope="row">{displayProductId}</th>
                     <td>{item?.attribute?.name || productNames[item?.attribute?.id] || item?.attribute?.product?.name || 'N/A'}</td>
                     <td>{item?.attribute?.size || 'N/A'}</td>
                     <td>{item?.sellPrice?.toLocaleString?.() || 0}₫</td>
