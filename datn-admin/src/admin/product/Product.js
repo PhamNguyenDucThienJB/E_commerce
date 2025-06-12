@@ -14,19 +14,30 @@ const Product = () => {
   const [brand, setBrand] = useState([]);
 
   useEffect(() => {
-    onLoad();
-  }, [page]);
-
-  const onLoad = () => {
-    getAllProductsByBrand(0, page, 10, true).then((response) => {
-      setProducts(response.data.content);
-      setTotal(response.data.totalPages);
-    });
-
-    getBrands(1, 20)
-      .then((resp) => setBrand(resp.data.content))
+    let isMounted = true;
+    // Fetch products for current page
+    getAllProductsByBrand(0, page, 10, true)
+      .then((response) => {
+        if (isMounted) {
+          console.log("Product sample:", response.data.content[0]); // Debug product structure
+          setProducts(response.data.content);
+          setTotal(response.data.totalPages);
+        }
+      })
       .catch((error) => console.log(error));
-  };
+    // Fetch brands
+    getBrands(1, 20)
+      .then((resp) => {
+        if (isMounted) {
+          setBrand(resp.data.content);
+        }
+      })
+      .catch((error) => console.log(error));
+    return () => {
+      // Cleanup to prevent state updates on unmounted component
+      isMounted = false;
+    };
+  }, [page]);
 
   const onChangePage = (page) => {
     setPage(page);
@@ -49,7 +60,13 @@ const Product = () => {
 
   const getProductByBrandHandler = (value) => {
     if (value == 0) {
-      onLoad();
+      // Fetch products for current page
+      getAllProductsByBrand(0, page, 10, true)
+        .then((response) => {
+          setProducts(response.data.content);
+          setTotal(response.data.totalPages);
+        })
+        .catch((error) => console.log(error));
     } else {
       getAllProductsByBrand(value, 1, 10, true)
         .then((resp) => {
@@ -115,12 +132,11 @@ const Product = () => {
                         <th>{item.code}</th>
                         <th>{item.brand}</th>
                         <th>
-                          {" "}
                           <img
                             className="img-fluid"
                             style={{ width: "100px", height: "100px" }}
-                            src={require(`../../static/images/${item.image}`)}
-                            alt=""
+                            src={`http://localhost:8080/uploads/${item.image}`}
+                            alt={item.name}
                           />
                         </th>
                         <th>{item.active ? "Đang bán" : "Dừng bán"}</th>

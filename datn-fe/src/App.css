@@ -36,3 +36,26 @@
     transform: rotate(360deg);
   }
 }
+
+/* Custom styles for textarea in rating modal */
+.custom-textarea::placeholder {
+  color: #000 !important;
+}
+
+.custom-textarea::-webkit-input-placeholder {
+  color: #000 !important;
+}
+
+.custom-textarea::-moz-placeholder {
+  color: #000 !important;
+  opacity: 1;
+}
+
+.custom-textarea:-ms-input-placeholder {
+  color: #000 !important;
+}
+
+.custom-textarea:-moz-placeholder {
+  color: #000 !important;
+  opacity: 1;
+}

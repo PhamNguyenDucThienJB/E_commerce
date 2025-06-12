@@ -40,4 +40,10 @@ public class Account {
     @OneToMany(mappedBy = "account")
     @JsonIgnore
     private Collection<CartItem> cartItems;
+    @OneToMany(mappedBy = "account")
+    @JsonIgnore
+    private Collection<Comment> comments;
+    @OneToMany(mappedBy = "account")
+    @JsonIgnore
+    private Collection<Rating> ratings;
 }

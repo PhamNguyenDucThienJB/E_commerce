@@ -20,6 +20,7 @@ const Detail = () => {
     const onLoad = () => {
       getProductById(id)
         .then((res) => {
+          console.log("Product data:", res.data);
           setItem(res.data);
           setAttributes(res.data.attributes);
         })
@@ -41,6 +42,36 @@ const Detail = () => {
     const goBack = () => {
         history.goBack();
       };
+
+    // Hàm để xử lý mô tả sản phẩm với ảnh
+    const renderDescription = (description) => {
+      if (!description) return { __html: "" };
+      
+      // Xử lý mô tả có thẻ [image:filename]
+      const imgRegex = /\[image:(.*?)\]/g;
+      let processedDesc = description.replace(imgRegex, (match, fileName) => {
+        if (!fileName) return match; // Nếu không có tên file, giữ nguyên text
+        return `<img src="http://localhost:8080/uploads/${fileName}" alt="Product description" class="img-fluid mb-3" style="max-width: 100%" />`;
+      });
+      
+      // Xử lý xuống dòng thành <br>
+      processedDesc = processedDesc.replace(/\n/g, '<br>');
+      
+      return { __html: processedDesc };
+    };
+
+    // Kiểm tra nếu đường dẫn hình ảnh hợp lệ
+    const getImageUrl = (imageName) => {
+      if (!imageName) return "/assets/placeholder-image.jpg"; // Đường dẫn đến ảnh mặc định
+      return `http://localhost:8080/uploads/${imageName}`;
+    };
+    
+    // Lấy danh sách hình ảnh hợp lệ từ dữ liệu sản phẩm
+    const getValidImages = (product) => {
+      if (!product || !product.images) return [];
+      return product.images.filter(img => img && typeof img === 'string');
+    };
+    
     return (
       <div>
         {item && (
@@ -58,10 +89,14 @@ const Detail = () => {
                 
                   <div className="col-md-4">
                     <img
-                      src={require(`../../static/images/${item.main}`)}
+                      src={getImageUrl(item.main)}
                       className="img-fluid rounded-start"
-                      style={{ width: "600px", height: "400px" }}
-                      alt=""
+                      style={{ width: "600px", height: "400px", objectFit: "contain" }}
+                      alt={item.name || "Hình ảnh sản phẩm"}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/assets/placeholder-image.jpg"; // Ảnh thay thế khi lỗi
+                      }}
                     />
                   </div>
                   <div className="col-md-8">
@@ -90,7 +125,7 @@ const Detail = () => {
                       <hr />
                       <div className="div">
                         <label className="mr-5">Chọn size</label>
-                        {attributes.map((i, index) => (
+                        {attributes && attributes.map((i, index) => (
                           <div
                             className="form-check form-check-inline"
                             key={index}
@@ -99,7 +134,7 @@ const Detail = () => {
                               className="form-check-input"
                               type="radio"
                               name="inlineRadioOptions"
-                              id="inlineRadio3"
+                              id={`size-${i.id}`}
                               defaultValue="option3"
                               onChange={() => onModify(i.price, i.stock, i.id)}
                               disabled={i.stock === 0}
@@ -112,38 +147,23 @@ const Detail = () => {
                       <hr />                     
                     </div>
                   </div>
-                  <div className="container row offset-3 mt-5">
-                    <img
-                      src={require(`../../static/images/${item.images[0]}`)}
-                      alt="..."
-                      className="img-thumbnail mr-3"
-                      style={{ width: "200px", height: "200px" }}
-                    />
-                    <img
-                      src={require(`../../static/images/${item.images[1]}`)}
-                      alt="..."
-                      className="img-thumbnail mr-3"
-                      style={{ width: "200px", height: "200px" }}
-                    />
-                    <img
-                      src={require(`../../static/images/${item.images[2]}`)}
-                      alt="..."
-                      className="img-thumbnail mr-3"
-                      style={{ width: "200px", height: "200px" }}
-                    />
-                    <img
-                      src={require(`../../static/images/${item.images[3]}`)}
-                      alt="..."
-                      className="img-thumbnail mr-3"
-                      style={{ width: "200px", height: "200px" }}
-                    />
-                    <img
-                      src={require(`../../static/images/${item.images[4]}`)}
-                      alt="..."
-                      className="img-thumbnail mr-3"
-                      style={{ width: "200px", height: "200px" }}
-                    />
-                  </div>
+                  {getValidImages(item).length > 0 && (
+                    <div className="container row offset-3 mt-5">
+                      {getValidImages(item).map((imgName, idx) => (
+                        <img
+                          key={idx}
+                          src={getImageUrl(imgName)}
+                          alt={`${item.name} - Hình ${idx + 1}`}
+                          className="img-thumbnail mr-3"
+                          style={{ width: "200px", height: "200px", objectFit: "contain" }}
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "/assets/placeholder-image.jpg"; // Ảnh thay thế khi lỗi
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="col-8 offset-2">
@@ -157,7 +177,34 @@ const Detail = () => {
                   </div>
                 </div>
                 <div className="container-fluid padding">
-                  <h5 className="font-italic">{item.description}</h5>
+                  {/* Hiển thị mô tả sản phẩm với hỗ trợ HTML */}
+                  <div className="description-container">
+                    {/* Hiển thị nội dung mô tả có thể chứa HTML */}
+                    <div className="font-italic" dangerouslySetInnerHTML={renderDescription(item.description)} />
+                    
+                    {/* Phần hiển thị ảnh trong mô tả */}
+                    {getValidImages(item).length > 0 && (
+                      <div className="description-images mt-4">
+                        <h5 className="mb-3">Hình ảnh sản phẩm</h5>
+                        <div className="row">
+                          {getValidImages(item).map((imgName, idx) => (
+                            <div className="col-md-3 col-6 mb-3" key={idx}>
+                              <img
+                                src={getImageUrl(imgName)}
+                                alt={`Mô tả ${item.name} - ${idx + 1}`}
+                                className="img-fluid rounded"
+                                style={{ maxWidth: "100%", height: "auto", objectFit: "contain" }}
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = "/assets/placeholder-image.jpg"; // Ảnh thay thế khi lỗi
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>          

@@ -66,7 +66,7 @@ public class ConvertUtil {
         respCartItemDto.setId((Long) objects[0]);
         respCartItemDto.setImage((String) objects[1]);
         respCartItemDto.setName((String) objects[2]);
-        respCartItemDto.setSize((Integer) objects[3]);
+        respCartItemDto.setSize((String) objects[3]);
         respCartItemDto.setPrice((Double) objects[4]);
         respCartItemDto.setQuantity((Integer) objects[5]);
         respCartItemDto.setStock((Integer) objects[6]);

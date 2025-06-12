@@ -31,77 +31,83 @@ import Detail from "./product/Detail";
 import Chat from "./chat/Chat";
 import SearchOrder from './pages/SearchOrder';
 import Error from "./error/Error";
+import ReviewsManagement from "./pages/ReviewsManagement";
+import CommentsManagement from "./pages/CommentsManagement";
 
 const Routes = () => {
   const [year, setYear] = useState();
-  const yearHandler = (value) => {
-    setYear(value);
+
+  const yearHandler = (year) => {
+    setYear(year);
   };
+
   return (
     <Switch>
-      <Route path="/" exact component={Dashboard} />
-      <Route path="/accounts" exact>
+      <Route path={`/dashboard`} exact>
+        <Dashboard></Dashboard>
+      </Route>
+      <Route path={`/account`} exact>
         <Account></Account>
       </Route>
-      <Route path="/add-account" exact>
-        <NewAccount></NewAccount>
-      </Route>
-      <Route path="/products" exact>
-        <Product></Product>
-      </Route>
-      <Route path="/add-product" exact>
-        <ProductForm></ProductForm>
-      </Route>
-      <Route path="/orders" exact>
+      <Route path={`/order`} exact>
         <Order></Order>
       </Route>
-      <Route path="/categories" exact>
-        <Category></Category>
-      </Route>
-      <Route path="/add-category" exact>
-        <NewCategory></NewCategory>
-      </Route>
-      <Route path="/sale" exact>
-        <Sale></Sale>
-      </Route>
-      <Route path="/add-sale" exact>
-        <NewSale></NewSale>
-      </Route>
-      <Route path="/vouchers" exact>
-        <Voucher></Voucher>
-      </Route>
-      <Route path="/add-voucher" exact>
-        <NewVoucher></NewVoucher>
-      </Route>
-      <Route path="/brand" exact>
-        <Brand></Brand>
-      </Route>
-      <Route path="/add-brand" exact>
-        <NewBrand></NewBrand>
-      </Route>
-      <Route path={`/order-detail/:id`} exact>
+      <Route path={`/order-form/:id`} exact>
         <OrderForm></OrderForm>
       </Route>
-      <Route path={`/product-detail/:id`} exact>
-        <EditProduct></EditProduct>
+      <Route path={`/product`} exact>
+        <Product></Product>
       </Route>
-      <Route path={`/detail-order/:id`} exact>
-        <OrderDetail></OrderDetail>
+      <Route path={`/add-product`} exact>
+        <ProductForm></ProductForm>
       </Route>
-      <Route path={`/account-detail/:id`} exact>
-        <EditAccount></EditAccount>
+      <Route path={`/voucher`} exact>
+        <Voucher></Voucher>
+      </Route>
+      <Route path={`/category`} exact>
+        <Category></Category>
+      </Route>
+      <Route path={`/sale`} exact>
+        <Sale></Sale>
+      </Route>
+      <Route path={`/brand`} exact>
+        <Brand></Brand>
+      </Route>
+      <Route path={`/add-voucher`} exact>
+        <NewVoucher></NewVoucher>
       </Route>
       <Route path={`/voucher-detail/:id`} exact>
         <EditVoucher></EditVoucher>
       </Route>
+      <Route path={`/add-brand`} exact>
+        <NewBrand></NewBrand>
+      </Route>
       <Route path={`/brand-detail/:id`} exact>
         <EditBrand></EditBrand>
+      </Route>
+      <Route path={`/add-account`} exact>
+        <NewAccount></NewAccount>
+      </Route>
+      <Route path={`/account-detail/:id`} exact>
+        <EditAccount></EditAccount>
+      </Route>
+      <Route path={`/order-detail/:id`} exact>
+        <OrderDetail></OrderDetail>
+      </Route>
+      <Route path={`/product-detail/:id`} exact>
+        <EditProduct></EditProduct>
+      </Route>
+      <Route path={`/add-category`} exact>
+        <NewCategory></NewCategory>
       </Route>
       <Route path={`/category-detail/:id`} exact>
         <EditCategory></EditCategory>
       </Route>
       <Route path={`/sale-detail/:id`} exact>
         <EditSale></EditSale>
+      </Route>
+      <Route path={`/add-sale`} exact>
+        <NewSale></NewSale>
       </Route>
       <Route path={`/report-product`} exact>
         <ReportProduct></ReportProduct>
@@ -121,14 +127,17 @@ const Routes = () => {
       <Route path={`/product-view/:id`} exact>
         <Detail></Detail>
       </Route>
-      <Route path={`/product-view/:id`} exact>
-        <Detail></Detail>
-      </Route>
       <Route path={`/chat`} exact>
         <Chat></Chat>
       </Route>
       <Route path={`/search/:id`} exact>
        <SearchOrder></SearchOrder>
+      </Route>
+      <Route path={`/reviews`} exact>
+        <ReviewsManagement></ReviewsManagement>
+      </Route>
+      <Route path={`/comments`} exact>
+        <CommentsManagement></CommentsManagement>
       </Route>
       <Route path={`/error-page`} exact>
        <Error></Error>

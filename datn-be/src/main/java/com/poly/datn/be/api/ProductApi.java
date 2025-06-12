@@ -5,6 +5,7 @@ import com.poly.datn.be.domain.constant.ProductConst;
 import com.poly.datn.be.domain.dto.*;
 import com.poly.datn.be.entity.Product;
 import com.poly.datn.be.service.ProductService;
+import com.poly.datn.be.service.RatingService;
 import com.poly.datn.be.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +25,9 @@ import java.util.stream.Collectors;
 public class ProductApi {
     @Autowired
     ProductService productService;
+
+    @Autowired
+    RatingService ratingService;
 
     @GetMapping(ProductConst.API_PRODUCT_GET_ALL)
     public ResponseEntity<?> getAllProductPagination(@RequestParam("page") Optional<Integer> page,
@@ -69,6 +73,12 @@ public class ProductApi {
     @GetMapping(ProductConst.API_PRODUCT_GET_BY_ID)
     public ResponseEntity<?> getProductById(@PathVariable("id") Long id) {
         return new ResponseEntity<>(ConvertUtil.fromProductDetail(productService.getProductById(id)), HttpStatus.OK);
+    }
+
+    // API công khai cho thống kê đánh giá sản phẩm
+    @GetMapping("/api/site/product/{productId}/ratings/statistics")
+    public ResponseEntity<RespProductRatingDto> getProductRatingStatistics(@PathVariable Long productId) {
+        return ResponseEntity.ok(ratingService.getProductRatingStatistics(productId));
     }
 
     @GetMapping(ProductConst.API_PRODUCT_TOTAL_PAGE)

@@ -35,6 +35,8 @@ public class Product {
     private Long view;
     @Column(name = "is_active", nullable = false)
     private Boolean isActive;
+    @Column(name = "avg_rating")
+    private java.math.BigDecimal avgRating;
     @ManyToOne
     @JoinColumn(name = "brand_id")
     private Brand brand;
@@ -51,4 +53,10 @@ public class Product {
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     @JsonIgnore
     private Collection<Notification> notifications;
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Collection<Comment> comments;
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Collection<Rating> ratings;
 }

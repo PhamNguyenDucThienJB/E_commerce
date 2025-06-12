@@ -20,4 +20,4 @@ Instance.interceptors.request.use(
     }
 );
 
-export default Instance
+export default Instance 

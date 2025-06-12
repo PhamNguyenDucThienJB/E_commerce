@@ -128,6 +128,31 @@ const Order = (props) => {
       .catch((error) => console.log(error.response.data.Errors));
   };
 
+  // Hàm tiện ích để kiểm tra xem đơn hàng đã giao hay chưa
+  const isDelivered = (orderStatus) => {
+    if (!orderStatus || !orderStatus.name) return false;
+    const status = orderStatus.name.toLowerCase();
+    return status.includes("đã giao") || status === "delivered";
+  };
+
+  // Điều hướng đến trang chi tiết sản phẩm để đánh giá
+  const handleRateProducts = (orderId, orderStatus) => {
+    // Chỉ cho phép đánh giá khi đơn hàng đã giao
+    if (isDelivered(orderStatus)) {
+      try {
+        // Mã hóa ID đơn hàng
+        const encodedOrderId = btoa(orderId.toString());
+        // Chuyển hướng đến trang chi tiết đơn hàng với tham số rate=true
+        history.push(`/order/detail/${encodedOrderId}?rate=true`);
+      } catch (e) {
+        console.error("Error encoding order ID:", e);
+        toast.error("Có lỗi xảy ra khi chuyển đến trang đánh giá");
+      }
+    } else {
+      toast.info("Bạn chỉ có thể đánh giá khi đơn hàng đã giao");
+    }
+  };
+
   return (
     <div>
       <div className="col-12">
@@ -180,6 +205,7 @@ const Order = (props) => {
                   <th scope="col">Tình trạng thanh toán</th>
                   <th scope="col">Tình trạng vận chuyển</th>
                   <th scope="col">Tổng tiền</th>
+                  <th scope="col">Đánh giá</th>
                   <th scope="col">Hủy</th>
                 </tr>
               </thead>
@@ -219,6 +245,17 @@ const Order = (props) => {
                         <h6 className="card-title mt-2 bolder">
                           {item.total.toLocaleString()} ₫
                         </h6>
+                      </td>
+                      <td>
+                        {console.log("Trạng thái đơn hàng:", item.orderStatus.name)}
+                        {isDelivered(item.orderStatus) && (
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => handleRateProducts(item.id, item.orderStatus)}
+                          >
+                            <i className="fa fa-star text-warning" aria-hidden="true"></i> Đánh giá
+                          </button>
+                        )}
                       </td>
                       <td>
                         <button

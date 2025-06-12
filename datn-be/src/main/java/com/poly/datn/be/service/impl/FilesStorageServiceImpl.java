@@ -25,36 +25,78 @@ public class FilesStorageServiceImpl implements FilesStorageService {
     @Autowired
     ServletContext app;
 
-    private final Path root = Paths.get("uploads");
+    private final Path root = Paths.get(System.getProperty("user.dir"), "uploads");
 
     @Override
     public void init() {
         try {
-            Files.createDirectory(root);
+            if (!Files.exists(root)) {
+                Files.createDirectory(root);
+                System.out.println("Created uploads directory successfully: " + root.toAbsolutePath());
+            } else {
+                System.out.println("Uploads directory already exists: " + root.toAbsolutePath());
+            }
+            
+            // Kiểm tra quyền ghi
+            File uploadsDir = root.toFile();
+            if (!uploadsDir.canWrite()) {
+                System.err.println("WARNING: No write permission to uploads directory: " + root.toAbsolutePath());
+                // Thử set quyền ghi
+                if (!uploadsDir.setWritable(true)) {
+                    System.err.println("CRITICAL: Could not set write permission to uploads directory");
+                } else {
+                    System.out.println("Successfully set write permission to uploads directory");
+                }
+            } else {
+                System.out.println("Write permission verified for uploads directory");
+            }
         } catch (IOException e) {
-            throw new RuntimeException("Could not initialize folder for upload!");
+            System.err.println("Error creating uploads directory: " + e.getMessage());
+            throw new RuntimeException("Could not initialize folder for upload!", e);
         }
     }
 
     @Override
     public void save(MultipartFile file) {
         try {
-            Files.copy(file.getInputStream(), this.root.resolve(file.getOriginalFilename()));
+            // Đảm bảo thư mục tồn tại
+            if (!Files.exists(root)) {
+                Files.createDirectory(root);
+            }
+            
+            Path targetPath = this.root.resolve(file.getOriginalFilename());
+            Files.copy(file.getInputStream(), targetPath);
+            System.out.println("Saved file: " + targetPath.toAbsolutePath());
         } catch (Exception e) {
-            throw new RuntimeException("Could not store the file. Error: " + e.getMessage());
+            System.err.println("Error saving file: " + e.getMessage());
+            throw new RuntimeException("Could not store the file. Error: " + e.getMessage(), e);
         }
     }
 
     @Override
     public List<String> upload(MultipartFile[] files) {
         List<String> filenames = new ArrayList<>();
+        
+        // Đảm bảo thư mục tồn tại
+        try {
+            if (!Files.exists(root)) {
+                Files.createDirectory(root);
+                System.out.println("Created uploads directory during file upload");
+            }
+        } catch (IOException e) {
+            System.err.println("Error creating directory during upload: " + e.getMessage());
+            throw new AppException("Could not create upload directory: " + e.getMessage());
+        }
+        
         for (MultipartFile file : files) {
             Path p = this.root.resolve(file.getOriginalFilename());
-            try{
+            try {
                 file.transferTo(p);
                 filenames.add(file.getOriginalFilename());
-            }catch (Exception e){
-                throw new AppException(e.getMessage());
+                System.out.println("Uploaded file: " + p.toAbsolutePath());
+            } catch (Exception e) {
+                System.err.println("Error uploading file " + file.getOriginalFilename() + ": " + e.getMessage());
+                throw new AppException("Error uploading file " + file.getOriginalFilename() + ": " + e.getMessage());
             }
         }
         return filenames;

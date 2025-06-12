@@ -20,8 +20,8 @@ public class AttributeApi {
 
     @GetMapping(AttributeConst.API_ATTRIBUTE_GET_BY_PRODUCT_ID)
     public ResponseEntity<?> cacheAttribute(@RequestParam("id") Long id,
-                                            @RequestParam("size") Optional<Integer> size) {
-        return new ResponseEntity<>(attributeService.getByProductIdAndSize(id, size.orElse(39)), HttpStatus.OK);
+                                            @RequestParam("size") Optional<String> size) {
+        return new ResponseEntity<>(attributeService.getByProductIdAndSize(id, size.orElse("S")), HttpStatus.OK);
     }
     @GetMapping(AttributeConst.API_ATTRIBUTE_GET_BY_ID)
     public ResponseEntity<?> getAttribute(@RequestParam("id") Long id) {

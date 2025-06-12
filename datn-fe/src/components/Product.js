@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getAllProducts, filterProducts } from "../api/ProductApi";
 import { NavLink } from "react-router-dom";
 import "./sidebar/sidebar.css";
+import "./Home.css";
 
 const brands = [
   {
@@ -213,212 +214,130 @@ const Product = (props) => {
   };
 
   return (
-    <div>
-      <div className="mt-5">
-        <div className="row">
-          <div className="col-2.5" style={{ position: "sticky", top: "100px", zIndex: 10 }}>
-            <div className="col mini-card">
-              <h4 className="text-danger fw-bolder">Loại</h4>
-              <ul className="list-group">
+    <div className="container-fluid py-4">
+      <div className="row">
+        <div className="col-lg-3 col-md-4 mb-4">
+          <div className="filter-section">
+            <div className="category-card mb-3">
+              <div className="category-title">
+                <h5 className="text-primary mb-0">Loại sản phẩm</h5>
+              </div>
+              <div className="category-items">
                 {brands.map((item, index) => (
-                  <div
-                    className="sidebar__item"
+                  <div 
                     key={index}
+                    className={`category-item ${brand.includes(item.value) ? 'category-active' : ''}`}
                     onClick={() => chooseBrandHandler(item.value)}
                   >
-                    <div
-                      className={
-                        brand.includes(item.value)
-                          ? `sidebar__item-inner active`
-                          : `sidebar__item-inner`
-                      }
-                    >
-                      <i className={item.icon}></i>
-                      <span>{item.display_name}</span>
-                    </div>
+                    <span className="category-icon">⊞</span> {item.display_name}
                   </div>
                 ))}
-              </ul>
+              </div>
             </div>
-            <div className="col mini-card">
-              <h4 className="text-danger fw-bolder">Màu Sắc</h4>
-              <ul className="list-group">
+            
+            <div className="category-card mb-3">
+              <div className="category-title">
+                <h5 className="text-primary mb-0">Màu sắc</h5>
+              </div>
+              <div className="category-items">
                 {categories.map((item, index) => (
-                  <div
-                    className="sidebar__item"
+                  <div 
                     key={index}
+                    className={`category-item ${category.includes(item.value) ? 'category-active' : ''}`}
                     onClick={() => chooseCategoryHandler(item.value)}
                   >
-                    <div
-                      className={
-                        category.includes(item.value)
-                          ? `sidebar__item-inner active`
-                          : `sidebar__item-inner`
-                      }
-                    >
-                      <i className={item.icon}></i>
-                      <span>{item.display_name}</span>
-                    </div>
+                    <span className="category-icon">⊞</span> {item.display_name}
                   </div>
                 ))}
-              </ul>
+              </div>
             </div>
 
-            <div className="col mt-3 mini-card">
-              <h4 className="text-danger fw-bolder">Giá</h4>
-              <ul className="list-group">
+            <div className="category-card">
+              <div className="category-title">
+                <h5 className="text-primary mb-0">Giá</h5>
+              </div>
+              <div className="category-items">
                 {prices.map((item, index) => (
-                  <div className="sidebar__item" key={index}>
-                    <div
-                      className={
-                        price.includes(item.value)
-                          ? `sidebar__item-inner active`
-                          : `sidebar__item-inner`
-                      }
-                      onClick={() => choosePriceHandler(item.value)}
-                    >
-                      <i className={item.icon}></i>
-                      <span>{item.display_name}</span>
-                    </div>
+                  <div 
+                    key={index}
+                    className={`category-item ${price.includes(item.value) ? 'category-active' : ''}`}
+                    onClick={() => choosePriceHandler(item.value)}
+                  >
+                    <span className="category-icon">⊞</span> {item.display_name}
                   </div>
                 ))}
-              </ul>
-            </div>
-          </div>
-          <div className="col">
-            <div className="container-fluid padding">
-              <div className="container-fluid padding">
-                <div className="row welcome mini-card">
-                  <h4 className="title text-danger">Sản phẩm nổi bật</h4>
-                </div>
-              </div>
-              <div className="row padding">
-                {products &&
-                  products.map((item, index) => (
-                    <div className="col-md-4 mb-3" key={index}>
-                      <div className="card h-100">
-                        <div className="d-flex justify-content-between position-absolute w-100">
-                          <div className="label-new">
-                            <span className="text-white bg-success small d-flex align-items-center px-2 py-1">
-                              <i className="fa fa-star" aria-hidden="true"></i>
-                              <span className="ml-1">New</span>
-                            </span>
-                          </div>
-                        </div>
-                        <NavLink to={`/product-detail/${item.id}`}>
-                          <img
-                            src={require(`../static/images/${item.image}`)}
-                            style={{ width: 150, height: 150 }}
-                            alt="Product"
-                          />
-                        </NavLink>
-                        <div className="card-body px-2 pb-2 pt-1">
-                          <div className="d-flex justify-content-between">
-                            <div>
-                              <p className="h4 text-primary">
-                                {item.price.toLocaleString()} Đ
-                              </p>
-                            </div>
-                          </div>
-                          <p className="text-warning d-flex align-items-center mb-2">
-                            <i className="fa fa-star" aria-hidden="true"></i>
-                            <i className="fa fa-star" aria-hidden="true"></i>
-                            <i className="fa fa-star" aria-hidden="true"></i>
-                            <i className="fa fa-star" aria-hidden="true"></i>
-                            <i className="fa fa-star" aria-hidden="true"></i>
-                          </p>
-                          <p className="mb-0">
-                            <strong>
-                              <NavLink
-                                to={`/product-detail/${item.id}`}
-                                className="text-secondary"
-                              >
-                                {item.name}
-                              </NavLink>
-                            </strong>
-                          </p>
-                          <p className="mb-1">
-                            <small>
-                              <NavLink to="#" className="text-secondary">
-                                {item.brand}
-                              </NavLink>
-                            </small>
-                          </p>
-                          <div className="d-flex mb-3 justify-content-between">
-                            <div>
-                              <p className="mb-0 small">
-                                <b>Yêu thích: </b> {item.view} lượt
-                              </p>
-                              <p className="mb-0 small">
-                                <b>Giá gốc: </b> {item.price.toLocaleString()} Đ
-                              </p>
-                              <p className="mb-0 small text-danger">
-                                <span className="font-weight-bold">
-                                  Tiết kiệm:{" "}
-                                </span>{" "}
-                                0 đ (0%)
-                              </p>
-                            </div>
-                          </div>
-                          <div className="d-flex justify-content-between">
-                            <div className="col px-0">
-                              <NavLink
-                                to={`/product-detail/${item.id}`}
-                                exact
-                                className="btn btn-outline-primary btn-block"
-                              >
-                                Thêm vào giỏ
-                                <i
-                                  className="fa fa-shopping-basket"
-                                  aria-hidden="true"
-                                ></i>
-                              </NavLink>
-                            </div>
-                            <div className="ml-2">
-                              <NavLink
-                                to="#"
-                                className="btn btn-outline-success"
-                                data-toggle="tooltip"
-                                data-placement="left"
-                                title="Add to Wishlist"
-                              >
-                                <i
-                                  className="fa fa-heart"
-                                  aria-hidden="true"
-                                ></i>
-                              </NavLink>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
               </div>
             </div>
           </div>
         </div>
-
-        <div className="d-flex justify-content-center mt-5">
-          <nav aria-label="Page navigation example">
-            <ul className="pagination offset-5">
-              <li className={page === 1 ? "page-item disabled" : "page-item"}>
-                <button className="page-link" onClick={() => onChangePage(1)}>
-                  First
-                </button>
-              </li>
-              {rows}
-              <li
-                className={page === total ? "page-item disabled" : "page-item"}
-              >
-                <button
-                  className="page-link"
-                  onClick={() => onChangePage(total)}
-                >
-                  Last
-                </button>
-              </li>
-            </ul>
-          </nav>
+          
+        <div className="col-lg-9 col-md-8">
+          <div className="product-section bg-white p-4 rounded">
+            <div className="row mb-4">
+              <div className="col-12">
+                <h2 className="section-title">Sản phẩm của chúng tôi</h2>
+              </div>
+            </div>
+            <div className="row d-flex flex-wrap">
+              {products && products.map((item, index) => (
+                <div className="col-6 col-sm-6 col-md-4 col-lg-4 mb-4 d-flex" key={index}>
+                  <div className="product-card flex-fill d-flex flex-column">
+                    <NavLink to={`/product-detail/${item.id}`} className="position-relative d-block">
+                      {item.discount > 0 && <span className="badge-sale">-{item.discount}%</span>}
+                      <img
+                        src={require(`../static/images/${item.image}`)}
+                        alt={item.name}
+                        className="product-image"
+                      />
+                    </NavLink>
+                    <div className="product-card-details mt-auto">
+                      <p className="product-card-title">{item.name}</p>
+                      <p className="product-card-price">{((item.price * (100 - item.discount)) / 100).toLocaleString()} đ</p>
+                      <div className="d-flex justify-content-center">
+                        <NavLink
+                          to={`/product-detail/${item.id}`} 
+                          className="btn btn-primary me-2"
+                        >
+                          Thêm vào giỏ hàng
+                        </NavLink>
+                        <button className="btn btn-outline-danger">
+                          <i className="fa fa-heart"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+            
+          <div className="d-flex justify-content-center mt-4">
+            <nav aria-label="Page navigation">
+              <ul className="pagination justify-content-center mt-3 mb-0">
+                <li className={page === 1 ? "page-item disabled" : "page-item"}>
+                  <button
+                    className="page-link"
+                    disabled={page === 1}
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={() => onChangePage(page - 1)}
+                  >
+                    <i className="fa fa-chevron-left"></i>
+                  </button>
+                </li>
+                {rows}
+                <li className={page === total ? "page-item disabled" : "page-item"}>
+                  <button
+                    className="page-link"
+                    disabled={page === total}
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={() => onChangePage(page + 1)}
+                  >
+                    <i className="fa fa-chevron-right"></i>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
         </div>
       </div>
     </div>
