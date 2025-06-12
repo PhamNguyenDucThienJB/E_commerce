@@ -31,8 +31,8 @@ import Detail from "./product/Detail";
 import Chat from "./chat/Chat";
 import SearchOrder from './pages/SearchOrder';
 import Error from "./error/Error";
-import ReviewsManagement from "./pages/ReviewsManagement";
-import CommentsManagement from "./pages/CommentsManagement";
+import ReviewsManagement from "./pages/ReviewsManagement.js";
+import CommentsManagement from "./pages/CommentsManagement.js";
 
 const Routes = () => {
   const [year, setYear] = useState();

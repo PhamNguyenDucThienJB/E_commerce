@@ -79,7 +79,7 @@ if (!jwtToken) {
   ));
 
   useEffect(() => {
-    getAllProducts(page, 12, active).then((response) =>
+    getAllProducts(page, 8, active).then((response) =>
       {
         setProducts(response.data.content);
         setTotal(response.data.totalPages);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getOrderById, getOrderDetailByOrderId } from "../api/OrderApi";
-import { useLocation } from "react-router-dom";
+import { useLocation, useHistory, Link } from "react-router-dom";
 import { Button, Modal, Form } from "react-bootstrap";
 import { createRating, canUserRateProduct } from "../api/RatingApi";
 import { toast } from "react-toastify";
@@ -51,6 +51,7 @@ const defaultMapping = {
   97: 32,  // AttributeID 97 -> ProductID 32 ("Pet All The Dogs" Tee)
   98: 32,  // AttributeID 98 -> ProductID 32 ("Pet All The Dogs" Tee)
   99: 32,  // AttributeID 99 -> ProductID 32 ("Pet All The Dogs" Tee)
+  102: 33, // AttributeID 102 -> ProductID 33 ("Monday Mood: Loading..." T-Shirt)
 };
 
 // Khởi tạo mapping từ localStorage hoặc dùng mapping mặc định
@@ -106,6 +107,7 @@ const OrderDetail = (props) => {
   const [productNames, setProductNames] = useState({});  // Store product names by attribute ID
   const [attributeMapping, setAttributeMapping] = useState(getAttributeProductMapping());
   const location = useLocation();
+  const history = useHistory();
   const [isRefreshingMappings, setIsRefreshingMappings] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState(null);
 
@@ -667,21 +669,13 @@ const OrderDetail = (props) => {
     try {
       setIsRefreshingMappings(true);
       
-      // Xóa tất cả mappings từ localStorage (trừ những mapping cố định)
-      const currentMapping = getAttributeProductMapping();
-      const defaultMappingKeys = Object.keys(defaultMapping).map(k => parseInt(k));
+      // Xóa hoàn toàn mapping trong localStorage để dùng mapping mặc định mới nhất
+      localStorage.removeItem('attributeProductMapping');
       
-      // Giữ lại các mapping mặc định, xóa các mapping đã lưu khác
-      const preservedMapping = {};
-      for (const key of defaultMappingKeys) {
-        preservedMapping[key] = currentMapping[key];
-      }
+      // Đặt lại mapping bằng mapping mặc định
+      setAttributeMapping({...defaultMapping});
       
-      // Lưu lại mapping đã làm sạch
-      localStorage.setItem('attributeProductMapping', JSON.stringify(preservedMapping));
-      setAttributeMapping(preservedMapping);
-      
-      // Chạy lại quá trình tải mapping
+      // Chạy lại quá trình tải mapping từ API
       await preloadAttributeProductMappings();
       
       // Cập nhật thời gian làm mới cuối cùng
@@ -781,11 +775,27 @@ const OrderDetail = (props) => {
                 }
                 
                 // Nếu không tìm được productId, sử dụng attributeId làm mã sản phẩm
+                // Luôn hiển thị productId nếu có, nếu không mới hiển thị attributeId
                 const displayProductId = productId || (attributeId ? `ATT-${attributeId}` : 'N/A');
                 
                 return (
                   <tr key={index}>
-                    <th scope="row">{displayProductId}</th>
+                    <th scope="row">
+                      {productId ? (
+                        <Link 
+                          to={`/product-detail/${productId}`} 
+                          className="text-primary"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            history.push(`/product-detail/${productId}`);
+                          }}
+                        >
+                          {displayProductId}
+                        </Link>
+                      ) : (
+                        displayProductId
+                      )}
+                    </th>
                     <td>{item?.attribute?.name || productNames[item?.attribute?.id] || item?.attribute?.product?.name || 'N/A'}</td>
                     <td>{item?.attribute?.size || 'N/A'}</td>
                     <td>{item?.sellPrice?.toLocaleString?.() || 0}₫</td>
