@@ -7,11 +7,14 @@ export const getRatingsByProductId = (productId, page = 0, size = 10, sortBy = "
 
 export const getRatingsByProductIdWithCacheBust = (productId, page = 0, size = 10, sortBy = "createdAt", direction = "desc") => {
   const timestamp = new Date().getTime();
-  return Instance.get(`/api/ratings/product/${productId}?page=${page}&size=${size}&sortBy=${sortBy}&direction=${direction}&_t=${timestamp}`, {
+  const random = Math.floor(Math.random() * 10000);
+  
+  return Instance.get(`/api/ratings/product/${productId}?page=${page}&size=${size}&sortBy=${sortBy}&direction=${direction}&_t=${timestamp}&_r=${random}`, {
     headers: {
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
-      'Expires': '0'
+      'Expires': '0',
+      'If-Modified-Since': '0'
     }
   });
 };

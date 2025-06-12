@@ -56,7 +56,8 @@ const ReviewsManagement = () => {
 
     const replyData = {
       productId: selectedRating.productId,
-      content: replyContent // Không cần thêm [ADMIN REPLY] prefix ở đây vì backend sẽ thêm
+      content: replyContent,
+      replyToRatingId: selectedRating.id
     };
 
     try {

@@ -3,6 +3,7 @@ package com.poly.datn.be.repo;
 import com.poly.datn.be.entity.Rating;
 import com.poly.datn.be.entity.Product;
 import com.poly.datn.be.entity.Account;
+import com.poly.datn.be.entity.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,6 +28,8 @@ public interface RatingRepo extends JpaRepository<Rating, Long> {
     Long countRatingsByProductIdAndStars(Long productId, Integer stars);
     
     Optional<Rating> findByAccountAndProductAndIsActiveTrue(Account account, Product product);
+    
+    Optional<Rating> findByAccountAndProductAndOrderAndIsActiveTrue(Account account, Product product, Order order);
     
     @Query("SELECT r FROM Rating r WHERE r.account.id = :accountId AND r.isActive = true")
     Page<Rating> findByAccountId(Long accountId, Pageable pageable);

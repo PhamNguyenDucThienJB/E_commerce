@@ -17,4 +17,7 @@ public class ReqAdminRatingReplyDto {
     @NotNull(message = "Nội dung trả lời không được để trống")
     @Size(min = 1, max = 1000, message = "Nội dung trả lời phải từ 1 đến 1000 ký tự")
     private String content;
+    
+    // ID của đánh giá mà admin đang phản hồi
+    private Long replyToRatingId;
 } 

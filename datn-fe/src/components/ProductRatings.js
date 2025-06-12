@@ -4,10 +4,13 @@ import { Button, Form, Card, Image, Pagination, ProgressBar, Row, Col, Modal } f
 import { toast } from "react-toastify";
 import format from "date-fns/format";
 import { vi } from "date-fns/locale";
-import { FaStar, FaRegStar } from "react-icons/fa";
+import { FaStar, FaRegStar, FaStarHalfAlt } from "react-icons/fa";
 
 const ProductRatings = ({ productId, user, orderId }) => {
   const [ratings, setRatings] = useState([]);
+  const [initialRatings, setInitialRatings] = useState([]);
+  const [allRatings, setAllRatings] = useState([]);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [statistics, setStatistics] = useState({
     averageRating: 0,
     totalRatings: 0,
@@ -46,30 +49,39 @@ const ProductRatings = ({ productId, user, orderId }) => {
     twoStarCount: 0,
     oneStarCount: 0
   });
+  const [hasMoreRatings, setHasMoreRatings] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [initialLoadTime, setInitialLoadTime] = useState(null);
+  const [shownNotificationIds, setShownNotificationIds] = useState(new Set());
+
+  // Số lượng đánh giá hiển thị ban đầu
+  const INITIAL_RATINGS_COUNT = 3;
 
   useEffect(() => {
     // Tải dữ liệu đánh giá khi component được tạo hoặc khi productId thay đổi
     console.log("ProductRatings - ProductID:", productId);
     console.log("Đang tải đánh giá cho sản phẩm có ID:", productId);
-    loadRatings(0);
-    loadStatistics();
-    if (user) {
-      checkCanRate();
-    }
+    
+    // Ghi lại thời gian tải ban đầu
+    setInitialLoadTime(new Date());
+    
+    // Tải dữ liệu đánh giá ban đầu
+    initialLoad();
 
-    // Set up auto-refresh every 12 seconds to check for new admin replies
+    // Tăng thời gian refresh để tránh quá nhiều request
     const interval = setInterval(() => {
-      if (!loading && !justSentRating && !document.hidden) {
-        // Only refresh if page is visible and user didn't just send a rating
+      if (!loading && !document.hidden) {
+        // Luôn refresh để kiểm tra phản hồi mới từ admin
         forceRefreshRatings(false);
       }
-    }, 12000); // Refresh every 12 seconds (slightly different from comments)
+    }, 30000); // Tăng lên 30 giây để giảm tần suất thông báo
     
     setAutoRefreshInterval(interval);
     
     // Add event listener for when user returns to tab
     const handleFocus = () => {
-      if (!loading && !justSentRating) {
+      if (!loading) {
+        // Khi tab được active lại, luôn refresh ngay lập tức
         forceRefreshRatings(false);
       }
     };
@@ -87,6 +99,36 @@ const ProductRatings = ({ productId, user, orderId }) => {
     };
   }, [productId, user, orderId]);
 
+  // Lưu trữ ID phản hồi đã hiển thị trong localStorage
+  useEffect(() => {
+    // Tải danh sách ID phản hồi đã hiển thị từ localStorage khi component mount
+    const loadShownNotificationIds = () => {
+      try {
+        const savedIds = localStorage.getItem(`shown_notification_ids_${productId}`);
+        if (savedIds) {
+          setShownNotificationIds(new Set(JSON.parse(savedIds)));
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải danh sách ID phản hồi đã hiển thị:", error);
+      }
+    };
+    loadShownNotificationIds();
+  }, [productId]);
+
+  // Lưu danh sách ID phản hồi đã hiển thị vào localStorage khi thay đổi
+  useEffect(() => {
+    if (shownNotificationIds.size > 0) {
+      try {
+        localStorage.setItem(
+          `shown_notification_ids_${productId}`, 
+          JSON.stringify(Array.from(shownNotificationIds))
+        );
+      } catch (error) {
+        console.error("Lỗi khi lưu danh sách ID phản hồi đã hiển thị:", error);
+      }
+    }
+  }, [shownNotificationIds, productId]);
+
   // Cleanup interval when component unmounts
   useEffect(() => {
     return () => {
@@ -96,20 +138,85 @@ const ProductRatings = ({ productId, user, orderId }) => {
     };
   }, [autoRefreshInterval]);
 
-  const loadRatings = (page) => {
+  const initialLoad = async () => {
+    try {
+      // Lấy tất cả đánh giá trang 0 với size lớn hơn để có nhiều đánh giá
+      const response = await getRatingsByProductId(productId, 0, 20);
+      const groupedRatings = groupRatingsWithReplies(response.data.content);
+      
+      // Lưu tất cả đánh giá vào state
+      setAllRatings(groupedRatings);
+      
+      // Lưu các ID phản hồi admin hiện tại vào danh sách đã hiển thị
+      const initialAdminReplyIds = new Set(shownNotificationIds);
+      response.data.content.forEach(item => {
+        if (item.content && (item.content.includes('[ADMIN REPLY]') || item.content.includes('ADMIN REPLY TO'))) {
+          initialAdminReplyIds.add(item.id);
+        }
+      });
+      setShownNotificationIds(initialAdminReplyIds);
+      
+      // Chỉ hiển thị số lượng đánh giá giới hạn ban đầu (3 đánh giá đầu tiên)
+      const initialDisplayRatings = groupedRatings.slice(0, INITIAL_RATINGS_COUNT);
+      setRatings(initialDisplayRatings);
+      setInitialRatings(initialDisplayRatings);
+      
+      setTotalPages(response.data.totalPages);
+      setCurrentPage(0);
+      // Có thêm đánh giá để xem nếu tổng số lớn hơn số lượng hiển thị ban đầu
+      setHasMoreRatings(groupedRatings.length > INITIAL_RATINGS_COUNT);
+      setIsExpanded(false);
+      
+      loadStatistics();
+      if (user) {
+        checkCanRate();
+      }
+    } catch (error) {
+      console.error("Error during initial ratings load:", error);
+    }
+  };
+
+  const loadRatings = (page, append = false) => {
     setLoading(true);
-    getRatingsByProductId(productId, page)
+    // Tăng size để lấy nhiều đánh giá hơn trong 1 lần tải
+    getRatingsByProductId(productId, page, 20)
       .then((res) => {
         // Group ratings by non-admin ratings and their corresponding admin replies
         const groupedRatings = groupRatingsWithReplies(res.data.content);
-        setRatings(groupedRatings);
+        
+        if (append) {
+          // Thêm đánh giá mới vào danh sách tất cả đánh giá
+          const newAllRatings = [...allRatings, ...groupedRatings];
+          setAllRatings(newAllRatings);
+          // Hiển thị tất cả đánh giá khi xem thêm
+          setRatings(newAllRatings);
+        } else {
+          // Lưu tất cả đánh giá
+          setAllRatings(groupedRatings);
+          
+          // Nếu là trang đầu tiên, chỉ hiển thị số lượng ban đầu
+          if (page === 0) {
+            const initialDisplayRatings = groupedRatings.slice(0, INITIAL_RATINGS_COUNT);
+            setRatings(initialDisplayRatings);
+            setInitialRatings(initialDisplayRatings);
+            setIsExpanded(false);
+          } else {
+            setRatings(groupedRatings);
+          }
+        }
+        
         setTotalPages(res.data.totalPages);
         setCurrentPage(page);
+        // Determine if there are more ratings to load
+        setHasMoreRatings(page < res.data.totalPages - 1 || 
+                          (page === 0 && groupedRatings.length > INITIAL_RATINGS_COUNT));
         setLoading(false);
+        setLoadingMore(false);
       })
       .catch((error) => {
         console.error("Error loading ratings:", error);
         setLoading(false);
+        setLoadingMore(false);
       });
   };
 
@@ -119,33 +226,74 @@ const ProductRatings = ({ productId, user, orderId }) => {
       setLoading(true);
     }
     
-    getRatingsByProductIdWithCacheBust(productId, currentPage, 10, "createdAt", "desc")
+    // Thêm timestamp để đảm bảo không có cache
+    const timestamp = new Date().getTime();
+    
+    getRatingsByProductIdWithCacheBust(productId, 0, 10, "createdAt", "desc")
       .then((res) => {
         console.log("Force refresh ratings response:", res.data); // Debug log
         
         // Check if there are new admin replies
         const newRatingCount = res.data.totalElements || res.data.content.length;
-        if (lastRatingCount > 0 && newRatingCount > lastRatingCount && !justSentRating) {
-          // Check if the newest ratings are admin replies (not from current user)
-          const newestRatings = res.data.content.slice(0, newRatingCount - lastRatingCount);
-          const hasAdminReplies = newestRatings.some(rating => 
-            rating.content && rating.content.startsWith('[ADMIN REPLY]')
-          );
-          
-          if (hasAdminReplies) {
-            setHasNewRatings(true);
-            // Show toast notification for new admin replies
-            toast.info("⭐ Có phản hồi mới từ người bán!", {
-              position: "top-right",
-              autoClose: 3000,
-              hideProgressBar: false,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: true,
-            });
-            // Auto-clear the notification after 5 seconds
-            setTimeout(() => setHasNewRatings(false), 5000);
+        
+        // Lưu dữ liệu đánh giá hiện tại trước khi cập nhật
+        const currentRatingsMap = new Map();
+        ratings.forEach(rating => {
+          currentRatingsMap.set(rating.id, rating);
+          // Nếu rating có adminReply, cũng lưu nó
+          if (rating.adminReply) {
+            currentRatingsMap.set(rating.adminReply.id, rating.adminReply);
           }
+        });
+        
+        // Tìm ra các phản hồi admin mới chưa từng hiển thị thông báo
+        const newAdminReplies = res.data.content.filter(item => {
+          // Kiểm tra xem có phải phản hồi admin không
+          const isAdminReply = item.content && 
+            (item.content.includes('[ADMIN REPLY]') || item.content.includes('ADMIN REPLY TO'));
+          
+          if (!isAdminReply) return false;
+          
+          // Kiểm tra xem phản hồi này đã hiển thị thông báo chưa
+          const notifiedBefore = shownNotificationIds.has(item.id);
+          
+          // Kiểm tra xem đây có phải là phản hồi mới/cập nhật không
+          const existingItem = currentRatingsMap.get(item.id);
+          const isNewOrUpdated = !existingItem || 
+            new Date(item.updatedAt) > new Date(existingItem.updatedAt);
+          
+          // Kiểm tra thêm: phản hồi phải được tạo/cập nhật sau khi component được tải
+          const isCreatedAfterInitialLoad = initialLoadTime && 
+            new Date(item.updatedAt || item.createdAt) > initialLoadTime;
+          
+          // Chỉ trả về true nếu là phản hồi admin mới, chưa hiển thị thông báo và tạo sau khi trang được tải
+          return isAdminReply && !notifiedBefore && isNewOrUpdated && isCreatedAfterInitialLoad;
+        });
+        
+        if (newAdminReplies.length > 0) {
+          console.log("Phát hiện phản hồi admin mới:", newAdminReplies.length);
+          setHasNewRatings(true);
+          
+          // Thêm ID của các phản hồi mới vào danh sách đã hiển thị thông báo
+          const newIds = new Set(shownNotificationIds);
+          newAdminReplies.forEach(reply => {
+            newIds.add(reply.id);
+            console.log("Đã thêm ID phản hồi vào danh sách đã hiển thị:", reply.id);
+          });
+          setShownNotificationIds(newIds);
+          
+          // Chỉ hiển thị một thông báo duy nhất cho tất cả các phản hồi mới
+          toast.info("⭐ Có phản hồi mới từ người bán!", {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+          
+          // Auto-clear the notification after 5 seconds
+          setTimeout(() => setHasNewRatings(false), 5000);
         }
         
         // Reset the flag after checking
@@ -159,6 +307,8 @@ const ProductRatings = ({ productId, user, orderId }) => {
         const groupedRatings = groupRatingsWithReplies(res.data.content);
         setRatings(groupedRatings);
         setTotalPages(res.data.totalPages);
+        setCurrentPage(0);
+        setHasMoreRatings(res.data.totalPages > 1);
         
         if (showLoading) {
           setLoading(false);
@@ -170,11 +320,13 @@ const ProductRatings = ({ productId, user, orderId }) => {
           setLoading(false);
         }
         // Fallback to regular refresh if cache bust fails
-        getRatingsByProductId(productId, currentPage, 10, "createdAt", "desc")
+        getRatingsByProductId(productId, 0, 10, "createdAt", "desc")
           .then((res) => {
             const groupedRatings = groupRatingsWithReplies(res.data.content);
             setRatings(groupedRatings);
             setTotalPages(res.data.totalPages);
+            setCurrentPage(0);
+            setHasMoreRatings(res.data.totalPages > 1);
             if (showLoading) {
               setLoading(false);
             }
@@ -188,16 +340,83 @@ const ProductRatings = ({ productId, user, orderId }) => {
       });
   };
 
+  const loadMoreRatings = () => {
+    if (!loadingMore) {
+      setIsExpanded(true);
+      
+      if (allRatings.length > INITIAL_RATINGS_COUNT) {
+        // Nếu đã tải đủ đánh giá, chỉ cần hiển thị tất cả
+        setRatings(allRatings);
+      } else if (hasMoreRatings) {
+        // Nếu chưa tải đủ và còn trang tiếp theo, tải thêm
+        setLoadingMore(true);
+        const nextPage = currentPage + 1;
+        loadRatings(nextPage, true);
+      }
+    }
+  };
+
+  const collapseRatings = () => {
+    // Trước khi thu gọn, cần đảm bảo các phản hồi admin được giữ lại
+    const updatedInitialRatings = [...initialRatings];
+    
+    // Tạo Map để theo dõi các đánh giá trong initialRatings theo ID
+    const initialRatingsMap = new Map();
+    initialRatings.forEach((rating, index) => {
+      initialRatingsMap.set(rating.id, index);
+    });
+    
+    // Duyệt qua tất cả đánh giá hiện tại để cập nhật phản hồi admin
+    allRatings.forEach(rating => {
+      // Nếu đánh giá này có trong initialRatings và có phản hồi admin
+      if (initialRatingsMap.has(rating.id) && rating.adminReply) {
+        const index = initialRatingsMap.get(rating.id);
+        updatedInitialRatings[index].adminReply = rating.adminReply;
+      }
+    });
+    
+    // Cập nhật initialRatings với thông tin phản hồi admin mới nhất
+    setInitialRatings(updatedInitialRatings);
+    
+    // Thu gọn về chỉ hiển thị số đánh giá ban đầu
+    setRatings(updatedInitialRatings);
+    setIsExpanded(false);
+  };
+
   const groupRatingsWithReplies = (ratingsData) => {
     const userRatings = [];
     const adminReplies = [];
     
     // Separate user ratings and admin replies
     ratingsData.forEach(rating => {
-      if (rating.content && rating.content.startsWith('[ADMIN REPLY]')) {
+      // Hỗ trợ cả định dạng phản hồi cũ và mới
+      if (rating.content && (rating.content.startsWith('[ADMIN REPLY') || rating.content.includes('ADMIN REPLY'))) {
+        console.log("Phát hiện phản hồi admin:", rating);
+        
+        // Xử lý cả định dạng cũ và mới
+        let replyToId = null;
+        // Định dạng mới: [ADMIN REPLY TO X]
+        const replyToMatch = rating.content.match(/\[ADMIN REPLY TO (\d+)\]/);
+        if (replyToMatch) {
+          replyToId = parseInt(replyToMatch[1]);
+        }
+        
+        // Loại bỏ prefix và lưu phản hồi
+        const cleanContent = rating.content
+          .replace(/\[ADMIN REPLY TO \d+\]/, '')
+          .replace('[ADMIN REPLY]', '')
+          .trim();
+          
         adminReplies.push({
           ...rating,
-          content: rating.content.replace('[ADMIN REPLY] ', '')
+          content: cleanContent,
+          replyToId
+        });
+        
+        console.log("Đã xử lý phản hồi admin:", {
+          id: rating.id,
+          content: cleanContent,
+          replyToId
         });
       } else {
         userRatings.push(rating);
@@ -206,6 +425,8 @@ const ProductRatings = ({ productId, user, orderId }) => {
 
     // Update the count of actual user ratings (excluding admin replies)
     setUserRatingsCount(userRatings.length);
+    console.log("Tổng số đánh giá người dùng:", userRatings.length);
+    console.log("Tổng số phản hồi admin:", adminReplies.length);
     
     // Calculate user rating statistics
     const stats = {
@@ -226,17 +447,34 @@ const ProductRatings = ({ productId, user, orderId }) => {
     
     setUserRatingStats(stats);
 
-    // Group user ratings with their admin replies
-    return userRatings.map((userRating, index) => {
-      // For now, show admin reply only for the first (most recent) rating
-      // This matches the typical e-commerce pattern where seller responds generally
-      const adminReply = index === 0 && adminReplies.length > 0 ? adminReplies[0] : null;
-      
-      return {
-        ...userRating,
-        adminReply: adminReply
-      };
+    // Tạo ánh xạ giữa ID của đánh giá người dùng và phản hồi của admin
+    const userRatingMap = new Map();
+    userRatings.forEach(rating => {
+      userRatingMap.set(rating.id, { ...rating, adminReply: null });
     });
+    
+    // Gán phản hồi admin cho đánh giá tương ứng
+    adminReplies.forEach(reply => {
+      if (reply.replyToId && userRatingMap.has(reply.replyToId)) {
+        // Nếu có replyToId và tìm thấy đánh giá tương ứng, gán phản hồi
+        userRatingMap.get(reply.replyToId).adminReply = reply;
+      }
+    });
+    
+    // Chuyển đổi Map thành mảng kết quả
+    const mappedRatings = Array.from(userRatingMap.values());
+    
+    // Sắp xếp để đánh giá có phản hồi admin nằm trên cùng, sau đó theo thời gian mới nhất
+    mappedRatings.sort((a, b) => {
+      // Nếu a có phản hồi admin và b không có, a hiển thị trước
+      if (a.adminReply && !b.adminReply) return -1;
+      // Nếu b có phản hồi admin và a không có, b hiển thị trước
+      if (!a.adminReply && b.adminReply) return 1;
+      // Nếu cả hai đều có hoặc đều không có phản hồi, sắp xếp theo thời gian mới nhất
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+    
+    return mappedRatings;
   };
 
   const loadStatistics = () => {
@@ -269,10 +507,6 @@ const ProductRatings = ({ productId, user, orderId }) => {
         console.error("Error checking if user can rate:", error);
         setCanRate(false);
       });
-  };
-
-  const handlePageChange = (page) => {
-    loadRatings(page);
   };
 
   const handleRatingChange = (value) => {
@@ -430,12 +664,23 @@ const ProductRatings = ({ productId, user, orderId }) => {
     
     const starColor = getStarColor(rating);
     
+    // Render đúng số sao được đánh giá, không hiển thị nửa sao
     for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <span key={i} style={{ color: i <= rating ? starColor : '#e8e8e8', marginRight: '2px' }}>
-          {i <= rating ? <FaStar /> : <FaRegStar />}
-        </span>
-      );
+      if (i <= rating) {
+        // Full star
+        stars.push(
+          <span key={i} style={{ color: starColor, marginRight: '2px' }}>
+            <FaStar />
+          </span>
+        );
+      } else {
+        // Empty star
+        stars.push(
+          <span key={i} style={{ color: '#e8e8e8', marginRight: '2px' }}>
+            <FaRegStar />
+          </span>
+        );
+      }
     }
     return stars;
   };
@@ -467,73 +712,6 @@ const ProductRatings = ({ productId, user, orderId }) => {
     );
   };
 
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-
-    const pages = [];
-    const maxPagesToShow = 5;
-    let startPage = Math.max(0, currentPage - Math.floor(maxPagesToShow / 2));
-    let endPage = Math.min(totalPages - 1, startPage + maxPagesToShow - 1);
-
-    if (endPage - startPage + 1 < maxPagesToShow) {
-      startPage = Math.max(0, endPage - maxPagesToShow + 1);
-    }
-
-    pages.push(
-      <Pagination.Item 
-        key="first" 
-        onClick={() => handlePageChange(0)}
-        disabled={currentPage === 0}
-      >
-        &laquo;
-      </Pagination.Item>
-    );
-
-    pages.push(
-      <Pagination.Item 
-        key="prev" 
-        onClick={() => handlePageChange(Math.max(0, currentPage - 1))}
-        disabled={currentPage === 0}
-      >
-        &lt;
-      </Pagination.Item>
-    );
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(
-        <Pagination.Item 
-          key={i} 
-          active={i === currentPage}
-          onClick={() => handlePageChange(i)}
-        >
-          {i + 1}
-        </Pagination.Item>
-      );
-    }
-
-    pages.push(
-      <Pagination.Item 
-        key="next" 
-        onClick={() => handlePageChange(Math.min(totalPages - 1, currentPage + 1))}
-        disabled={currentPage === totalPages - 1}
-      >
-        &gt;
-      </Pagination.Item>
-    );
-
-    pages.push(
-      <Pagination.Item 
-        key="last" 
-        onClick={() => handlePageChange(totalPages - 1)}
-        disabled={currentPage === totalPages - 1}
-      >
-        &raquo;
-      </Pagination.Item>
-    );
-
-    return <Pagination className="mt-3 justify-content-center">{pages}</Pagination>;
-  };
-
   const calculatePercentage = (count) => {
     return userRatingsCount > 0 ? (count / userRatingsCount) * 100 : 0;
   };
@@ -550,23 +728,44 @@ const ProductRatings = ({ productId, user, orderId }) => {
       return;
     }
 
+    // Đảm bảo chúng ta có id của đánh giá đang được trả lời
+    if (!replyingTo) {
+      toast.warning("Không xác định được đánh giá cần trả lời");
+      return;
+    }
+
+    // Chuẩn hóa định dạng phản hồi admin
     const replyData = {
       productId: productId,
-      content: replyContent
+      // Sử dụng định dạng cũ vì backend có thể không xử lý được định dạng mới
+      content: `[ADMIN REPLY] ${replyContent}`,
+      replyToRatingId: replyingTo // Truyền ID đánh giá cần phản hồi như một trường riêng
     };
 
+    console.log("Đang gửi phản hồi admin:", replyData);
+
     createAdminRatingReply(replyData)
-      .then(() => {
+      .then((response) => {
+        console.log("Phản hồi thành công:", response.data);
         toast.success("Phản hồi thành công");
         setReplyingTo(null);
         setReplyContent("");
-        // Immediate refresh without loading indicator
-        forceRefreshRatings(false);
         
-        // Backup refresh to ensure consistency
-        setTimeout(() => {
-          forceRefreshRatings(false);
-        }, 100);
+        // Reset to page 0 after admin reply
+        setCurrentPage(0);
+        
+        // Refresh page 0 instead of current page
+        getRatingsByProductIdWithCacheBust(productId, 0, 10, "createdAt", "desc")
+          .then((res) => {
+            const groupedRatings = groupRatingsWithReplies(res.data.content);
+            setRatings(groupedRatings);
+            setTotalPages(res.data.totalPages);
+          })
+          .catch((error) => {
+            console.error("Error refreshing ratings after reply:", error);
+            // Fallback to standard loading
+            loadRatings(0);
+          });
       })
       .catch((error) => {
         console.error("Error creating admin reply:", error);
@@ -579,6 +778,7 @@ const ProductRatings = ({ productId, user, orderId }) => {
       toast.warning("Chỉ admin mới có thể trả lời đánh giá");
       return;
     }
+    // Lưu id của đánh giá đang được trả lời
     setReplyingTo(ratingId);
     setReplyContent("");
   };
@@ -622,18 +822,56 @@ const ProductRatings = ({ productId, user, orderId }) => {
         toast.success("Cập nhật phản hồi thành công");
         setEditingAdminReply(null);
         setEditReplyContent("");
-        // Immediate refresh without loading indicator
-        forceRefreshRatings(false);
         
-        // Backup refresh to ensure consistency
-        setTimeout(() => {
-          forceRefreshRatings(false);
-        }, 100);
+        // Reset to page 0 after editing admin reply
+        setCurrentPage(0);
+        
+        // Refresh page 0 instead of current page
+        getRatingsByProductIdWithCacheBust(productId, 0, 10, "createdAt", "desc")
+          .then((res) => {
+            const groupedRatings = groupRatingsWithReplies(res.data.content);
+            setRatings(groupedRatings);
+            setTotalPages(res.data.totalPages);
+          })
+          .catch((error) => {
+            console.error("Error refreshing ratings after editing reply:", error);
+            // Fallback to standard loading
+            loadRatings(0);
+          });
       })
       .catch((error) => {
         console.error("Error updating admin reply:", error);
         toast.error("Có lỗi xảy ra khi cập nhật phản hồi");
       });
+  };
+
+  // Tính toán đánh giá trung bình chính xác dựa trên dữ liệu thực tế của tất cả đánh giá
+  const calculateExactRating = () => {
+    // Nếu không có đánh giá nào, trả về 0
+    if (!allRatings || allRatings.length === 0) {
+      return 0;
+    }
+    
+    // Nếu chỉ có 1 đánh giá, trả về chính xác giá trị đánh giá đó
+    if (allRatings.length === 1) {
+      return allRatings[0].rating;
+    }
+    
+    // Nếu có nhiều đánh giá, tính tổng số sao và chia cho số lượng đánh giá
+    let totalStars = 0;
+    let totalRatings = 0;
+    
+    // Duyệt qua tất cả đánh giá và tính tổng (sử dụng allRatings thay vì ratings)
+    allRatings.forEach(rating => {
+      if (rating && rating.rating) {
+        totalStars += rating.rating;
+        totalRatings++;
+      }
+    });
+    
+    // Tính trung bình, làm tròn đến 1 chữ số thập phân và trả về
+    const avgRating = totalRatings > 0 ? totalStars / totalRatings : 0;
+    return Math.round(avgRating * 10) / 10; // Làm tròn đến 1 chữ số thập phân
   };
 
   return (
@@ -715,12 +953,12 @@ const ProductRatings = ({ productId, user, orderId }) => {
                 color: '#333',
                 margin: '0 0 8px 0'
               }}>
-                {statistics.averageRating !== null && statistics.averageRating !== undefined 
-                  ? statistics.averageRating.toFixed(1) 
-                  : "0.0"}
+                {/* Hiển thị số sao trung bình với tối đa 1 chữ số thập phân */}
+                {calculateExactRating().toFixed(1)}
               </h2>
               <div className="mb-2" style={{ fontSize: '18px' }}>
-                {renderStars(Math.round(statistics.averageRating || 0))}
+                {/* Hiển thị sao dựa trên giá trị đánh giá chính xác */}
+                {renderStars(calculateExactRating())}
               </div>
               <p style={{ color: '#666', fontSize: '14px', margin: '0' }}>
                 {userRatingsCount || 0} đánh giá
@@ -896,269 +1134,159 @@ const ProductRatings = ({ productId, user, orderId }) => {
         <p className="text-center">Chưa có đánh giá nào cho sản phẩm này.</p>
       ) : (
         <>
-          {ratings.map((rating, index) => (
-            <div key={rating.id} className="mb-4">
-              {/* User Rating */}
-              <Card className="rating-card" style={{ backgroundColor: '#fff', border: '1px solid #f0f0f0', borderRadius: '8px', boxShadow: 'none' }}>
-                <Card.Body style={{ padding: '20px' }}>
-                  <div className="d-flex align-items-start">
-                    <div className="user-avatar" style={{ marginRight: '15px' }}>
-                      <Image 
-                        src={rating.accountAvatar || "https://via.placeholder.com/40"} 
-                        roundedCircle 
-                        width={40} 
-                        height={40} 
-                        style={{ border: '1px solid #e0e0e0', objectFit: 'cover' }}
+          <div className="ratings-list">
+            {ratings.map((rating, index) => (
+              <div 
+                key={rating.id} 
+                className="mb-4 p-4" 
+                style={{ 
+                  backgroundColor: rating.adminReply ? '#fafff7' : '#fff',
+                  borderRadius: '8px',
+                  border: '1px solid #f0f0f0',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                {/* Hiển thị đánh giá của người dùng */}
+                {editingRating && editingRating.id === rating.id ? (
+                  <Form onSubmit={handleEditSubmit}>
+                    {renderRatingInput(editData.rating, handleEditRatingChange)}
+                    <Form.Group>
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        value={editData.content}
+                        onChange={(e) => setEditData({ ...editData, content: e.target.value })}
+                        style={{ 
+                          resize: 'none', 
+                          borderRadius: '6px', 
+                          border: '1px solid #ddd', 
+                          fontSize: '14px',
+                          padding: '10px',
+                          color: '#000'
+                        }}
                       />
+                    </Form.Group>
+                    <div className="d-flex justify-content-end mt-2">
+                      <Button 
+                        variant="outline-secondary" 
+                        size="sm" 
+                        className="mr-2" 
+                        onClick={cancelEdit}
+                        style={{ marginRight: '8px', fontSize: '12px' }}
+                      >
+                        Hủy
+                      </Button>
+                      <Button 
+                        variant="primary" 
+                        size="sm" 
+                        type="submit"
+                        style={{ fontSize: '12px' }}
+                      >
+                        Cập nhật
+                      </Button>
                     </div>
-                    <div className="flex-grow-1">
-                      <div className="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                          <h6 className="mb-1" style={{ fontSize: '14px', fontWeight: '600', color: '#333', margin: '0' }}>
-                            {rating.fullname || rating.username}
-                          </h6>
-                          <div className="mb-2" style={{ fontSize: '14px' }}>
-                            {renderStars(rating.rating)}
-                          </div>
+                  </Form>
+                ) : (
+                  <>
+                    <div className="d-flex justify-content-between align-items-start mb-2">
+                      <div>
+                        <h5 style={{ fontSize: '16px', fontWeight: '600', margin: '0 0 5px 0' }}>
+                          {rating.fullname || rating.username || "Người dùng ẩn danh"}
+                        </h5>
+                        <div className="mb-1">
+                          {renderStars(rating.rating)}
                         </div>
-                        <small style={{ color: '#999', fontSize: '12px' }}>
-                          {formatDate(rating.createdAt)} | Phân loại hàng: Trắng,L
-                        </small>
                       </div>
-                      
-                      {editingRating && editingRating.id === rating.id ? (
-                        <Form onSubmit={handleEditSubmit}>
-                          {renderRatingInput(editData.rating, handleEditRatingChange)}
-                          <Form.Group>
-                            <Form.Control
-                              as="textarea"
-                              rows={3}
-                              value={editData.content}
-                              onChange={(e) => setEditData({ ...editData, content: e.target.value })}
-                              style={{ 
-                                resize: 'none', 
-                                borderRadius: '6px', 
-                                border: '1px solid #ddd', 
-                                fontSize: '14px',
-                                padding: '10px',
-                                color: '#000'
-                              }}
-                            />
-                          </Form.Group>
-                          <div className="d-flex justify-content-end mt-2">
+                      <small style={{ color: '#999', fontSize: '12px' }}>
+                        {formatDate(rating.createdAt)} | Phân loại hàng: Trắng,L
+                      </small>
+                    </div>
+                    <p style={{ fontSize: '14px', margin: '0 0 15px 0' }}>{rating.content}</p>
+                    
+                    {/* Hiển thị nút Chỉnh sửa/Xóa nếu đánh giá là của người dùng hiện tại */}
+                    {user && (user.id === rating.accountId || user.role === "ADMIN") && (
+                      <div className="rating-actions d-flex">
+                        {user.id === rating.accountId && (
+                          <>
                             <Button 
-                              variant="outline-secondary" 
+                              variant="link" 
                               size="sm" 
-                              className="mr-2" 
-                              onClick={cancelEdit}
-                              style={{ marginRight: '8px', fontSize: '12px' }}
+                              className="text-primary p-0 me-3"
+                              onClick={() => startEdit(rating)}
+                              style={{ fontSize: '13px', textDecoration: 'none', display: 'flex', alignItems: 'center', height: '28px' }}
                             >
-                              Hủy
+                              <i className="far fa-edit me-1"></i> Chỉnh sửa
                             </Button>
                             <Button 
-                              variant="primary" 
+                              variant="link" 
                               size="sm" 
-                              type="submit"
-                              style={{ fontSize: '12px' }}
+                              className="text-danger p-0"
+                              onClick={() => handleDeleteRating(rating.id)}
+                              style={{ fontSize: '13px', textDecoration: 'none', display: 'flex', alignItems: 'center', height: '28px' }}
                             >
-                              Cập nhật
+                              <i className="far fa-trash-alt me-1"></i> Xóa
                             </Button>
-                          </div>
-                        </Form>
-                      ) : (
-                        <div className="rating-content mb-3">
-                          {rating.content ? (
-                            <p className="mb-0" style={{ fontSize: '14px', lineHeight: '1.6', color: '#333', margin: '0' }}>
-                              {rating.content}
-                            </p>
-                          ) : (
-                            <p className="mb-0 fst-italic" style={{ color: '#999', fontSize: '14px' }}>
-                              Không có nội dung đánh giá
-                            </p>
-                          )}
-                        </div>
-                      )}
-                      
-                      {!editingRating && (
-                        <div className="d-flex mt-3" style={{ gap: '15px' }}>
-                          {user && user.role === "ADMIN" && !rating.adminReply && index === 0 && (
-                            <Button 
-                              variant="link"
-                              size="sm" 
-                              className="p-0"
-                              style={{ color: '#1890ff', textDecoration: 'none', fontSize: '12px' }}
-                              onClick={() => startReply(rating.id)}
-                            >
-                              <i className="fas fa-reply me-1"></i> Phản hồi
-                            </Button>
-                          )}
-                          <Button 
-                            variant="link"
-                            size="sm" 
-                            className="p-0"
-                            style={{ color: '#1890ff', textDecoration: 'none', fontSize: '12px' }}
-                            onClick={() => startEdit(rating)}
-                            disabled={!(user && (user.id === rating.accountId || user.role === "ADMIN"))}
-                          >
-                            <i className="fas fa-edit me-1"></i> Chỉnh sửa
-                          </Button>
+                          </>
+                        )}
+                        {/* Thêm nút Trả lời cho admin */}
+                        {user.role === "ADMIN" && !rating.adminReply && (
                           <Button 
                             variant="link" 
                             size="sm" 
-                            className="p-0"
-                            style={{ color: '#ff4d4f', textDecoration: 'none', fontSize: '12px' }}
-                            onClick={() => handleDeleteRating(rating.id)}
-                            disabled={!(user && (user.id === rating.accountId || user.role === "ADMIN"))}
+                            className="text-primary p-0 me-3"
+                            onClick={() => startReply(rating.id)}
+                            style={{ fontSize: '13px', textDecoration: 'none', display: 'flex', alignItems: 'center', height: '28px' }}
                           >
-                            <i className="fas fa-trash-alt me-1"></i> Xóa
+                            <i className="far fa-comment me-1"></i> Trả lời
                           </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
-
-              {/* Admin Reply Form */}
-              {replyingTo === rating.id && (
-                <div style={{ marginLeft: '55px', marginTop: '10px' }}>
-                  <div style={{ 
-                    backgroundColor: '#fafafa', 
-                    border: '1px solid #f0f0f0', 
-                    borderRadius: '6px',
-                    padding: '15px'
-                  }}>
-                    <h6 className="mb-3" style={{ color: '#666', fontSize: '13px', margin: '0 0 10px 0' }}>
-                      Phản hồi của người bán
-                    </h6>
-                    <Form onSubmit={handleAdminReplySubmit}>
-                      <Form.Group>
-                        <Form.Control
-                          as="textarea"
-                          rows={3}
-                          placeholder="Nhập phản hồi của bạn..."
-                          value={replyContent}
-                          onChange={(e) => setReplyContent(e.target.value)}
-                          style={{
-                            border: "1px solid #ddd",
-                            borderRadius: "6px",
-                            fontSize: "14px",
-                            padding: "10px",
-                            resize: "none",
-                            color: "#000"
-                          }}
-                        />
-                      </Form.Group>
-                      <div className="d-flex justify-content-end mt-2" style={{ gap: '8px' }}>
-                        <Button 
-                          variant="outline-secondary" 
-                          size="sm" 
-                          onClick={cancelReply}
-                          style={{ fontSize: '12px' }}
-                        >
-                          Hủy
-                        </Button>
-                        <Button 
-                          variant="primary" 
-                          size="sm" 
-                          type="submit"
-                          style={{ fontSize: '12px' }}
-                        >
-                          Gửi phản hồi
-                        </Button>
+                        )}
                       </div>
-                    </Form>
-                  </div>
-                </div>
-              )}
-
-              {/* Admin Reply Display - Only show for the first rating */}
-              {rating.adminReply && index === 0 && (
-                <div style={{ marginLeft: '55px', marginTop: '10px' }}>
-                  <div style={{ 
-                    backgroundColor: '#fafafa', 
-                    border: '1px solid #f0f0f0', 
-                    borderRadius: '6px',
-                    padding: '15px'
-                  }}>
+                    )}
+                  </>
+                )}
+                
+                {/* Hiển thị phản hồi của admin nếu có */}
+                {rating.adminReply && (
+                  <div 
+                    className="mt-3 pt-3" 
+                    style={{ 
+                      borderTop: '1px dashed #e8e8e8',
+                      paddingLeft: '20px'
+                    }}
+                  >
                     <div className="d-flex justify-content-between align-items-start mb-2">
                       <h6 style={{ 
-                        color: '#666', 
-                        fontSize: '13px', 
-                        margin: '0', 
-                        fontWeight: '600' 
+                        fontSize: '14px', 
+                        fontWeight: '600', 
+                        margin: '0',
+                        color: '#389e0d'
                       }}>
-                        Phản Hồi Của Người Bán
+                        <i className="fas fa-store me-1"></i> Phản Hồi Của Người Bán
                       </h6>
-                      {user && user.role === "ADMIN" && !editingAdminReply && (
-                        <div className="d-flex" style={{ gap: '8px' }}>
-                          <Button 
-                            variant="link" 
-                            size="sm" 
-                            className="p-0"
-                            style={{ 
-                              color: '#1890ff', 
-                              textDecoration: 'none', 
-                              fontSize: '11px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px'
-                            }}
-                            onClick={() => startEditAdminReply(rating.adminReply)}
-                          >
-                            <i className="fas fa-edit" style={{ fontSize: '10px' }}></i>
-                            Sửa
-                          </Button>
-                          <Button 
-                            variant="link" 
-                            size="sm" 
-                            className="p-0"
-                            style={{ 
-                              color: '#ff4d4f', 
-                              textDecoration: 'none', 
-                              fontSize: '11px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '4px'
-                            }}
-                            onClick={() => handleDeleteRating(rating.adminReply.id)}
-                          >
-                            <i className="fas fa-trash-alt" style={{ fontSize: '10px' }}></i>
-                            Xóa
-                          </Button>
-                        </div>
-                      )}
+                      <small style={{ color: '#999', fontSize: '12px' }}>
+                        {formatDate(rating.adminReply.createdAt)}
+                      </small>
                     </div>
                     
                     {editingAdminReply && editingAdminReply.id === rating.adminReply.id ? (
                       <Form onSubmit={handleEditAdminReplySubmit}>
-                        <Form.Group>
-                          <Form.Control
-                            as="textarea"
+                        <Form.Group className="mb-3">
+                          <Form.Control 
+                            as="textarea" 
                             rows={3}
                             value={editReplyContent}
                             onChange={(e) => setEditReplyContent(e.target.value)}
-                            style={{
-                              border: "1px solid #e0e0e0",
-                              borderRadius: "6px",
-                              fontSize: "14px",
-                              padding: "10px",
-                              resize: "none",
-                              backgroundColor: "#fff",
-                              color: "#000"
-                            }}
+                            placeholder="Nhập nội dung phản hồi..."
+                            required
                           />
                         </Form.Group>
-                        <div className="d-flex justify-content-end mt-2" style={{ gap: '6px' }}>
+                        <div className="d-flex justify-content-end">
                           <Button 
                             variant="outline-secondary" 
                             size="sm" 
                             onClick={cancelEditAdminReply}
-                            style={{ 
-                              fontSize: '11px', 
-                              padding: '4px 12px',
-                              borderRadius: '5px'
-                            }}
+                            className="me-2"
                           >
                             Hủy
                           </Button>
@@ -1166,11 +1294,6 @@ const ProductRatings = ({ productId, user, orderId }) => {
                             variant="primary" 
                             size="sm" 
                             type="submit"
-                            style={{ 
-                              fontSize: '11px', 
-                              padding: '4px 12px',
-                              borderRadius: '5px'
-                            }}
                           >
                             Cập nhật
                           </Button>
@@ -1178,26 +1301,114 @@ const ProductRatings = ({ productId, user, orderId }) => {
                       </Form>
                     ) : (
                       <>
-                        <p style={{ 
-                          fontSize: '14px', 
-                          lineHeight: '1.6', 
-                          color: '#333',
-                          margin: '0 0 8px 0'
-                        }}>
+                        <p style={{ fontSize: '14px', margin: '0 0 10px 0' }}>
                           {rating.adminReply.content}
                         </p>
-                        <small style={{ color: '#999', fontSize: '12px' }}>
-                          {formatDate(rating.adminReply.createdAt)}
-                        </small>
+                        {/* Hiển thị nút chỉnh sửa phản hồi cho admin */}
+                        {user && user.role === "ADMIN" && (
+                          <div className="d-flex justify-content-end">
+                            <Button 
+                              variant="link" 
+                              size="sm" 
+                              className="text-primary p-0"
+                              onClick={() => startEditAdminReply(rating.adminReply)}
+                              style={{ fontSize: '13px', textDecoration: 'none' }}
+                            >
+                              <i className="far fa-edit me-1"></i> Sửa phản hồi
+                            </Button>
+                          </div>
+                        )}
                       </>
                     )}
                   </div>
-                </div>
+                )}
+                
+                {/* Form trả lời của admin */}
+                {replyingTo === rating.id && (
+                  <div className="mt-3 pt-3" style={{ borderTop: '1px dashed #e8e8e8' }}>
+                    <Form onSubmit={handleAdminReplySubmit}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>
+                          <span style={{ color: '#389e0d', fontWeight: '500' }}>
+                            <i className="fas fa-store me-1"></i> Phản hồi với tư cách người bán
+                          </span>
+                        </Form.Label>
+                        <Form.Control 
+                          as="textarea" 
+                          rows={3}
+                          value={replyContent}
+                          onChange={(e) => setReplyContent(e.target.value)}
+                          placeholder="Nhập nội dung phản hồi..."
+                          required
+                        />
+                      </Form.Group>
+                      <div className="d-flex justify-content-end">
+                        <Button 
+                          variant="outline-secondary" 
+                          size="sm" 
+                          onClick={cancelReply}
+                          className="me-2"
+                        >
+                          Hủy
+                        </Button>
+                        <Button 
+                          variant="primary" 
+                          size="sm" 
+                          type="submit"
+                        >
+                          Gửi phản hồi
+                        </Button>
+                      </div>
+                    </Form>
+                  </div>
+                )}
+              </div>
+            ))}
+            
+            {/* Nút xem thêm và thu gọn */}
+            <div className="d-flex justify-content-center mt-4">
+              {isExpanded && (
+                <Button 
+                  variant="outline-secondary" 
+                  onClick={collapseRatings}
+                  style={{
+                    borderRadius: '20px',
+                    padding: '8px 24px',
+                    fontSize: '14px',
+                    marginRight: '12px'
+                  }}
+                >
+                  <i className="fas fa-chevron-up me-2"></i>
+                  Thu gọn
+                </Button>
+              )}
+              
+              {(hasMoreRatings || (allRatings.length > INITIAL_RATINGS_COUNT && !isExpanded)) && (
+                <Button 
+                  variant="outline-primary" 
+                  onClick={loadMoreRatings}
+                  disabled={loadingMore}
+                  style={{
+                    borderRadius: '20px',
+                    padding: '8px 24px',
+                    fontSize: '14px'
+                  }}
+                >
+                  {loadingMore ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Đang tải...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-chevron-down me-2"></i>
+                      Xem thêm đánh giá
+                    </>
+                  )}
+                </Button>
               )}
             </div>
-          ))}
-          
-          {renderPagination()}
+          </div>
         </>
       )}
       

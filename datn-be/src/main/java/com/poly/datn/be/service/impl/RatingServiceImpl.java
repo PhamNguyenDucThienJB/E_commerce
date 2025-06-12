@@ -72,12 +72,12 @@ public class RatingServiceImpl implements RatingService {
             if (!order.getOrderStatus().getName().equalsIgnoreCase("Đã giao")) {
                 throw new AppException("Bạn chỉ có thể đánh giá sản phẩm sau khi đơn hàng đã giao", HttpStatus.BAD_REQUEST);
             }
-        }
-
-        // Kiểm tra xem người dùng đã đánh giá sản phẩm này chưa
-        Optional<Rating> existingRating = ratingRepo.findByAccountAndProductAndIsActiveTrue(account, product);
-        if (existingRating.isPresent()) {
-            throw new AppException("Bạn đã đánh giá sản phẩm này rồi", HttpStatus.BAD_REQUEST);
+            
+            // Kiểm tra xem người dùng đã đánh giá cho đơn hàng này chưa
+            Optional<Rating> existingOrderRating = ratingRepo.findByAccountAndProductAndOrderAndIsActiveTrue(account, product, order);
+            if (existingOrderRating.isPresent()) {
+                throw new AppException("Bạn đã đánh giá sản phẩm cho đơn hàng này rồi", HttpStatus.BAD_REQUEST);
+            }
         }
 
         Rating rating = new Rating();
@@ -192,14 +192,15 @@ public class RatingServiceImpl implements RatingService {
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new AppException("Không tìm thấy sản phẩm", HttpStatus.NOT_FOUND));
         
-        // Kiểm tra xem người dùng đã đánh giá sản phẩm này chưa
-        Optional<Rating> existingRating = ratingRepo.findByAccountAndProductAndIsActiveTrue(account, product);
-        if (existingRating.isPresent()) {
-            return false; // Đã đánh giá rồi
+        // Kiểm tra người dùng đã mua sản phẩm này chưa và đơn hàng đã hoàn thành chưa
+        Boolean hasBoughtProduct = orderRepo.existsCompletedOrderWithProductForUser(account.getId(), productId);
+        
+        // Nếu người dùng chưa mua sản phẩm, không cho phép đánh giá
+        if (!hasBoughtProduct) {
+            return false;
         }
         
-        // Kiểm tra xem người dùng đã mua sản phẩm này chưa và đơn hàng đã hoàn thành chưa
-        return orderRepo.existsCompletedOrderWithProductForUser(account.getId(), productId);
+        return true;
     }
 
     @Override
@@ -240,13 +241,27 @@ public class RatingServiceImpl implements RatingService {
         Product product = productRepo.findById(reqAdminRatingReplyDto.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
+        // Chuẩn bị nội dung phản hồi, bao gồm ID đánh giá nếu có
+        String replyContent;
+        if (reqAdminRatingReplyDto.getReplyToRatingId() != null) {
+            // Định dạng mới: [ADMIN REPLY TO X] content - để frontend có thể phân tích
+            replyContent = String.format("[ADMIN REPLY TO %d] %s", 
+                    reqAdminRatingReplyDto.getReplyToRatingId(), 
+                    reqAdminRatingReplyDto.getContent());
+            
+            System.out.println("Admin đang phản hồi cho đánh giá ID: " + reqAdminRatingReplyDto.getReplyToRatingId());
+        } else {
+            // Định dạng cũ nếu không có replyToRatingId
+            replyContent = "[ADMIN REPLY] " + reqAdminRatingReplyDto.getContent();
+        }
+
         // Create admin reply rating without order validation
         Rating rating = new Rating();
         rating.setAccount(admin);
         rating.setProduct(product);
         rating.setOrder(null); // Admin replies don't need orders
         rating.setRating(5); // Default 5 stars for admin replies
-        rating.setContent("[ADMIN REPLY] " + reqAdminRatingReplyDto.getContent());
+        rating.setContent(replyContent);
         rating.setCreatedAt(LocalDateTime.now());
         rating.setUpdatedAt(LocalDateTime.now());
         rating.setIsActive(true);
