@@ -229,7 +229,7 @@ const ProductRatings = ({ productId, user, orderId }) => {
     // Thêm timestamp để đảm bảo không có cache
     const timestamp = new Date().getTime();
     
-    getRatingsByProductIdWithCacheBust(productId, 0, 10, "createdAt", "desc")
+    getRatingsByProductIdWithCacheBust(productId, 0, 20, "createdAt", "desc")
       .then((res) => {
         console.log("Force refresh ratings response:", res.data); // Debug log
         
@@ -305,10 +305,23 @@ const ProductRatings = ({ productId, user, orderId }) => {
         
         // Group ratings by non-admin ratings and their corresponding admin replies
         const groupedRatings = groupRatingsWithReplies(res.data.content);
-        setRatings(groupedRatings);
+        
+        // Cập nhật tất cả dữ liệu đánh giá
+        setAllRatings(groupedRatings);
+        
+        // Nếu đang ở trạng thái thu gọn, chỉ hiển thị số lượng đánh giá ban đầu
+        if (!isExpanded) {
+          const initialDisplayRatings = groupedRatings.slice(0, INITIAL_RATINGS_COUNT);
+          setRatings(initialDisplayRatings);
+          setInitialRatings(initialDisplayRatings);
+        } else {
+          // Nếu đang ở trạng thái mở rộng, hiển thị tất cả đánh giá
+          setRatings(groupedRatings);
+        }
+        
         setTotalPages(res.data.totalPages);
         setCurrentPage(0);
-        setHasMoreRatings(res.data.totalPages > 1);
+        setHasMoreRatings(res.data.totalPages > 1 || groupedRatings.length > INITIAL_RATINGS_COUNT);
         
         if (showLoading) {
           setLoading(false);
@@ -320,13 +333,27 @@ const ProductRatings = ({ productId, user, orderId }) => {
           setLoading(false);
         }
         // Fallback to regular refresh if cache bust fails
-        getRatingsByProductId(productId, 0, 10, "createdAt", "desc")
+        getRatingsByProductId(productId, 0, 20, "createdAt", "desc")
           .then((res) => {
             const groupedRatings = groupRatingsWithReplies(res.data.content);
-            setRatings(groupedRatings);
+            
+            // Cập nhật tất cả dữ liệu đánh giá
+            setAllRatings(groupedRatings);
+            
+            // Nếu đang ở trạng thái thu gọn, chỉ hiển thị số lượng đánh giá ban đầu
+            if (!isExpanded) {
+              const initialDisplayRatings = groupedRatings.slice(0, INITIAL_RATINGS_COUNT);
+              setRatings(initialDisplayRatings);
+              setInitialRatings(initialDisplayRatings);
+            } else {
+              // Nếu đang ở trạng thái mở rộng, hiển thị tất cả đánh giá
+              setRatings(groupedRatings);
+            }
+            
             setTotalPages(res.data.totalPages);
             setCurrentPage(0);
-            setHasMoreRatings(res.data.totalPages > 1);
+            setHasMoreRatings(res.data.totalPages > 1 || groupedRatings.length > INITIAL_RATINGS_COUNT);
+            
             if (showLoading) {
               setLoading(false);
             }
@@ -350,6 +377,8 @@ const ProductRatings = ({ productId, user, orderId }) => {
       } else if (hasMoreRatings) {
         // Nếu chưa tải đủ và còn trang tiếp theo, tải thêm
         setLoadingMore(true);
+        // Refresh dữ liệu trước khi hiển thị thêm
+        forceRefreshRatings(false);
         const nextPage = currentPage + 1;
         loadRatings(nextPage, true);
       }
@@ -611,7 +640,36 @@ const ProductRatings = ({ productId, user, orderId }) => {
     deleteRating(ratingToDelete)
       .then(() => {
         toast.success("Xóa đánh giá thành công");
-        // Immediate refresh without loading indicator
+        
+        // Cập nhật các danh sách đánh giá cục bộ để xóa đánh giá đã bị xóa
+        // Điều này giúp UI cập nhật ngay lập tức mà không phải đợi API
+        const updateRatingsList = (ratingsList) => {
+          return ratingsList.filter(rating => {
+            // Lọc bỏ đánh giá bị xóa
+            if (rating.id === ratingToDelete) {
+              return false;
+            }
+            
+            // Nếu đánh giá có adminReply và adminReply.id === ratingToDelete
+            // thì xóa adminReply khỏi đánh giá đó
+            if (rating.adminReply && rating.adminReply.id === ratingToDelete) {
+              delete rating.adminReply;
+            }
+            
+            return true;
+          });
+        };
+        
+        // Cập nhật tất cả các danh sách đánh giá
+        const updatedAllRatings = updateRatingsList([...allRatings]);
+        const updatedInitialRatings = updateRatingsList([...initialRatings]);
+        const updatedCurrentRatings = updateRatingsList([...ratings]);
+        
+        setAllRatings(updatedAllRatings);
+        setInitialRatings(updatedInitialRatings);
+        setRatings(updatedCurrentRatings);
+        
+        // Sau khi cập nhật cục bộ, vẫn gọi refresh để đồng bộ dữ liệu từ server
         forceRefreshRatings(false);
         loadStatistics();
         checkCanRate();
@@ -620,7 +678,8 @@ const ProductRatings = ({ productId, user, orderId }) => {
         setTimeout(() => {
           forceRefreshRatings(false);
           loadStatistics();
-        }, 100);
+        }, 500); // Tăng thời gian lên 500ms để đảm bảo server đã xử lý xong
+        
         setShowDeleteModal(false);
         setRatingToDelete(null);
       })
