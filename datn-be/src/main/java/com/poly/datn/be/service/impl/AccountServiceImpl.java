@@ -28,10 +28,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -268,19 +265,39 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     @Override
     public void forgotPassword(ReqForgotPasswordDto reqForgotPasswordDto) throws MessagingException {
+        // 1. Tìm account
         Account account = this.accountRepo.findAccountByUsername(reqForgotPasswordDto.getUsername());
-        if (account == null){
+        if (account == null) {
             throw new AppException("Username không tồn tại");
-        }else {
-            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-            String newPassword = String.valueOf(UUID.randomUUID());
-            account.setPassword(passwordEncoder.encode(newPassword));
-            this.accountRepo.save(account);
-            //gửi mail
-            AccountDetail accountDetail = this.accountDetailService.findAccountDetail(account.getId());
-            MailUtil.sendmailForgotPassword(accountDetail.getEmail(), newPassword);
         }
+
+        // 2. Sinh mật khẩu mới (plain text)
+        String newPasswordPlain = generateRandomPassword(8);
+
+        // 3. Mã hóa mật khẩu
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String hashedPassword = passwordEncoder.encode(newPasswordPlain);
+
+        // 4. Lưu mật khẩu đã mã hóa vào database
+        account.setPassword(hashedPassword);
+        this.accountRepo.save(account);
+
+        // 5. Gửi mật khẩu chưa mã hóa qua email cho người dùng
+        AccountDetail accountDetail = this.accountDetailService.findAccountDetail(account.getId());
+        MailUtil.sendmailForgotPassword(accountDetail.getEmail(), newPasswordPlain);
     }
+
+    // Hàm sinh mật khẩu ngẫu nhiên
+    private String generateRandomPassword(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder password = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < length; i++) {
+            password.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return password.toString();
+    }
+
 
     @Override
     public AccountDetail update(ReqUpdateAccountDetailDto reqUpdateAccountDetailDto) {

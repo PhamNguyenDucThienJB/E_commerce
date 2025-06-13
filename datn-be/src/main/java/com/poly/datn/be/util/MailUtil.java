@@ -53,54 +53,103 @@ public class MailUtil {
     }
 
     public static void sendEmail(Voucher voucher, Order order) throws MessagingException {
+        // Cấu hình SMTP
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", "smtp.gmail.com");
         props.put("mail.smtp.port", "587");
 
+        // Xác thực Gmail
         Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication("thienpham0712@gmail.com", "neoa yxdj dsme xzbf");
             }
         });
-        Message msg = new MimeMessage(session);
-        msg.setFrom(new InternetAddress("thienpham0712@gmail.com", false));
 
-        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(order.getEmail()));
-        StringBuilder sb = new StringBuilder()
-                .append("Bạn nhận được voucher giảm giá cho lần sử dụng tiếp theo: " + voucher.getCode()).append("<br/>")
-                .append("Số lần sử dụng: " + voucher.getCount()).append("<br/>")
-                .append("Hạn sử dụng: " + voucher.getExpireDate()).append("<br/>")
-                .append("Giảm giá: " + voucher.getDiscount() + " %").append("<br/>");
-        msg.setSubject("🛍️ Cửa hàng S&A (Sustainable fashion) thông báo");
-        msg.setContent(sb.toString(), "text/html; charset=utf-8");
-        msg.setSentDate(new Date());
-        Transport.send(msg);
+        // Tạo email
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress("thienpham0712@gmail.com", false));
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(order.getEmail()));
+        message.setSubject("🎉 Ưu đãi đặc biệt từ S&A - Sustainable Fashion 🎉");
+        message.setSentDate(new Date());
+
+        // Soạn nội dung email (giao diện HTML đẹp hơn)
+        String content = "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;'>"
+                + "<h2 style='color: #4CAF50; text-align: center;'>🎁 ƯU ĐÃI ĐẶC BIỆT DÀNH CHO BẠN 🎁</h2>"
+                + "<p style='text-align: center; font-size: 16px;'>Cảm ơn bạn đã đồng hành cùng <strong>S&A - Sustainable Fashion</strong>.</p>"
+                + "<div style='background-color: #f9f9f9; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0;'>"
+                + "<p style='font-size: 18px; margin: 10px 0;'><strong>Mã Voucher:</strong> <span style='color: #e91e63; font-size: 24px;'>" + voucher.getCode() + "</span></p>"
+                + "<p><strong>Giảm giá:</strong> " + voucher.getDiscount() + "%</p>"
+                + "<p><strong>Số lần sử dụng:</strong> " + voucher.getCount() + "</p>"
+                + "<p><strong>Hạn sử dụng:</strong> " + voucher.getExpireDate() + "</p>"
+                + "</div>"
+                + "<div style='text-align: center;'>"
+                + "<a href='http://localhost:3000/store' style='background-color: #4CAF50; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; display: inline-block;'>"
+                + "🛒 Mua sắm ngay"
+                + "</a>"
+                + "</div>"
+                + "<hr style='margin: 30px 0;'/>"
+                + "<p style='text-align: center;'>💌 Một lần nữa cảm ơn bạn đã tin tưởng <strong>S&A - Sustainable Fashion</strong>.</p>"
+                + "<p style='text-align: center;'>Hẹn gặp lại bạn trong những lần mua sắm tiếp theo!</p>"
+                + "</div>";
+
+        message.setContent(content, "text/html; charset=UTF-8");
+        message.setSentDate(new Date());
+        // Gửi email
+        Transport.send(message);
     }
 
-    public static void sendmailForgotPassword(String receive, String password) throws MessagingException {
+
+    public static void sendmailForgotPassword(String receiver, String password) throws MessagingException {
+        // Cấu hình SMTP
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.host", "smtp.gmail.com");
         props.put("mail.smtp.port", "587");
 
+        // Xác thực Gmail
         Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication("thienpham0712@gmail.com", "neoa yxdj dsme xzbf");
             }
         });
-        Message msg = new MimeMessage(session);
-        msg.setFrom(new InternetAddress("thienpham0712@gmail.com", false));
 
-        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(receive));
-        msg.setSubject("🛍️ Cửa hàng S&A (Sustainable fashion) thông báo");
-        msg.setContent("New Pasword: " + password, "text/html");
-        msg.setSentDate(new Date());
+        // Tạo email
+        Message message = new MimeMessage(session);
+        message.setFrom(new InternetAddress("thienpham0712@gmail.com", false));
+        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(receiver));
+        message.setSubject("🔐 Cấp Lại Mật Khẩu - S&A (Sustainable Fashion)");
+        message.setSentDate(new Date());
 
-        Transport.send(msg);
+        // Soạn nội dung email (HTML chuyên nghiệp)
+        String content = "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;'>"
+                + "<h2 style='text-align: center; color: #4CAF50;'>🔐 CẤP LẠI MẬT KHẨU</h2>"
+                + "<p>Xin chào,</p>"
+                + "<p>Bạn đã yêu cầu cấp lại mật khẩu cho tài khoản của mình tại <strong>S&A - Sustainable Fashion</strong>.</p>"
+                + "<p style='font-size: 16px;'>Mật khẩu mới của bạn là:</p>"
+                + "<div style='text-align: center; margin: 20px 0;'>"
+                + "    <span style='display: inline-block; background-color: #f0f0f0; padding: 10px 20px; font-size: 20px; color: #333; border-radius: 5px;'>" + password + "</span>"
+                + "</div>"
+                + "<p style='color: red;'><strong>Vui lòng đăng nhập và đổi mật khẩu ngay sau khi đăng nhập để đảm bảo an toàn cho tài khoản của bạn.</strong></p>"
+                + "<div style='text-align: center; margin: 30px 0;'>"
+                + "    <a href='http://localhost:3000/sign-in' style='background-color: #4CAF50; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px;'>ĐĂNG NHẬP NGAY</a>"
+                + "</div>"
+                + "<hr/>"
+                + "<p style='font-size: 14px; color: gray;'>Nếu bạn không yêu cầu đổi mật khẩu, vui lòng bỏ qua email này.</p>"
+                + "<p style='font-size: 14px; color: gray;'>Nếu cần hỗ trợ, vui lòng liên hệ: <a href='mailto:thienpham0712@gmail.com'>thienpham0712@gmail.com</a></p>"
+                + "</div>";
+
+        message.setContent(content, "text/html; charset=UTF-8");
+
+        // Gửi email
+        Transport.send(message);
     }
+
+
     public static void sendVerificationEmail(String toEmail, String token) throws MessagingException {
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");

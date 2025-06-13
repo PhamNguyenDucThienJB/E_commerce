@@ -404,9 +404,9 @@ public class OrderServiceImpl implements OrderService {
                voucher.setCreateDate(LocalDate.now());
                voucher.setCount(new Integer(1));
                voucher.setExpireDate(LocalDate.now().plusYears(1));
-               if (order.getTotal() >= 3000000) {
+               if (order.getTotal() >= 2000000) {
                    voucher.setDiscount(new Integer(30));
-               } else if (order.getTotal() >= 2000000) {
+               } else if (order.getTotal() >= 1500000) {
                    voucher.setDiscount(new Integer(20));
                } else {
                    voucher.setDiscount(new Integer(10));
