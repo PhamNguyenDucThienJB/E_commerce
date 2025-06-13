@@ -594,7 +594,7 @@ const Checkout = (props) => {
                         const details = await actions.order.capture();
                         toast.success("Thanh toán PayPal thành công!");
                         const totalUSD = details.purchase_units[0].amount.value;
-                        const totalVND = await convertUSDtoVND(totalUSD);
+                        const totalVND = Math.round( (await convertUSDtoVND(totalUSD))/ 1000)*1000;
                         const orderData = {
                           fullname: obj.name || "Tên mặc định",
                           phone: obj.phone || "0000000000",
@@ -614,10 +614,13 @@ const Checkout = (props) => {
                           })),
                         };
                         console.log("Dữ liệu đơn hàng gửi lên:", orderData);
-                        await createOrder(orderData);
+                        const resp = await createOrder(orderData);
                         handleCloseFirst();
                         console.log(`Số tiền PayPal (USD): ${totalUSD}`);
                         console.log(`Số tiền lưu vào DB (VND): ${totalVND}`);
+                    
+                        history.push(`/order/detail/${resp.data.encodeUrl}`);
+
                       } catch (error) {
                         toast.error("Lỗi khi tạo đơn hàng!");
                         console.error(error);

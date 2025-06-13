@@ -161,7 +161,7 @@ const SignIn = (props) => {
                   <div className="mt-4">
                     <p className="mb-0 text-white-50">
                       Chưa có tài khoản?{' '}
-                      <NavLink to="/register" className="register-link">
+                      <NavLink to="/verify" className="register-link">
                         Đăng ký ngay
                       </NavLink>
                     </p>
