@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./topnav.css";
 import Dropdown from "../dropdown/Dropdown";
 import { Link, NavLink, useHistory } from "react-router-dom";
-import user_image from "../../assets/images/tan.jpg";
+import user_image from "../../assets/images/admin-panel.png";
 import user_menu from "../../assets/JsonData/user_menus.json";
 import { loadNotification, readNotification, pushNotification } from "../../api/NotificationApi";
 import { toast } from "react-toastify";

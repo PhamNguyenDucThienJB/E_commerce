@@ -33,7 +33,7 @@ const SignIn = (props) => {
             localStorage.setItem("username", data.username);
             localStorage.setItem("password", data.password);
             if (res.data.roleName === "ADMIN") {
-              history.push("/");
+              history.push("/dashboard");
             } else {
               history.push("/orders");
             }

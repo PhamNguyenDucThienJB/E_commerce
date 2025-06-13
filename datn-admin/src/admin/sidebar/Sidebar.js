@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import "./sidebar.css";
-import logo from "../../assets/images/logo-sneaker.png";
+import logo from "../../assets/images/logo.jpg";
 // import sidebar_items from "../../assets/JsonData/sidebar_routes.json";
 import { Link } from "react-router-dom";
 
@@ -69,14 +69,14 @@ const sidebar_items_1 = [
       "display_name": "Bình luận",
       "route": "/comments",
       "icon": "bx bx-message-dots"
-  },
-  {
-      "display_name": "Hộp thoại",
-      "route": "/chat",
-      "add": "/chat",
-      "modify": "/chat",
-      "icon": "bx bx-chat"
   }
+  // {
+  //     "display_name": "Hộp thoại",
+  //     "route": "/chat",
+  //     "add": "/chat",
+  //     "modify": "/chat",
+  //     "icon": "bx bx-chat"
+  // }
 ]
 
 const sidebar_items_2 = [
@@ -88,12 +88,10 @@ const sidebar_items_2 = [
       "sub": "/detail-order",
       "icon": "bx bx-cart"
   },
-  {
-      "display_name": "Hộp thoại",
-      "route": "/chat",
-      "add": "/chat",
-      "modify": "/chat",
-      "icon": "bx bx-chat"
+ {
+      "display_name": "Bình luận",
+      "route": "/comments",
+      "icon": "bx bx-message-dots"
   }
 ]
 const SidebarItem = (props) => {
