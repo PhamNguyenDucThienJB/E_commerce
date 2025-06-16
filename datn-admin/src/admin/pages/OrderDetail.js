@@ -125,14 +125,13 @@ const OrderDetail = () => {
               </p>
             </div>
             <div className="col text ">
-              <p
-                className="display-4 text-primary"
-                style={{ fontSize: "24px" }}
-              >
+              <p className="display-4 text-primary" style={{ fontSize: "24px" }}>
                 Trạng thái đơn hàng
               </p>
               <p className="text-danger" style={{ fontWeight: "bolder" }}>
-                {order.orderStatus && order.orderStatus.name}
+                {order.orderStatus
+                  ? order.orderStatus.name
+                  : "Đã hoàn trả"}
               </p>
             </div>
           </div>

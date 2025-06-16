@@ -9,10 +9,12 @@ import third from "../static/images/slide_07.jpg";
 import fourth from "../static/images/slide_06.jpg";
 import React, { useState, useEffect } from "react";
 import { getAllProducts, getMostViewedProducts, getBestSellingProducts } from "../api/ProductApi";
+import { getProductRatingStatistics } from "../api/RatingApi";
 import './Home.css';
 
 const Home = (props) => {
   const [products, setProducts] = useState([]);
+  const [ratingsStats, setRatingsStats] = useState({});
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState({});
   const [active, setActive] = useState(true);
@@ -104,6 +106,26 @@ if (!jwtToken) {
     });
   }, [bestSellingPage]);
 
+  // Fetch rating statistics for all homepage products
+  useEffect(() => {
+    const allItems = [...products, ...mostViewedProducts, ...bestSellingProducts];
+    if (allItems.length > 0) {
+      const fetchStats = async () => {
+        const statsMap = {};
+        await Promise.all(allItems.map(async (item) => {
+          try {
+            const resp = await getProductRatingStatistics(item.id);
+            statsMap[item.id] = resp.data;
+          } catch (error) {
+            console.error("Failed to fetch rating stats for product", item.id, error);
+          }
+        }));
+        setRatingsStats(statsMap);
+      };
+      fetchStats();
+    }
+  }, [products, mostViewedProducts, bestSellingProducts]);
+
   const onChangePage = (page) => {
     setPage(page);
   };
@@ -161,6 +183,11 @@ if (!jwtToken) {
               <div className="product-card flex-fill d-flex flex-column">
                 <NavLink to={`/product-detail/${item.id}`} className="position-relative d-block">
                   {item.discount > 0 && <span className="badge-sale">-{item.discount}%</span>}
+                  {ratingsStats[item.id] && (
+                    <span className="badge-rating">
+                      {ratingsStats[item.id].averageRating.toFixed(1)}★({ratingsStats[item.id].totalRatings})
+                    </span>
+                  )}
                   <img
                     src={require(`../static/images/${item.image}`)}
                     alt={item.name}
@@ -222,6 +249,11 @@ if (!jwtToken) {
               <div className="product-card flex-fill d-flex flex-column">
                 <NavLink to={`/product-detail/${item.id}`} className="position-relative d-block">
                   {item.discount > 0 && <span className="badge-sale">-{item.discount}%</span>}
+                  {ratingsStats[item.id] && (
+                    <span className="badge-rating">
+                      {ratingsStats[item.id].averageRating.toFixed(1)}★({ratingsStats[item.id].totalRatings})
+                    </span>
+                  )}
                   <img
                     src={require(`../static/images/${item.image}`)}
                     alt={item.name}
@@ -283,6 +315,11 @@ if (!jwtToken) {
               <div className="product-card flex-fill d-flex flex-column">
                 <NavLink to={`/product-detail/${item.id}`} className="position-relative d-block">
                   {item.discount > 0 && <span className="badge-sale">-{item.discount}%</span>}
+                  {ratingsStats[item.id] && (
+                    <span className="badge-rating">
+                      {ratingsStats[item.id].averageRating.toFixed(1)}★({ratingsStats[item.id].totalRatings})
+                    </span>
+                  )}
                   <img
                     src={require(`../static/images/${item.image}`)}
                     alt={item.name}

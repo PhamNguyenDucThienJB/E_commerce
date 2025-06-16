@@ -5,6 +5,7 @@ import com.poly.datn.be.domain.dto.ReqCancelOrder;
 import com.poly.datn.be.domain.dto.ReqOrderDto;
 import com.poly.datn.be.domain.dto.ReqUpdateOrderDto;
 import com.poly.datn.be.domain.dto.ReqUpdateStatusOrder;
+import com.poly.datn.be.domain.dto.ReqReturnOrder;
 import com.poly.datn.be.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -159,5 +160,9 @@ public class OrderApi {
     @PostMapping(OrderConst.API_CANCEL_ORDER)
     public ResponseEntity<?> cancelOrder(@RequestBody ReqUpdateStatusOrder reqUpdateStatusOrder){
         return new ResponseEntity<>(orderService.cancelOrder(reqUpdateStatusOrder), HttpStatus.OK);
+    }
+    @PostMapping(OrderConst.API_ORDER_RETURN)
+    public ResponseEntity<?> returnOrder(@RequestBody ReqReturnOrder reqReturnOrder){
+        return new ResponseEntity<>(orderService.returnOrder(reqReturnOrder), HttpStatus.OK);
     }
 }

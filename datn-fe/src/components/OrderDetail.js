@@ -736,7 +736,6 @@ const OrderDetail = (props) => {
           <table className="table table-striped table-bordered">
             <thead>
               <tr>
-                <th scope="col">Mã sản phẩm</th>
                 <th scope="col">Tên sản phẩm</th>
                 <th scope="col">Size</th>
                 <th scope="col">Giá</th>
@@ -757,28 +756,22 @@ const OrderDetail = (props) => {
                 const totalDisplay = orderDetail.length === 1 ? total : item.sellPrice * item.quantity;
                 // Xác định product ID: ưu tiên API, sau đó productInfo, sau đó attributeMapping
                 const productId = item.attribute?.product?.id || item.productInfo?.productId || (attributeId ? attributeMapping[attributeId] : null);
-                // Hiển thị productId hoặc fallback là attribute ID
-                const displayProductId = productId || attributeId || 'N/A';
-                
+                // Không hiển thị mã, dùng link trên tên
                 return (
                   <tr key={index}>
-                    <th scope="row">
+                    <td>
                       {productId ? (
-                        <Link 
-                          to={`/product-detail/${productId}`} 
+                        <Link
+                          to={`/product-detail/${productId}`}
                           className="text-primary"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            history.push(`/product-detail/${productId}`);
-                          }}
+                          onClick={(e) => { e.preventDefault(); history.push(`/product-detail/${productId}`); }}
                         >
-                          {displayProductId}
+                          {item?.attribute?.name || productNames[item?.attribute?.id] || item?.attribute?.product?.name || 'N/A'}
                         </Link>
                       ) : (
-                        displayProductId
+                        item?.attribute?.name || productNames[item?.attribute?.id] || item?.attribute?.product?.name || 'N/A'
                       )}
-                    </th>
-                    <td>{item?.attribute?.name || productNames[item?.attribute?.id] || item?.attribute?.product?.name || 'N/A'}</td>
+                    </td>
                     <td>{item?.attribute?.size || 'N/A'}</td>
                     <td>{(priceDisplay || 0).toLocaleString()}₫</td>
                     <td>{item?.quantity || 0}</td>

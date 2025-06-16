@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getAllProducts, filterProducts } from "../api/ProductApi";
+import { getProductRatingStatistics } from "../api/RatingApi";
 import { NavLink } from "react-router-dom";
 import "./sidebar/sidebar.css";
 import "./Home.css";
@@ -123,6 +124,7 @@ const defaultCategory = [1, 2, 3, 4, 5, 6, 7];
 
 const Product = (props) => {
   const [products, setProducts] = useState([]);
+  const [ratingsStats, setRatingsStats] = useState({});
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState({});
 
@@ -167,6 +169,24 @@ const Product = (props) => {
     }
     props.changeHeaderHandler(2);
   }, [page, category, brand, price]);
+
+  useEffect(() => {
+    if (products.length > 0) {
+      const fetchStats = async () => {
+        const statsMap = {};
+        await Promise.all(products.map(async (item) => {
+          try {
+            const resp = await getProductRatingStatistics(item.id);
+            statsMap[item.id] = resp.data;
+          } catch (error) {
+            console.error("Failed to fetch rating stats for product", item.id, error);
+          }
+        }));
+        setRatingsStats(statsMap);
+      };
+      fetchStats();
+    }
+  }, [products]);
 
   const onChangePage = (page) => {
     setPage(page);
@@ -284,6 +304,11 @@ const Product = (props) => {
                   <div className="product-card flex-fill d-flex flex-column">
                     <NavLink to={`/product-detail/${item.id}`} className="position-relative d-block">
                       {item.discount > 0 && <span className="badge-sale">-{item.discount}%</span>}
+                      {ratingsStats[item.id] && (
+                        <span className="badge-rating">
+                          {ratingsStats[item.id].averageRating.toFixed(1)}★({ratingsStats[item.id].totalRatings})
+                        </span>
+                      )}
                       <img
                         src={require(`../static/images/${item.image}`)}
                         alt={item.name}

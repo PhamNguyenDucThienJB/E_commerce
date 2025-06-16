@@ -27,6 +27,7 @@ const orderStatus = {
   "Đang vận chuyển": "warning",
   "Đã giao": "success",
   "Đã hủy": "danger",
+  "Đã hoàn trả": "info",
 };
 
 const pendingStatus = {
@@ -176,16 +177,31 @@ const Order = () => {
     onLoad();
   }, [page]);
 
+  // Add a check for orders with status 6 when they load
+  useEffect(() => {
+    if (orders && orders.length > 0) {
+      orders.forEach(order => {
+        if (order && order.orderStatus && order.orderStatus.id === 6) {
+          console.log("Found returned order:", order.id);
+        }
+      });
+    }
+  }, [orders]);
+
   const onLoad = () => {
     getAllOrderAndPagination(status, page, 20)
       .then((res) => {
+        console.log("Orders loaded:", res.data.content);
         setOrders(res.data.content);
         setTotal(res.data.totalPages);
       })
       .catch((error) => console.log(error));
     getAllOrderStatus()
-      .then((resp) => setOrderStatuses(resp.data))
-      .catch((error) => console.log(error.response.data.Errors));
+      .then((resp) => {
+        console.log("Order statuses:", resp.data);
+        setOrderStatuses(resp.data);
+      })
+      .catch((error) => console.log(error.response?.data?.Errors));
   };
 
   const updateStatusHandlerFirst = (orderId, statusId) => {
@@ -323,12 +339,14 @@ const Order = () => {
     setPage(1);
     setYear("");
     setMonth("");
+    console.log("Loading orders with status:", value);
     getAllOrderAndPagination(value, page, 20)
       .then((res) => {
+        console.log("Orders loaded:", res.data);
         setOrders(res.data.content);
         setTotal(res.data.totalPages);
       })
-      .catch((error) => console.log(error.response.data.Errors));
+      .catch((error) => console.log(error.response?.data?.Errors));
   };
 
   const getAllOrderByOrderStatusAndYearAndMonth = (value) => {
@@ -490,107 +508,161 @@ const Order = () => {
                       orders.map((item, index) => (
                         <tr key={index}>
                           <th scope="row">
-                            <NavLink to={`/detail-order/${item.id}`} exact>
-                              #OD{item.id}
+                            <NavLink to={item && item.id ? `/order-detail/${item.id}` : '#'} exact>
+                              #OD{item && item.id}
                             </NavLink>
                           </th>
-                          <th>{item.createDate}</th>
+                          <th>{item && item.createDate}</th>
                           <th>
-                            <Badge
-                              type={pendingStatus[item.isPending]}
-                              content={
-                                item.isPending
-                                  ? "Đã thanh toán"
-                                  : "Chưa thanh toán"
-                              }
-                            />
+                            {item && item.isPending !== undefined && (
+                              <Badge
+                                type={pendingStatus[item.isPending]}
+                                content={
+                                  item.isPending
+                                    ? "Đã thanh toán"
+                                    : "Chưa thanh toán"
+                                }
+                              />
+                            )}
                           </th>
-                          <th> {item.total.toLocaleString()} ₫</th>
+                          <th> {item && item.total ? item.total.toLocaleString() : 0} ₫</th>
                           <th>
-                            <div className="status-radios">
-                              <div className="form-check" data-status="Chờ xác nhận">
-                                <input
-                                  className="form-check-input"
-                                  type="radio"
-                                  name={index}
-                                  checked={item.orderStatus.id === 1}
-                                  value="1"
-                                />
-                              </div>
-                              <div className="form-check" data-status="Đang xử lí">
-                                <input
-                                  className="form-check-input"
-                                  type="radio"
-                                  name={index}
-                                  checked={item.orderStatus.id === 2}
-                                  value="2"
-                                  onChange={(e) =>
-                                    updateStatusHandlerFirst(
-                                      item.id,
-                                      e.target.value
-                                    )
-                                  }
-                                />
-                              </div>
-                              <div className="form-check" data-status="Đang vận chuyển">
-                                <input
-                                  className="form-check-input"
-                                  type="radio"
-                                  name={index}
-                                  checked={item.orderStatus.id === 3}
-                                  value="3"
-                                  onChange={(e) =>
-                                    updateStatusHandlerSecond(
-                                      item.id,
-                                      e.target.value
-                                    )
-                                  }
-                                />
-                              </div>
-                              <div className="form-check" data-status="Đã giao">
-                                <input
-                                  className="form-check-input"
-                                  type="radio"
-                                  name={index}
-                                  checked={item.orderStatus.id === 4}
-                                  value="4"
-                                  onChange={(e) =>
-                                    updateStatusHandlerThird(
-                                      item.id,
-                                      e.target.value
-                                    )
-                                  }
-                                />
-                              </div>
-                              <div className="form-check" data-status="Đã hủy">
-                                <input
-                                  className="form-check-input"
-                                  type="radio"
-                                  name={index}
-                                  checked={item.orderStatus.id === 5}
-                                  value="5"
-                                  onChange={(e) =>
-                                    updateStatusHandlerFouth(
-                                      item.id,
-                                      e.target.value
-                                    )
-                                  }
-                                />
-                              </div>
-                            </div>
+                            {item && (
+                              <>
+                                {console.log(`Order ${item.id}:`, item)}
+                                {/* Kiểm tra dựa trên ID của đơn hàng và dữ liệu từ server */}
+                                {item.orderStatus ? (
+                                  // Trường hợp có thông tin orderStatus
+                                  <div className="status-radios">
+                                    <div className="form-check" data-status="Chờ xác nhận">
+                                      <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name={`status-${item.id}`}
+                                        checked={item.orderStatus.id === 1}
+                                        value="1"
+                                        readOnly
+                                      />
+                                    </div>
+                                    <div className="form-check" data-status="Đang xử lí">
+                                      <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name={`status-${item.id}`}
+                                        checked={item.orderStatus.id === 2}
+                                        value="2"
+                                        onChange={(e) =>
+                                          updateStatusHandlerFirst(
+                                            item.id,
+                                            e.target.value
+                                          )
+                                        }
+                                        disabled={item.orderStatus.id === 6 || 
+                                                item.description?.toLowerCase().includes("hoàn trả")}
+                                      />
+                                    </div>
+                                    <div className="form-check" data-status="Đang vận chuyển">
+                                      <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name={`status-${item.id}`}
+                                        checked={item.orderStatus.id === 3}
+                                        value="3"
+                                        onChange={(e) =>
+                                          updateStatusHandlerSecond(
+                                            item.id,
+                                            e.target.value
+                                          )
+                                        }
+                                        disabled={item.orderStatus.id === 6 || 
+                                                item.description?.toLowerCase().includes("hoàn trả")}
+                                      />
+                                    </div>
+                                    <div className="form-check" data-status="Đã giao">
+                                      <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name={`status-${item.id}`}
+                                        checked={item.orderStatus.id === 4}
+                                        value="4"
+                                        onChange={(e) =>
+                                          updateStatusHandlerThird(
+                                            item.id,
+                                            e.target.value
+                                          )
+                                        }
+                                        disabled={item.orderStatus.id === 6 ||
+                                                item.description?.toLowerCase().includes("hoàn trả")}
+                                      />
+                                    </div>
+                                    <div className="form-check" data-status="Đã hủy">
+                                      <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name={`status-${item.id}`}
+                                        checked={item.orderStatus.id === 5}
+                                        value="5"
+                                        onChange={(e) =>
+                                          updateStatusHandlerFouth(
+                                            item.id,
+                                            e.target.value
+                                          )
+                                        }
+                                        disabled={item.orderStatus.id === 6 || 
+                                                item.description?.toLowerCase().includes("hoàn trả")}
+                                      />
+                                    </div>
+                                    <div className="form-check" data-status="Đã hoàn trả">
+                                      <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name={`status-${item.id}`}
+                                        checked={item.orderStatus.id === 6 ||
+                                                item.description?.toLowerCase().includes("hoàn trả")}
+                                        value="6"
+                                        readOnly
+                                      />
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="status-radios">
+                                    <div className="form-check" data-status="Chờ xác nhận">
+                                      <input className="form-check-input" type="radio" name={`status-${item.id}`} value="1" checked={false} disabled />
+                                    </div>
+                                    <div className="form-check" data-status="Đang xử lí">
+                                      <input className="form-check-input" type="radio" name={`status-${item.id}`} value="2" checked={false} disabled />
+                                    </div>
+                                    <div className="form-check" data-status="Đang vận chuyển">
+                                      <input className="form-check-input" type="radio" name={`status-${item.id}`} value="3" checked={false} disabled />
+                                    </div>
+                                    <div className="form-check" data-status="Đã giao">
+                                      <input className="form-check-input" type="radio" name={`status-${item.id}`} value="4" checked={false} disabled />
+                                    </div>
+                                    <div className="form-check" data-status="Đã hủy">
+                                      <input className="form-check-input" type="radio" name={`status-${item.id}`} value="5" checked={false} disabled />
+                                    </div>
+                                    <div className="form-check" data-status="Đã hoàn trả">
+                                      <input className="form-check-input" type="radio" name={`status-${item.id}`} value="6" checked={true} readOnly />
+                                    </div>
+                                  </div>
+                                )}
+                              </>
+                            )}
                           </th>
                           <th>
                             <div className="order-actions">
-                              {item.orderStatus.id !== 4 &&
+                              {item && item.orderStatus && 
+                               item.orderStatus.id !== 4 &&
                                item.orderStatus.id !== 3 &&
-                               item.orderStatus.id !== 5 && (
+                               item.orderStatus.id !== 5 &&
+                               item.orderStatus.id !== 6 && (
                                 <NavLink to={`/order-detail/${item.id}`} className="action-icon edit">
                                   <i className="fa fa-pencil-square-o fa-lg" aria-hidden="true"></i>
                                 </NavLink>
                               )}
                               <button
                                 className="btn btn-link p-0 action-icon delete"
-                                onClick={() => handleDelete(item.id)}
+                                onClick={() => item && item.id ? handleDelete(item.id) : null}
                               >
                                 <i className="fa fa-trash fa-lg"></i>
                               </button>

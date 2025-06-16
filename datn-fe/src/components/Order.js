@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useHistory } from "react-router-dom";
-import { getAllOrder, cancelOrder } from "../api/OrderApi";
+import { getAllOrder, cancelOrder, returnOrder } from "../api/OrderApi";
 import { getAllOrderStatus } from "../api/OrderStatusApi";
 import { Button, Form } from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
@@ -18,6 +18,7 @@ const Order = (props) => {
   const [showFouth, setShowFouth] = useState(false);
   const [description, setDescription] = useState(null);
   const [reason, setReason] = useState(null);
+  const RETURN_STATUS_ID = 6;
   const history = useHistory();
 
   const handleCloseFouth = () => {
@@ -59,22 +60,37 @@ const Order = (props) => {
   const confirmUpdateCancel = () => {
     const data = {
       id: obj.orderId,
-      description: `${reason} - ${description}`,
+      description: reason || "Hoàn trả đơn hàng"
     };
 
-    cancelOrder(data)
+    console.log("Sending data:", data, "Status:", obj.statusId === RETURN_STATUS_ID ? "Return" : "Cancel");
+
+    const action = obj.statusId === RETURN_STATUS_ID ? returnOrder : cancelOrder;
+    action(data)
       .then(() => {
-        toast.success("Cập nhật thành công.");
-        setStatus(obj.statusId);
-        setPage(1);
-        getAllOrderByStatus(obj.statusId)
-          .then((res) => {
-            setOrder(res.data.content);
-            setTotal(res.data.totalPages);
-          })
-          .catch((error) => console.log(error));
+        const successMessage = obj.statusId === RETURN_STATUS_ID 
+          ? "Đơn hàng đã được đánh dấu hoàn trả thành công. Vui lòng đợi xác nhận từ cửa hàng."
+          : "Hủy đơn hàng thành công.";
+        
+        toast.success(successMessage);
+        
+        // Reload trang sau khi hủy/hoàn trả để hiển thị đúng trạng thái
+        setTimeout(() => {
+          setStatus(obj.statusId === RETURN_STATUS_ID ? 0 : obj.statusId);
+          setPage(1);
+          getAllOrderByStatus(obj.statusId === RETURN_STATUS_ID ? 0 : obj.statusId)
+            .then((res) => {
+              setOrder(res.data.content);
+              setTotal(res.data.totalPages);
+            })
+            .catch((error) => console.log(error));
+        }, 1000);
       })
-      .catch((error) => toast.error(error.response.data.Errors));
+      .catch((error) => {
+        console.error("Error in cancel/return order:", error);
+        const errMsg = error.response?.data?.Errors || "Có lỗi xảy ra khi xử lý yêu cầu.";
+        toast.error(errMsg);
+      });
 
     setReason(null);
     setDescription(null);
@@ -105,7 +121,7 @@ const Order = (props) => {
           setOrder(res.data.content);
           setTotal(res.data.totalPages);
         })
-        .catch((error) => console.log(error.response.data.Errors));
+        .catch((error) => console.log(error.response?.data?.Errors));
 
       getAllOrderStatus()
         .then((resp) => setOrderStatus(resp.data))
@@ -118,14 +134,21 @@ const Order = (props) => {
   };
 
   const getAllOrderByStatus = (value) => {
+    const statusValue = Number(value);
+    // Reset to page 1 and update status filter
     setPage(1);
-    setStatus(value);
-    getAllOrder(props.user.id, value, page, 8)
+    setStatus(statusValue);
+    // Always request the first page for the new status filter
+    return getAllOrder(props.user.id, statusValue, 1, 8)
       .then((res) => {
         setOrder(res.data.content);
         setTotal(res.data.totalPages);
+        return res;
       })
-      .catch((error) => console.log(error.response.data.Errors));
+      .catch((error) => {
+        console.log(error.response?.data?.Errors);
+        throw error;
+      });
   };
 
   // Hàm tiện ích để kiểm tra xem đơn hàng đã giao hay chưa
@@ -151,6 +174,11 @@ const Order = (props) => {
     } else {
       toast.info("Bạn chỉ có thể đánh giá khi đơn hàng đã giao");
     }
+  };
+
+  // Placeholder for return functionality when order is delivered
+  const handleReturnOrder = (orderId) => {
+    handleShowFouth(orderId, RETURN_STATUS_ID);
   };
 
   return (
@@ -206,7 +234,7 @@ const Order = (props) => {
                   <th scope="col">Tình trạng vận chuyển</th>
                   <th scope="col">Tổng tiền</th>
                   <th scope="col">Đánh giá</th>
-                  <th scope="col">Hủy</th>
+                  <th scope="col">Hủy/Hoàn hàng</th>
                 </tr>
               </thead>
               <tbody>
@@ -238,7 +266,8 @@ const Order = (props) => {
                       </td>
                       <td>
                         <h6 className="card-title mt-2 bolder">
-                          {item.orderStatus.name}
+                          {/* Safely render order status, fallback to 'Đã hoàn trả' if null */}
+                          {item.orderStatus?.name ?? "Đã hoàn trả"}
                         </h6>
                       </td>
                       <td>
@@ -247,7 +276,7 @@ const Order = (props) => {
                         </h6>
                       </td>
                       <td>
-                        {console.log("Trạng thái đơn hàng:", item.orderStatus.name)}
+                        {console.log("Trạng thái đơn hàng:", item.orderStatus?.name)}
                         {isDelivered(item.orderStatus) && (
                           <button
                             className="btn btn-primary"
@@ -258,15 +287,22 @@ const Order = (props) => {
                         )}
                       </td>
                       <td>
-                        <button
-                          className="btn btn-light"
-                          onClick={() => handleShowFouth(item.id, 5)}
-                        >
-                          <i
-                            className="fa fa-ban text-danger"
-                            aria-hidden="true"
-                          ></i>
-                        </button>
+                        {item.orderStatus?.name === "Chờ xác nhận" && (
+                          <button
+                            className="btn btn-light"
+                            onClick={() => handleShowFouth(item.id, 5)}
+                          >
+                            <i className="fa fa-ban text-danger" aria-hidden="true"></i>
+                          </button>
+                        )}
+                        {item.orderStatus?.name === "Đã giao" && (
+                          <button
+                            className="btn btn-light"
+                            onClick={() => handleReturnOrder(item.id)}
+                          >
+                            <i className="fa fa-undo text-primary" aria-hidden="true"></i> Hoàn trả
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -306,39 +342,52 @@ const Order = (props) => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Alert variant="danger">
-            <Alert.Heading>Hủy đơn hàng</Alert.Heading>
+          <Alert variant={obj.statusId === RETURN_STATUS_ID ? "primary" : "danger"}>
+            <Alert.Heading>{obj.statusId === RETURN_STATUS_ID ? "Hoàn trả đơn hàng" : "Hủy đơn hàng"}</Alert.Heading>
             <hr />
             <Form.Label style={{ marginRight: 30, marginBottom: 10 }}>
-              Lí do hủy đơn
+              {obj.statusId === RETURN_STATUS_ID ? "Lí do hoàn trả" : "Lí do hủy đơn"}
             </Form.Label>
             <Form.Select
               style={{ height: 40, width: 420, marginBottom: 20 }}
               onChange={(e) => reasonHandler(e.target.value)}
             >
-              <option value={null}></option>
-              <option value="Đặt trùng">Đặt trùng</option>
-              <option value="Thêm bớt sản phẩm">Thêm bớt sản phẩm</option>
-              <option value="Gojek">Không còn nhu cầu</option>
-              <option value="AhaMove">Lí do khác</option>
+              <option value="">Chọn lý do</option>
+              {obj.statusId === RETURN_STATUS_ID ? (
+                <>
+                  <option value="Sản phẩm bị lỗi">Sản phẩm bị lỗi</option>
+                  <option value="Sản phẩm không đúng mô tả">Sản phẩm không đúng mô tả</option>
+                  <option value="Sản phẩm không vừa">Sản phẩm không vừa</option>
+                  <option value="Lý do khác">Lý do khác</option>
+                </>
+              ) : (
+                <>
+                  <option value="Đặt trùng">Đặt trùng</option>
+                  <option value="Thêm bớt sản phẩm">Thêm bớt sản phẩm</option>
+                  <option value="Không còn nhu cầu">Không còn nhu cầu</option>
+                  <option value="Lý do khác">Lý do khác</option>
+                </>
+              )}
             </Form.Select>
-            <Form>
-              <Form.Label style={{ marginRight: 30, marginBottom: 10 }}>
-                Mô tả
-              </Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                onChange={(e) => descriptionHandler(e.target.value)}
-              />
-            </Form>
+            {obj.statusId !== RETURN_STATUS_ID && (
+              <Form>
+                <Form.Label style={{ marginRight: 30, marginBottom: 10 }}>
+                  Mô tả
+                </Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  onChange={(e) => descriptionHandler(e.target.value)}
+                />
+              </Form>
+            )}
           </Alert>
         </Modal.Body>
         <Modal.Footer>
           <Button
             variant="danger"
             onClick={confirmUpdateCancel}
-            disabled={!reason || !description}
+            disabled={obj.statusId === RETURN_STATUS_ID ? !reason : (!reason || !description)}
           >
             Xác nhận
           </Button>

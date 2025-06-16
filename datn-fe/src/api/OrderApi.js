@@ -12,6 +12,10 @@ export const cancelOrder = (data) =>{
     const url = `/api/site/order/cancel`;
     return Instance.post(url, data);
 }
+export const returnOrder = (data) =>{
+    const url = `/api/site/order/return`;
+    return Instance.post(url, data);
+}
 export const getAllOrder = (id, status, page, size) =>{
     const url = `/api/site/order/get-orders?id=${id}&status=${status}&page=${page}&size=${size}`;
     return Instance.get(url);

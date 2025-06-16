@@ -26,6 +26,7 @@ public class OrderConst {
     public static final String API_SUCCESS_ORDER = "/api/site/order/success-order";
     public static final String API_CANCEL_ORDER = "/api/site/order/cancel-order";
     public static final String API_ORDER_DELETE = "/api/admin/order/delete-order";
+    public static final String API_ORDER_RETURN = "/api/site/order/return";
 
     /* Order constant*/
     public static final String CART_ITEM_MSG_ERROR_NOT_ENOUGH = "Sản phẩm còn lại không đủ!";

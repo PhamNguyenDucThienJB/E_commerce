@@ -91,6 +91,20 @@
   font-size: 0.75rem;
   border-radius: 0.25rem;
   text-transform: uppercase;
+  z-index: 2;
+}
+
+/* Rating badge style */
+.badge-rating {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #343a40;
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  z-index: 2;
 }
 
 /* Hero carousel style similar to reference site */
@@ -366,4 +380,8 @@
 
 .category-active .category-icon {
   color: #007bff;
+}
+
+.bg-light-warning {
+  background-color: rgba(255, 193, 7, 0.15) !important;
 } 

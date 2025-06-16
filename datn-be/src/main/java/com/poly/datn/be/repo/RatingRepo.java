@@ -18,13 +18,13 @@ public interface RatingRepo extends JpaRepository<Rating, Long> {
     
     Page<Rating> findAllByIsActiveTrue(Pageable pageable);
     
-    @Query("SELECT COALESCE(AVG(r.rating), 0.0) FROM Rating r WHERE r.product.id = :productId AND r.isActive = true")
+    @Query("SELECT COALESCE(AVG(r.rating), 0.0) FROM Rating r WHERE r.product.id = :productId AND r.isActive = true AND r.order IS NOT NULL")
     Double getAverageRatingByProductId(Long productId);
     
-    @Query("SELECT COUNT(r) FROM Rating r WHERE r.product.id = :productId AND r.isActive = true")
+    @Query("SELECT COUNT(r) FROM Rating r WHERE r.product.id = :productId AND r.isActive = true AND r.order IS NOT NULL")
     Long countRatingsByProductId(Long productId);
     
-    @Query("SELECT COUNT(r) FROM Rating r WHERE r.product.id = :productId AND r.rating = :stars AND r.isActive = true")
+    @Query("SELECT COUNT(r) FROM Rating r WHERE r.product.id = :productId AND r.rating = :stars AND r.isActive = true AND r.order IS NOT NULL")
     Long countRatingsByProductIdAndStars(Long productId, Integer stars);
     
     Optional<Rating> findByAccountAndProductAndIsActiveTrue(Account account, Product product);

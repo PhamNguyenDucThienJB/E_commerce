@@ -16,4 +16,10 @@ public class OrderStatusConst {
     public static final String ORDER_STATUS_SUCCESS_MESSAGE = "Đơn hàng đã giao thành công.";
     public static final Long ORDER_STATUS_CANCEL = 5L;
     public static final String ORDER_STATUS_CANCEL_MESSAGE = "Đơn hàng đã hủy.";
+    public static final Long ORDER_STATUS_RETURN = 6L;
+    public static final String ORDER_STATUS_RETURN_MESSAGE = "Đơn hàng đã được hoàn trả.";
+    public static final Long ORDER_STATUS_WAITING_RETURN = 7L;
+    public static final String ORDER_STATUS_WAITING_RETURN_MESSAGE = "Đang chờ người bán xác nhận hoàn trả.";
+    public static final Long ORDER_STATUS_REJECT_RETURN = 8L;
+    public static final String ORDER_STATUS_REJECT_RETURN_MESSAGE = "Người bán từ chối hoàn trả.";
 }

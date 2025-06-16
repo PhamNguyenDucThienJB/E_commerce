@@ -33,6 +33,7 @@ import SearchOrder from './pages/SearchOrder';
 import Error from "./error/Error";
 import ReviewsManagement from "./pages/ReviewsManagement.js";
 import CommentsManagement from "./pages/CommentsManagement.js";
+import ReturnOrders from "./pages/ReturnOrders";
 
 const Routes = () => {
   const [year, setYear] = useState();
@@ -51,6 +52,9 @@ const Routes = () => {
       </Route>
       <Route path={`/order`} exact>
         <Order></Order>
+      </Route>
+      <Route path={`/return-orders`} exact>
+        <ReturnOrders></ReturnOrders>
       </Route>
       <Route path={`/order-form/:id`} exact>
         <OrderForm></OrderForm>

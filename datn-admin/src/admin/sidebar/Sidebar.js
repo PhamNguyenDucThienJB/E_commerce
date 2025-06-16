@@ -33,6 +33,11 @@ const sidebar_items_1 = [
       "icon": "bx bx-cart"
   },
   {
+      "display_name": "Hoàn hàng",
+      "route": "/return-orders",
+      "icon": "bx bx-package"
+  },
+  {
       "display_name": "Voucher",
       "route": "/voucher",
       "add": "/add-voucher",

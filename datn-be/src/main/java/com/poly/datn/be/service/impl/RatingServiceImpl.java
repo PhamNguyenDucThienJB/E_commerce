@@ -152,8 +152,8 @@ public class RatingServiceImpl implements RatingService {
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new AppException("Không tìm thấy sản phẩm", HttpStatus.NOT_FOUND));
         
-        // Lấy trực tiếp avg_rating từ bảng products thay vì tính toán từ bảng ratings
-        Double averageRating = product.getAvgRating() != null ? product.getAvgRating().doubleValue() : 0.0;
+        // Tính lại trung bình và tổng số đánh giá từ bảng ratings, đã loại bỏ admin replies qua query mới
+        Double averageRating = ratingRepo.getAverageRatingByProductId(productId);
         Long totalRatings = ratingRepo.countRatingsByProductId(productId);
         
         RespProductRatingDto dto = new RespProductRatingDto();

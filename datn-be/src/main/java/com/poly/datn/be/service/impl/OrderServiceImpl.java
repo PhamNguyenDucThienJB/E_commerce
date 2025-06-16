@@ -5,6 +5,7 @@ import com.poly.datn.be.domain.dto.ReqCancelOrder;
 import com.poly.datn.be.domain.dto.ReqOrderDto;
 import com.poly.datn.be.domain.dto.ReqUpdateOrderDto;
 import com.poly.datn.be.domain.dto.ReqUpdateStatusOrder;
+import com.poly.datn.be.domain.dto.ReqReturnOrder;
 import com.poly.datn.be.domain.exception.AppException;
 import com.poly.datn.be.domain.model.*;
 import com.poly.datn.be.entity.*;
@@ -134,6 +135,7 @@ public class OrderServiceImpl implements OrderService {
         if (orderStatus == null) {
             return orderRepo.findAll(pageable);
         }
+        System.out.println("Loading orders with status ID: " + id);
         return orderRepo.findOrderByOrderStatus_Id(id, pageable);
     }
 
@@ -453,6 +455,91 @@ public class OrderServiceImpl implements OrderService {
                 voucher.setIsActive(Boolean.TRUE);
                 voucherService.saveVoucher(voucher);
             }
+            return orderRepo.save(order);
+        }
+    }
+
+    @Override
+    @Transactional
+    public Order returnOrder(ReqReturnOrder reqReturnOrder) {
+        Order order = getByOrderId(reqReturnOrder.getId());
+        
+        // Check if this is a customer request for return or admin approval/rejection
+        if (reqReturnOrder.getIsApproved() == null) {
+            // Customer requesting return
+            if (!order.getOrderStatus().getId().equals(OrderStatusConst.ORDER_STATUS_SUCCESS)) {
+                throw new AppException("Chỉ có thể hoàn trả sau khi đơn hàng đã giao thành công.");
+            }
+            
+            // Set status to waiting for return confirmation
+            OrderStatus waitingReturnStatus = orderStatusService.getById(OrderStatusConst.ORDER_STATUS_WAITING_RETURN);
+            if (waitingReturnStatus == null) {
+                throw new AppException("Trạng thái chờ xác nhận hoàn trả không tồn tại.");
+            }
+            order.setOrderStatus(waitingReturnStatus);
+            order.setDescription(reqReturnOrder.getDescription());
+            order.setModifyDate(LocalDate.now());
+            
+            Notification notification = new Notification();
+            notification.setRead(false);
+            notification.setDeliver(false);
+            notification.setType(2);
+            notification.setContent(String.format("Đơn hàng %s đang yêu cầu hoàn trả", order.getId()));
+            notification.setOrder(order);
+            notificationService.createNotification(notification);
+            
+            return orderRepo.save(order);
+        } else {
+            // Admin approving or rejecting return
+            if (!order.getOrderStatus().getId().equals(OrderStatusConst.ORDER_STATUS_WAITING_RETURN)) {
+                throw new AppException("Đơn hàng không ở trạng thái chờ xác nhận hoàn trả.");
+            }
+            
+            if (reqReturnOrder.getIsApproved()) {
+                // Admin approves return
+                OrderStatus returnStatus = orderStatusService.getById(OrderStatusConst.ORDER_STATUS_RETURN);
+                if (returnStatus == null) {
+                    throw new AppException("Trạng thái hoàn trả không tồn tại.");
+                }
+                order.setOrderStatus(returnStatus);
+                
+                // Update product stock
+                for (OrderDetail detail : order.getOrderDetails()) {
+                    Attribute attribute = detail.getAttribute();
+                    attribute.setStock(attribute.getStock() + detail.getQuantity());
+                    attributeService.save(attribute);
+                }
+                
+                Notification notification = new Notification();
+                notification.setRead(false);
+                notification.setDeliver(false);
+                notification.setType(2);
+                notification.setContent(String.format("Đơn hàng %s đã được chấp nhận hoàn trả", order.getId()));
+                notification.setOrder(order);
+                notificationService.createNotification(notification);
+            } else {
+                // Admin rejects return
+                OrderStatus rejectStatus = orderStatusService.getById(OrderStatusConst.ORDER_STATUS_REJECT_RETURN);
+                if (rejectStatus == null) {
+                    throw new AppException(OrderStatusConst.ORDER_STATUS_REJECT_RETURN_MESSAGE);
+                }
+                order.setOrderStatus(rejectStatus);
+                
+                // If admin provided a reason, update the description
+                if (reqReturnOrder.getDescription() != null && !reqReturnOrder.getDescription().isEmpty()) {
+                    order.setDescription(reqReturnOrder.getDescription());
+                }
+                
+                Notification notification = new Notification();
+                notification.setRead(false);
+                notification.setDeliver(false);
+                notification.setType(2);
+                notification.setContent(String.format("Yêu cầu hoàn trả đơn hàng %s đã bị từ chối", order.getId()));
+                notification.setOrder(order);
+                notificationService.createNotification(notification);
+            }
+            
+            order.setModifyDate(LocalDate.now());
             return orderRepo.save(order);
         }
     }

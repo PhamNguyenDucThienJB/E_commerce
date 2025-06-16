@@ -28,6 +28,11 @@ tbody > tr:hover {
     color: var(--txt-black);
 }
 
+/* Ensure links in table rows stay legible when hovered */
+tbody tr:hover a:hover {
+    color: var(--txt-color);
+}
+
 .table__pagination {
     display: flex;
     width: 100%;

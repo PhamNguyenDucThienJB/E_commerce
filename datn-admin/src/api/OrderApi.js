@@ -97,6 +97,25 @@ export const updateCancel = (data) =>{
     return Instance.post(url, data);
 }
 
+export const returnOrder = (data) =>{
+    const url = `/api/site/order/return`;
+    return Instance.post(url, data);
+}
+
+export const approveReturnOrder = (data) => {
+    // Set isApproved to true for approval
+    data.isApproved = true;
+    const url = `/api/site/order/return`;
+    return Instance.post(url, data);
+}
+
+export const rejectReturnOrder = (data) => {
+    // Set isApproved to false for rejection
+    data.isApproved = false;
+    const url = `/api/site/order/return`;
+    return Instance.post(url, data);
+}
+
 export const reportAmountCategory = (year, month) =>{
     const url = `/api/admin/order/amount-category-month?year=${year}&month=${month}`;
     return Instance.get(url);

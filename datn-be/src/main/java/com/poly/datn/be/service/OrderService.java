@@ -4,6 +4,7 @@ import com.poly.datn.be.domain.dto.ReqCancelOrder;
 import com.poly.datn.be.domain.dto.ReqOrderDto;
 import com.poly.datn.be.domain.dto.ReqUpdateOrderDto;
 import com.poly.datn.be.domain.dto.ReqUpdateStatusOrder;
+import com.poly.datn.be.domain.dto.ReqReturnOrder;
 import com.poly.datn.be.domain.model.AmountMonth;
 import com.poly.datn.be.domain.model.AmountYear;
 import com.poly.datn.be.domain.model.CountOrder;
@@ -47,6 +48,7 @@ public interface OrderService {
     Order successOrder(ReqUpdateStatusOrder reqUpdateStatusOrder);
     Order cancelOrder(ReqUpdateStatusOrder reqUpdateStatusOrder);
     Order cancelOrder(ReqCancelOrder reqCancelOrder);
+    Order returnOrder(ReqReturnOrder reqReturnOrder);
     void deleteOrderByCode(String code);
     void deleteOrderById(Long id);
 }
