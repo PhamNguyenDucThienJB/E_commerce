@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useHistory } from "react-router-dom";
-import { getAllOrder, cancelOrder } from "../api/OrderApi";
+import { getAllOrder, cancelOrder, returnOrder } from "../api/OrderApi";
 import { getAllOrderStatus } from "../api/OrderStatusApi";
 import { Button, Form } from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
@@ -18,6 +18,7 @@ const Order = (props) => {
   const [showFouth, setShowFouth] = useState(false);
   const [description, setDescription] = useState(null);
   const [reason, setReason] = useState(null);
+  const RETURN_STATUS_ID = 6;
   const history = useHistory();
 
   const handleCloseFouth = () => {
@@ -33,18 +34,18 @@ const Order = (props) => {
     });
   };
   var rows = new Array(total).fill(0).map((zero, index) => (
-    <li
-      className={page === index + 1 ? "page-item active" : "page-item"}
-      key={index}
-    >
-      <button
-        className="page-link"
-        style={{ borderRadius: 50 }}
-        onClick={() => onChangePage(index + 1)}
+      <li
+          className={page === index + 1 ? "page-item active" : "page-item"}
+          key={index}
       >
-        {index + 1}
-      </button>
-    </li>
+        <button
+            className="page-link"
+            style={{ borderRadius: 50 }}
+            onClick={() => onChangePage(index + 1)}
+        >
+          {index + 1}
+        </button>
+      </li>
   ));
 
   const onChangePage = (page) => {
@@ -59,22 +60,37 @@ const Order = (props) => {
   const confirmUpdateCancel = () => {
     const data = {
       id: obj.orderId,
-      description: `${reason} - ${description}`,
+      description: reason || "Hoàn trả đơn hàng"
     };
 
-    cancelOrder(data)
-      .then(() => {
-        toast.success("Cập nhật thành công.");
-        setStatus(obj.statusId);
-        setPage(1);
-        getAllOrderByStatus(obj.statusId)
-          .then((res) => {
-            setOrder(res.data.content);
-            setTotal(res.data.totalPages);
-          })
-          .catch((error) => console.log(error));
-      })
-      .catch((error) => toast.error(error.response.data.Errors));
+    console.log("Sending data:", data, "Status:", obj.statusId === RETURN_STATUS_ID ? "Return" : "Cancel");
+
+    const action = obj.statusId === RETURN_STATUS_ID ? returnOrder : cancelOrder;
+    action(data)
+        .then(() => {
+          const successMessage = obj.statusId === RETURN_STATUS_ID
+              ? "Đơn hàng đã được đánh dấu hoàn trả thành công. Vui lòng đợi xác nhận từ cửa hàng."
+              : "Hủy đơn hàng thành công.";
+
+          toast.success(successMessage);
+
+          // Reload trang sau khi hủy/hoàn trả để hiển thị đúng trạng thái
+          setTimeout(() => {
+            setStatus(obj.statusId === RETURN_STATUS_ID ? 0 : obj.statusId);
+            setPage(1);
+            getAllOrderByStatus(obj.statusId === RETURN_STATUS_ID ? 0 : obj.statusId)
+                .then((res) => {
+                  setOrder(res.data.content);
+                  setTotal(res.data.totalPages);
+                })
+                .catch((error) => console.log(error));
+          }, 1000);
+        })
+        .catch((error) => {
+          console.error("Error in cancel/return order:", error);
+          const errMsg = error.response?.data?.Errors || "Có lỗi xảy ra khi xử lý yêu cầu.";
+          toast.error(errMsg);
+        });
 
     setReason(null);
     setDescription(null);
@@ -101,15 +117,15 @@ const Order = (props) => {
   const onLoad = () => {
     if (props.user) {
       getAllOrder(props.user.id, status, page, 8)
-        .then((res) => {
-          setOrder(res.data.content);
-          setTotal(res.data.totalPages);
-        })
-        .catch((error) => console.log(error.response.data.Errors));
+          .then((res) => {
+            setOrder(res.data.content);
+            setTotal(res.data.totalPages);
+          })
+          .catch((error) => console.log(error.response?.data?.Errors));
 
       getAllOrderStatus()
-        .then((resp) => setOrderStatus(resp.data))
-        .catch((error) => console.log(error.response.data.Errors));
+          .then((resp) => setOrderStatus(resp.data))
+          .catch((error) => console.log(error.response.data.Errors));
 
       props.changeHeaderHandler(5);
     } else {
@@ -120,12 +136,16 @@ const Order = (props) => {
   const getAllOrderByStatus = (value) => {
     setPage(1);
     setStatus(value);
-    getAllOrder(props.user.id, value, page, 8)
-      .then((res) => {
-        setOrder(res.data.content);
-        setTotal(res.data.totalPages);
-      })
-      .catch((error) => console.log(error.response.data.Errors));
+    return getAllOrder(props.user.id, value, page, 8)
+        .then((res) => {
+          setOrder(res.data.content);
+          setTotal(res.data.totalPages);
+          return res;
+        })
+        .catch((error) => {
+          console.log(error.response?.data?.Errors);
+          throw error;
+        });
   };
 
   // Hàm tiện ích để kiểm tra xem đơn hàng đã giao hay chưa
@@ -153,52 +173,57 @@ const Order = (props) => {
     }
   };
 
+  // Placeholder for return functionality when order is delivered
+  const handleReturnOrder = (orderId) => {
+    handleShowFouth(orderId, RETURN_STATUS_ID);
+  };
+
   return (
-    <div>
-      <div className="col-12">
-        <div className="container-fluid welcome mb-5 mt-2">
-          <div className="col-10 offset-1 text mini-card">
-            <p className="text-danger text-center" style={{ fontSize: "34px" }}>
-              Đơn hàng của bạn
-            </p>
-          </div>
-          <div className="row col-12 mb-5">
-            <div className="col-12 mb-3 mt-3 mini-card">
-              <div className="form-check form-check-inline mr-5">
-                <input
-                  className="form-check-input"
-                  type="radio"
-                  name="inlineRadioOptions"
-                  value="0"
-                  onChange={(event) => getAllOrderByStatus(event.target.value)}
-                  checked={status == 0}
-                />
-                <label className="form-check-label">Tất cả</label>
-              </div>
-              {orderStatus &&
-                orderStatus.map((item, index) => (
-                  <div
-                    className="form-check form-check-inline mr-5 ml-5"
-                    key={index}
-                  >
-                    <input
+      <div>
+        <div className="col-12">
+          <div className="container-fluid welcome mb-5 mt-2">
+            <div className="col-10 offset-1 text mini-card">
+              <p className="text-danger text-center" style={{ fontSize: "34px" }}>
+                Đơn hàng của bạn
+              </p>
+            </div>
+            <div className="row col-12 mb-5">
+              <div className="col-12 mb-3 mt-3 mini-card">
+                <div className="form-check form-check-inline mr-5">
+                  <input
                       className="form-check-input"
                       type="radio"
                       name="inlineRadioOptions"
-                      value={item.id}
-                      onChange={(event) =>
-                        getAllOrderByStatus(event.target.value)
-                      }
-                      checked={status == item.id}
-                    />
-                    <label className="form-check-label" htmlFor="inlineRadio2">
-                      {item.name}
-                    </label>
-                  </div>
-                ))}
-            </div>
-            <table className="table table-striped table-bordered mt-2 text-center">
-              <thead>
+                      value="0"
+                      onChange={(event) => getAllOrderByStatus(event.target.value)}
+                      checked={status == 0}
+                  />
+                  <label className="form-check-label">Tất cả</label>
+                </div>
+                {orderStatus &&
+                    orderStatus.map((item, index) => (
+                        <div
+                            className="form-check form-check-inline mr-5 ml-5"
+                            key={index}
+                        >
+                          <input
+                              className="form-check-input"
+                              type="radio"
+                              name="inlineRadioOptions"
+                              value={item.id}
+                              onChange={(event) =>
+                                  getAllOrderByStatus(event.target.value)
+                              }
+                              checked={status == item.id}
+                          />
+                          <label className="form-check-label" htmlFor="inlineRadio2">
+                            {item.name}
+                          </label>
+                        </div>
+                    ))}
+              </div>
+              <table className="table table-striped table-bordered mt-2 text-center">
+                <thead>
                 <tr>
                   <th scope="col">Đơn hàng</th>
                   <th scope="col">Ngày tạo</th>
@@ -206,148 +231,169 @@ const Order = (props) => {
                   <th scope="col">Tình trạng vận chuyển</th>
                   <th scope="col">Tổng tiền</th>
                   <th scope="col">Đánh giá</th>
-                  <th scope="col">Hủy</th>
+                  <th scope="col">Hủy/Hoàn hàng</th>
                 </tr>
-              </thead>
-              <tbody>
+                </thead>
+                <tbody>
                 {order &&
-                  order.map((item, index) => (
-                    <tr key={index}>
-                      <th scope="row">
-                        <h6 className="card-title mt-2 bolder">
-                          <NavLink to={`/order/detail/${item.encodeUrl}`} exact>
-                            #{item.id}
-                          </NavLink>
-                        </h6>
-                      </th>
-                      <td>
-                        <h6 className="card-title mt-2 bolder">
-                          {item.modifyDate}
-                        </h6>
-                      </td>
-                      <td>
-                        {item.isPending ? (
-                          <h6 className="card-title mt-2 bolder text-success">
-                            Đã thanh toán
-                          </h6>
-                        ) : (
-                          <h6 className="card-title mt-2 bolder text-danger">
-                            Chưa thanh toán
-                          </h6>
-                        )}
-                      </td>
-                      <td>
-                        <h6 className="card-title mt-2 bolder">
-                          {item.orderStatus.name}
-                        </h6>
-                      </td>
-                      <td>
-                        <h6 className="card-title mt-2 bolder">
-                          {item.total.toLocaleString()} ₫
-                        </h6>
-                      </td>
-                      <td>
-                        {console.log("Trạng thái đơn hàng:", item.orderStatus.name)}
-                        {isDelivered(item.orderStatus) && (
-                          <button
-                            className="btn btn-primary"
-                            onClick={() => handleRateProducts(item.id, item.orderStatus)}
-                          >
-                            <i className="fa fa-star text-warning" aria-hidden="true"></i> Đánh giá
-                          </button>
-                        )}
-                      </td>
-                      <td>
-                        <button
-                          className="btn btn-light"
-                          onClick={() => handleShowFouth(item.id, 5)}
-                        >
-                          <i
-                            className="fa fa-ban text-danger"
-                            aria-hidden="true"
-                          ></i>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-            <nav aria-label="navigation" className="col-4 offset-5">
-              <ul className="pagination">
-                <li className={page == 1 ? "page-item disabled" : "page-item"}>
-                  <button
-                    className="page-link"
-                    style={{ borderRadius: 50 }}
-                    onClick={() => onChangePage(1)}
-                  >{`<<`}</button>
-                </li>
-                {rows}
-                <li
-                  className={page == total ? "page-item disabled" : "page-item"}
-                >
-                  <button
-                    className="page-link"
-                    style={{ borderRadius: 50 }}
-                    onClick={() => onChangePage(total)}
+                    order.map((item, index) => (
+                        <tr key={index}>
+                          <th scope="row">
+                            <h6 className="card-title mt-2 bolder">
+                              <NavLink to={`/order/detail/${item.encodeUrl}`} exact>
+                                #{item.id}
+                              </NavLink>
+                            </h6>
+                          </th>
+                          <td>
+                            <h6 className="card-title mt-2 bolder">
+                              {item.modifyDate}
+                            </h6>
+                          </td>
+                          <td>
+                            {item.isPending ? (
+                                <h6 className="card-title mt-2 bolder text-success">
+                                  Đã thanh toán
+                                </h6>
+                            ) : (
+                                <h6 className="card-title mt-2 bolder text-danger">
+                                  Chưa thanh toán
+                                </h6>
+                            )}
+                          </td>
+                          <td>
+                            <h6 className="card-title mt-2 bolder">
+                              {/* Safely render order status, fallback to 'Đã hoàn trả' if null */}
+                              {item.orderStatus?.name ?? "Đã hoàn trả"}
+                            </h6>
+                          </td>
+                          <td>
+                            <h6 className="card-title mt-2 bolder">
+                              {item.total.toLocaleString()} ₫
+                            </h6>
+                          </td>
+                          <td>
+                            {console.log("Trạng thái đơn hàng:", item.orderStatus?.name)}
+                            {isDelivered(item.orderStatus) && (
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => handleRateProducts(item.id, item.orderStatus)}
+                                >
+                                  <i className="fa fa-star text-warning" aria-hidden="true"></i> Đánh giá
+                                </button>
+                            )}
+                          </td>
+                          <td>
+                            {item.orderStatus?.name === "Chờ xác nhận" && (
+                                <button
+                                    className="btn btn-light"
+                                    onClick={() => handleShowFouth(item.id, 5)}
+                                >
+                                  <i className="fa fa-ban text-danger" aria-hidden="true"></i>
+                                </button>
+                            )}
+                            {item.orderStatus?.name === "Đã giao" && (
+                                <button
+                                    className="btn btn-light"
+                                    onClick={() => handleReturnOrder(item.id)}
+                                >
+                                  <i className="fa fa-undo text-primary" aria-hidden="true"></i> Hoàn trả
+                                </button>
+                            )}
+                          </td>
+                        </tr>
+                    ))}
+                </tbody>
+              </table>
+              <nav aria-label="navigation" className="col-4 offset-5">
+                <ul className="pagination">
+                  <li className={page == 1 ? "page-item disabled" : "page-item"}>
+                    <button
+                        className="page-link"
+                        style={{ borderRadius: 50 }}
+                        onClick={() => onChangePage(1)}
+                    >{`<<`}</button>
+                  </li>
+                  {rows}
+                  <li
+                      className={page == total ? "page-item disabled" : "page-item"}
                   >
-                    {" "}
-                    {`>>`}
-                  </button>
-                </li>
-              </ul>
-            </nav>
+                    <button
+                        className="page-link"
+                        style={{ borderRadius: 50 }}
+                        onClick={() => onChangePage(total)}
+                    >
+                      {" "}
+                      {`>>`}
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
           </div>
         </div>
-      </div>
-      <Modal show={showFouth} onHide={handleCloseFouth}>
-        <Modal.Header closeButton>
-          <Modal.Title style={{ textAlign: "center" }}>
-            Xác nhận cập nhật?
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Alert variant="danger">
-            <Alert.Heading>Hủy đơn hàng</Alert.Heading>
-            <hr />
-            <Form.Label style={{ marginRight: 30, marginBottom: 10 }}>
-              Lí do hủy đơn
-            </Form.Label>
-            <Form.Select
-              style={{ height: 40, width: 420, marginBottom: 20 }}
-              onChange={(e) => reasonHandler(e.target.value)}
-            >
-              <option value={null}></option>
-              <option value="Đặt trùng">Đặt trùng</option>
-              <option value="Thêm bớt sản phẩm">Thêm bớt sản phẩm</option>
-              <option value="Gojek">Không còn nhu cầu</option>
-              <option value="AhaMove">Lí do khác</option>
-            </Form.Select>
-            <Form>
+        <Modal show={showFouth} onHide={handleCloseFouth}>
+          <Modal.Header closeButton>
+            <Modal.Title style={{ textAlign: "center" }}>
+              Xác nhận cập nhật?
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Alert variant={obj.statusId === RETURN_STATUS_ID ? "primary" : "danger"}>
+              <Alert.Heading>{obj.statusId === RETURN_STATUS_ID ? "Hoàn trả đơn hàng" : "Hủy đơn hàng"}</Alert.Heading>
+              <hr />
               <Form.Label style={{ marginRight: 30, marginBottom: 10 }}>
-                Mô tả
+                {obj.statusId === RETURN_STATUS_ID ? "Lí do hoàn trả" : "Lí do hủy đơn"}
               </Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                onChange={(e) => descriptionHandler(e.target.value)}
-              />
-            </Form>
-          </Alert>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="danger"
-            onClick={confirmUpdateCancel}
-            disabled={!reason || !description}
-          >
-            Xác nhận
-          </Button>
-          <Button variant="primary" onClick={handleCloseFouth}>
-            Đóng
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </div>
+              <Form.Select
+                  style={{ height: 40, width: 420, marginBottom: 20 }}
+                  onChange={(e) => reasonHandler(e.target.value)}
+              >
+                <option value="">Chọn lý do</option>
+                {obj.statusId === RETURN_STATUS_ID ? (
+                    <>
+                      <option value="Sản phẩm bị lỗi">Sản phẩm bị lỗi</option>
+                      <option value="Sản phẩm không đúng mô tả">Sản phẩm không đúng mô tả</option>
+                      <option value="Sản phẩm không vừa">Sản phẩm không vừa</option>
+                      <option value="Lý do khác">Lý do khác</option>
+                    </>
+                ) : (
+                    <>
+                      <option value="Đặt trùng">Đặt trùng</option>
+                      <option value="Thêm bớt sản phẩm">Thêm bớt sản phẩm</option>
+                      <option value="Không còn nhu cầu">Không còn nhu cầu</option>
+                      <option value="Lý do khác">Lý do khác</option>
+                    </>
+                )}
+              </Form.Select>
+              {obj.statusId !== RETURN_STATUS_ID && (
+                  <Form>
+                    <Form.Label style={{ marginRight: 30, marginBottom: 10 }}>
+                      Mô tả
+                    </Form.Label>
+                    <Form.Control
+                        as="textarea"
+                        rows={3}
+                        onChange={(e) => descriptionHandler(e.target.value)}
+                    />
+                  </Form>
+              )}
+            </Alert>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+                variant="danger"
+                onClick={confirmUpdateCancel}
+                disabled={obj.statusId === RETURN_STATUS_ID ? !reason : (!reason || !description)}
+            >
+              Xác nhận
+            </Button>
+            <Button variant="primary" onClick={handleCloseFouth}>
+              Đóng
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
   );
 };
 
