@@ -1,6 +1,7 @@
 package com.poly.datn.be.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.Collection;
 
+@JsonIgnoreProperties({"attributes"})
 @Entity
 @Table(name = "products")
 @Data

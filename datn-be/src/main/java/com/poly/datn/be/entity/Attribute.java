@@ -1,6 +1,7 @@
 package com.poly.datn.be.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -37,7 +38,7 @@ public class Attribute {
     private LocalDate modifyDate;
     @ManyToOne
     @JoinColumn(name = "product_id")
-    @JsonIgnore
+    @JsonIgnoreProperties({"attributes"})
     private Product product;
     @OneToMany(mappedBy = "attribute")
     @JsonIgnore

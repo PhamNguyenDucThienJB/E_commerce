@@ -749,34 +749,16 @@ const OrderDetail = (props) => {
             </thead>
             <tbody>
               {orderDetail && orderDetail.map((item, index) => {
-                // Xác định product ID
-                let productId = null;
-                const attributeId = item?.attribute?.id;
-                
-                if (attributeId) {
-                  // 1. Sử dụng productInfo nếu có
-                  if (item.productInfo && item.productInfo.productId) {
-                    productId = item.productInfo.productId;
-                  } 
-                  // 2. Sử dụng mapping từ attributeId -> productId
-                  else if (attributeMapping[attributeId]) {
-                    productId = attributeMapping[attributeId];
-                  }
-                  // 3. Sử dụng product.id từ attribute object nếu có
-                  else if (item?.attribute?.product?.id) {
-                    productId = item.attribute.product.id;
-                    // Thêm mapping mới tìm được vào localStorage để sử dụng sau này
-                    addToMapping(attributeId, productId);
-                  }
-                  // 4. Log lỗi để debug
-                  else {
-                    console.warn(`Không thể xác định productId cho attributeId=${attributeId}. Sử dụng attributeId làm mã sản phẩm.`);
-                  }
-                }
-                
-                // Nếu không tìm được productId, sử dụng attributeId làm mã sản phẩm
-                // Luôn hiển thị productId nếu có, nếu không mới hiển thị attributeId
-                const displayProductId = productId || (attributeId ? `ATT-${attributeId}` : 'N/A');
+                // Xác định attributeId
+                const attributeId = item.attribute?.id;
+                // Tính giá hiển thị: nếu chỉ 1 item thì dùng tổng từ order.total, ngược lại dùng sellPrice
+                const priceDisplay = orderDetail.length === 1 ? total : item.sellPrice;
+                // Tính tổng hiển thị: nếu chỉ 1 item thì dùng tổng từ order.total, ngược lại tính sellPrice*quantity
+                const totalDisplay = orderDetail.length === 1 ? total : item.sellPrice * item.quantity;
+                // Xác định product ID: ưu tiên API, sau đó productInfo, sau đó attributeMapping
+                const productId = item.attribute?.product?.id || item.productInfo?.productId || (attributeId ? attributeMapping[attributeId] : null);
+                // Hiển thị productId hoặc fallback là attribute ID
+                const displayProductId = productId || attributeId || 'N/A';
                 
                 return (
                   <tr key={index}>
@@ -798,11 +780,9 @@ const OrderDetail = (props) => {
                     </th>
                     <td>{item?.attribute?.name || productNames[item?.attribute?.id] || item?.attribute?.product?.name || 'N/A'}</td>
                     <td>{item?.attribute?.size || 'N/A'}</td>
-                    <td>{item?.sellPrice?.toLocaleString?.() || 0}₫</td>
+                    <td>{(priceDisplay || 0).toLocaleString()}₫</td>
                     <td>{item?.quantity || 0}</td>
-                    <td>
-                      {((item?.sellPrice || 0) * (item?.quantity || 0)).toLocaleString()}₫
-                    </td>
+                    <td>{(totalDisplay || 0).toLocaleString()}₫</td>
                     {order?.orderStatus && isDelivered(order.orderStatus) && (
                       <td>
                         <Button
