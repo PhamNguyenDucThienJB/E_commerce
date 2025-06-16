@@ -72,12 +72,7 @@ const Checkout = (props) => {
         setCart(resp.data.filter((item) => props.buy.includes(item.id + "")));
         const result = resp.data
           .filter((item) => props.buy.includes(item.id + ""))
-          .reduce(
-            (price, item) =>
-              price +
-              (item.price * item.quantity * (100 - item.discount)) / 100,
-            0
-          );
+          .reduce((price, item) => price + item.lastPrice * item.quantity, 0);
         setAmount(result);
       });
       const flag = {
@@ -93,11 +88,7 @@ const Checkout = (props) => {
       );
       const result = props.cartItem
         .filter((item) => props.buy.includes(item.id + ""))
-        .reduce(
-          (price, item) =>
-            price + (item.price * item.quantity * (100 - item.discount)) / 100,
-          0
-        );
+        .reduce((price, item) => price + item.lastPrice * item.quantity, 0);
       setAmount(result);
     }
     props.changeHeaderHandler(3);
@@ -285,18 +276,11 @@ const Checkout = (props) => {
                       {item.name} - {item.size}
                     </h6>
                     <small className="text-muted">
-                      {(
-                        (item.price * (100 - item.discount)) /
-                        100
-                      ).toLocaleString()}{" "}
-                      x {item.quantity}
+                      {item.lastPrice.toLocaleString()} x {item.quantity}
                     </small>
                   </div>
                   <strong>
-                    {(
-                      ((item.price * (100 - item.discount)) / 100) *
-                      item.quantity
-                    ).toLocaleString()}
+                    {(item.lastPrice * item.quantity).toLocaleString()}
                   </strong>
                 </li>
               ))}
