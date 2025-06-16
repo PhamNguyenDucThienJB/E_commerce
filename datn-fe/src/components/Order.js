@@ -206,12 +206,14 @@ const Order = (props) => {
                   <th scope="col">Tình trạng vận chuyển</th>
                   <th scope="col">Tổng tiền</th>
                   <th scope="col">Đánh giá</th>
-                  <th scope="col">Hủy</th>
+                  <th scope="col">Hủy / Trả hàng</th>
                 </tr>
               </thead>
               <tbody>
-                {order &&
-                  order.map((item, index) => (
+               {order &&
+                  [...order]
+                    .sort((a, b) => new Date(b.modifyDate) - new Date(a.modifyDate)) // Sắp xếp giảm dần
+                    .map((item, index) => (
                     <tr key={index}>
                       <th scope="row">
                         <h6 className="card-title mt-2 bolder">
