@@ -84,16 +84,18 @@ const SignIn = (props) => {
                   <h2 className="fw-bold mb-4 text-uppercase text-white">Đăng nhập</h2>
                   <form className="needs-validation" onSubmit={handleSubmit(signInHandler)}>
                       <div className="form-outline form-white mb-4">
-                        <input
-                          type="text"
-                          id="typeEmailX"
-                          className="form-control form-control-lg"
-                          placeholder=" "
-                          {...register("username", {
-                            required: true,
-                            pattern: /^\s*\S+.*/,
-                          })}
-                        />
+                      <input
+                              type="text"
+                              className="form-control form-control-lg"
+                              placeholder="Nhập email hoặc username"
+                              {...register("identifier", {
+                                required: "Vui lòng nhập email hoặc username",
+                                validate: (value) =>
+                                  /^\s*\S+@\S+\.\S+$/.test(value) || /^\s*\S{3,}$/.test(value) || // Email hoặc username có ít nhất 3 ký tự
+                                  "Email không hợp lệ hoặc username quá ngắn",
+                              })}
+                            />
+
                         <label className="form-label" htmlFor="typeEmailX">
                           Tài khoản
                         </label>
