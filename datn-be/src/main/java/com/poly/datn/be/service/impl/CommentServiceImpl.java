@@ -163,16 +163,18 @@ public class CommentServiceImpl implements CommentService {
         dto.setUpdatedAt(comment.getUpdatedAt());
         dto.setProductId(comment.getProduct().getId());
         dto.setProductName(comment.getProduct().getName());
-        dto.setAccountId(comment.getAccount().getId());
-        dto.setUsername(comment.getAccount().getUsername());
-        
-        // Lấy fullname và avatar từ AccountDetail nếu có
-        AccountDetail accountDetail = accountDetailRepo.findAccountDetailByAccount_Id(comment.getAccount().getId());
-        if (accountDetail != null) {
-            dto.setFullname(accountDetail.getFullname()); // Lấy fullname từ AccountDetail
-            // Gán avatar từ accountDetail nếu có thuộc tính này
-            // dto.setAccountAvatar(accountDetail.getAvatar());
-            // Hiện tại AccountDetail không có avatar nên bỏ qua
+        // Chỉ gán thông tin tài khoản nếu có
+        if (comment.getAccount() != null) {
+            dto.setAccountId(comment.getAccount().getId());
+            dto.setUsername(comment.getAccount().getUsername());
+            // Lấy fullname và avatar từ AccountDetail nếu có
+            AccountDetail accountDetail = accountDetailRepo.findAccountDetailByAccount_Id(comment.getAccount().getId());
+            if (accountDetail != null) {
+                dto.setFullname(accountDetail.getFullname()); // Lấy fullname từ AccountDetail
+                // Gán avatar từ accountDetail nếu có thuộc tính này
+                // dto.setAccountAvatar(accountDetail.getAvatar());
+                // Hiện tại AccountDetail không có avatar nên bỏ qua
+            }
         }
         
         if (comment.getParent() != null) {
