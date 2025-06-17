@@ -17,8 +17,10 @@ const SignIn = (props) => {
   // Xử lý đăng nhập tài khoản bình thường
   const signInHandler = (data) => {
     setLoadingLogin(true);
+    const isEmail = data.account.includes("@");
     const loginData = {
-      username: data.username,
+      username: isEmail ? null : data.account,
+      email: isEmail ? data.account : null,
       password: data.password,
       admin: false
     };
@@ -36,7 +38,7 @@ const SignIn = (props) => {
         history.push("/");
       })
       .catch((error) => {
-        toast.error(error.response?.data?.Errors || "Đăng nhập thất bại");
+        toast.error(error.response?.data?.Errors || "Email hoặc mật khẩu sai !!!");
       })
       .finally(() => {
         setLoadingLogin(false);
@@ -88,16 +90,16 @@ const SignIn = (props) => {
                           type="text"
                           id="typeEmailX"
                           className="form-control form-control-lg"
-                          placeholder=" "
-                          {...register("username", {
-                            required: true,
-                            pattern: /^\s*\S+.*/,
-                          })}
-                        />
+                          placeholder="Nhập Email hoặc Username"
+                         {...register("account", {
+                              required: true,
+                              pattern: /^\s*\S+.*/, // không để trống hoặc toàn dấu cách
+                            })}
+                          />
                         <label className="form-label" htmlFor="typeEmailX">
                           Tài khoản
                         </label>
-                        {errors.username && (
+                        {errors.account && (
                         <div className="alert alert-danger mt-2" role="alert">
                             Tài khoản không hợp lệ!
                           </div>
@@ -108,7 +110,7 @@ const SignIn = (props) => {
                           type="password"
                           id="typePasswordX"
                           className="form-control form-control-lg"
-                        placeholder=" "
+                        placeholder="Nhập mật khẩu"
                           {...register("password", {
                             required: true,
                             pattern: /^\s*\S+.*/,
