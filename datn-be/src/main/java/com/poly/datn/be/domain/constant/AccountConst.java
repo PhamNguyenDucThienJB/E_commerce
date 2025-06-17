@@ -19,7 +19,7 @@ public class AccountConst {
     public static final String API_ACCOUNT_FORGOT_PASSWORD= "/api/site/forgot-password";
     /* Account constant*/
     public static final String ACCOUNT_MSG_ERROR_NOT_EXIST = "Tài khoản không tồn tại!";
-    public static final String ACCOUNT_MSG_ERROR_SIGN_IN = "Đăng nhập thất bại!";
+    public static final String ACCOUNT_MSG_ERROR_SIGN_IN = "Địa chỉ Email hoặc mật khẩu không đúng!";
     public static final String ACCOUNT_MSG_ERROR_LOCK = "Tài khoản đã bị khóa!";
     public static final String ACCOUNT_MSG_ERROR_ACCESS_DENIED = "Bạn không có quyền truy cập!";
 }

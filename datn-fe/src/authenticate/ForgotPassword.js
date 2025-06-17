@@ -9,9 +9,11 @@ const ForgotPassword = () => {
   const history = useHistory();
 
   const signInHandler = (data) => {
-    const userFlag = {
-      username: data.username
-    };
+    const isEmail = data.account.includes("@");
+    const userFlag = isEmail
+      ? { email: data.account }
+      : { username: data.account };
+
     forgotPassword(userFlag)
       .then((res) => {
         toast.success(res.data);
@@ -49,11 +51,12 @@ const ForgotPassword = () => {
                           type="text"
                           id="typeEmailX"
                           className="form-control form-control-lg"
-                          {...register("username", {
-                            required: true,
-                            pattern: /^\s*\S+.*/,
-                          })}
-                        />
+                          placeholder="Vui lòng nhập Email"
+                         {...register("account", {
+                              required: true,
+                              pattern: /^\s*\S+.*/, // không để trống hoặc toàn dấu cách
+                            })}
+                          />
                         <label className="form-label" htmlFor="typeEmailX">
                           Tài khoản
                         </label>

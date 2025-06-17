@@ -44,49 +44,60 @@ public class AuthenticateApi {
     public LoginResponse authenticateUser(@RequestBody LoginRequest loginRequest) {
         try {
             System.out.println("Login request received: " + loginRequest);
-            String username;
-            
-            // Simplified login logic - directly use email and ignore validation
+            String username = null;
+            Authentication authentication = null;
+
+            // email → thử xác thực trực tiếp bằng email như username
             if (loginRequest.getEmail() != null) {
-                // Just try to authenticate directly with email as username
                 try {
-                    Authentication authentication = authenticationManager.authenticate(
-                            new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+                    authentication = authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    loginRequest.getEmail(), loginRequest.getPassword()
+                            )
                     );
-                    
-                    if (loginRequest.getAdmin() != null && loginRequest.getAdmin()) {
-                        if(authentication.getAuthorities().toArray()[0].toString().equals(RoleConst.ROLE_CUSTOMER)) {
+
+                    //  Kiểm tra quyền admin
+                    if (Boolean.TRUE.equals(loginRequest.getAdmin())) {
+                        if (authentication.getAuthorities().stream()
+                                .anyMatch(auth -> RoleConst.ROLE_CUSTOMER.equals(auth.getAuthority()))) {
                             throw new AppException(AccountConst.ACCOUNT_MSG_ERROR_ACCESS_DENIED);
                         }
                     }
-                    
+
+                    //  Thành công thì set context + trả token
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                     String jwt = tokenProvider.generateToken((CustomUserDetails) authentication.getPrincipal());
                     return new LoginResponse(jwt);
                 } catch (Exception e) {
-                    // If direct authentication fails, try to find username by email
+                    //  thất bại → tìm username tương ứng  email để fallback
                     username = accountService.findUsernameByEmail(loginRequest.getEmail());
                     if (username == null) {
                         throw new AppException("Email không tồn tại hoặc chưa được xác minh!");
                     }
                 }
-            } else if (loginRequest.getUsername() != null) {
+            }
+
+            // không có email hoặc fallback từ email sang username
+            if (username == null && loginRequest.getUsername() != null) {
                 username = loginRequest.getUsername();
-            } else {
+            }
+
+            if (username == null) {
                 throw new AppException("Vui lòng cung cấp tên đăng nhập hoặc email!");
             }
 
-            // Authenticate with username
-            Authentication authentication = authenticationManager.authenticate(
+            //xác thực bằng username
+            authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, loginRequest.getPassword())
             );
-            
-            if(loginRequest.getAdmin() != null && loginRequest.getAdmin()){
-                if(authentication.getAuthorities().toArray()[0].toString().equals(RoleConst.ROLE_CUSTOMER)){
+
+            if (Boolean.TRUE.equals(loginRequest.getAdmin())) {
+                if (authentication.getAuthorities().stream()
+                        .anyMatch(auth -> RoleConst.ROLE_CUSTOMER.equals(auth.getAuthority()))) {
                     throw new AppException(AccountConst.ACCOUNT_MSG_ERROR_ACCESS_DENIED);
                 }
             }
-            
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = tokenProvider.generateToken((CustomUserDetails) authentication.getPrincipal());
             return new LoginResponse(jwt);
@@ -96,6 +107,7 @@ public class AuthenticateApi {
             throw new AppException(AccountConst.ACCOUNT_MSG_ERROR_SIGN_IN);
         }
     }
+
 
     @GetMapping(AccountConst.API_ACCOUNT_FIND_ME)
     public ResponseEntity<?> getUser(@RequestParam("token") String token) {
