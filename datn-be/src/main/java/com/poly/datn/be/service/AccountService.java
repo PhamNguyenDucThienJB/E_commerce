@@ -43,4 +43,7 @@ public interface AccountService {
     AccountDetail update(ReqUpdateAccountDetailDto reqUpdateAccountDetailDto);
 
     String findUsernameByEmail(String email);
+
+//    Account findAccountByEmail(String email);
+
 }

@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
@@ -50,5 +51,8 @@ public interface AccountRepo extends JpaRepository<Account, Long> {
             "inner join AccountDetail ad on a.id = ad.account.id " +
             "inner join Role r on a.role.id = r.id where a.role.name = ?1")
     List<RespAccountDto> findAccountByRoleName(String name, Pageable pageable);
+    @Query("SELECT ad.account FROM AccountDetail ad WHERE ad.email = :email")
+    Account findAccountByEmail(@Param("email") String email);
+
 
 }

@@ -265,10 +265,10 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     @Override
     public void forgotPassword(ReqForgotPasswordDto reqForgotPasswordDto) throws MessagingException {
-        // 1. Tìm account
-        Account account = this.accountRepo.findAccountByUsername(reqForgotPasswordDto.getUsername());
+        // 1. Tìm account by Email
+        Account account = this.accountRepo.findAccountByEmail(reqForgotPasswordDto.getEmail());
         if (account == null) {
-            throw new AppException("Username không tồn tại");
+            throw new AppException("Email không tồn tại");
         }
 
         // 2. Sinh mật khẩu mới (plain text)
@@ -320,6 +320,11 @@ public class AccountServiceImpl implements AccountService {
         AccountDetail detail = accountDetailService.findAccountDetailByEmail(email);
         return detail != null ? detail.getAccount().getUsername() : null;
     }
+//
+//    @Override
+//    public Account findAccountByEmail(String email) {
+//        return null;
+//    }
 
 
     //    public void sendOtpToEmail(String email) throws MessagingException {
