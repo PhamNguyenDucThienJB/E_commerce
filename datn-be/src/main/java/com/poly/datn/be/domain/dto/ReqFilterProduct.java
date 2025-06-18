@@ -18,4 +18,8 @@ public class ReqFilterProduct {
     private List<Long> brand;
     private Double min;
     private Double max;
+
+
+    private String sortField;      // VD: "avg_rating", "sale_id", "view"
+    private String sortDirection;  // "ASC" hoặc "DESC"
 }

@@ -48,6 +48,23 @@ public class ProductApi {
         Pageable pageable = PageRequest.of(reqFilterProduct.getPage() - 1, reqFilterProduct.getCount(), sort);
         return new ResponseEntity<>(productService.filterAllProducts(reqFilterProduct.getCategory(), reqFilterProduct.getBrand(), reqFilterProduct.getMin(), reqFilterProduct.getMax(), pageable), HttpStatus.OK);
     }
+    @PostMapping("/api/site/product/filter-advanced")
+    public ResponseEntity<?> filterProductsAdvanced(@RequestBody ReqFilterProduct req) {
+        String sortField = Optional.ofNullable(req.getSortField()).orElse("modifyDate");
+        String sortDirection = Optional.ofNullable(req.getSortDirection()).orElse("DESC");
+
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortField);
+
+        Pageable pageable = PageRequest.of(req.getPage() - 1, req.getCount(), sort);
+
+        return ResponseEntity.ok(
+                productService.filterAllProducts(
+                        req.getCategory(), req.getBrand(), req.getMin(), req.getMax(), pageable
+                )
+        );
+    }
+
     @GetMapping(ProductConst.API_PRODUCT_GET_ALL_BY_BRAND)
     public ResponseEntity<?> getAllProductByBrand(@RequestParam("page") Optional<Integer> page,
                                                   @RequestParam("size") Optional<Integer> size,
