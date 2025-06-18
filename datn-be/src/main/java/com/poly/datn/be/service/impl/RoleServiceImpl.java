@@ -13,6 +13,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Role findById(Long id) {
-        return roleRepo.findById(id).get();
+        return roleRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Role với ID: " + id));
     }
+
 }

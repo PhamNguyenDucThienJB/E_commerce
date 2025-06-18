@@ -5,3 +5,4 @@ import com.poly.datn.be.entity.Role;
 public interface RoleService {
     Role findById(Long id);
 }
+
