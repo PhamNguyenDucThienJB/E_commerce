@@ -1,48 +1,36 @@
 .gradient-custom {
-    /* fallback for old browsers */
-    background: #5a3f93;
-    
-    /* Chrome 10-25, Safari 5.1-6 */
-    background: -webkit-linear-gradient(to right, rgba(90, 63, 147, 1), rgba(45, 95, 207, 1));
-    
-    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-    background: linear-gradient(to right, rgba(90, 63, 147, 1), rgba(45, 95, 207, 1));
-}
+  /* fallback for old browsers */
+  background: #5a3f93;
 
-.card {
-  border-radius: 1rem !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
-  background-color: rgba(33, 37, 41, 0.9) !important;
-  border: none !important;
-}
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: -webkit-linear-gradient(to right, rgba(90, 63, 147, 1), rgba(45, 95, 207, 1));
 
-.card-body {
-  padding: 2.5rem !important;
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(to right, #f2f2f2, #e6e6e6);
 }
 
 .form-control {
-  background-color: rgba(255, 255, 255, 0.1);
-  border: none;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
   border-radius: 4px;
   padding: 12px 15px;
-  color: #fff;
+  color: #000;
   margin-bottom: 15px;
   transition: all 0.3s ease;
 }
 
 .form-control:focus {
-  background-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 0 2px rgba(82, 168, 236, 0.2);
-  color: #fff;
+  background-color: #fff;
+  border-color: #999;
+  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.4);
+  color: #000;
 }
 
 .form-control::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: #aaa;
 }
 
 .form-label {
-  color: rgba(255, 255, 255, 0.7) !important;
   margin-top: 0.5rem;
   transform-origin: left;
   transition: all 0.3s ease;
@@ -51,35 +39,35 @@
 .form-outline input:focus ~ label,
 .form-outline input:not(:placeholder-shown) ~ label {
   transform: translateY(-1.5rem) scale(0.85);
-  color: rgba(255, 255, 255, 0.9) !important;
+  color: rgba(0, 0, 0, 0.9) !important;
 }
 
 .btn-login {
   width: 100%;
   padding: 12px;
   border-radius: 4px;
-  font-weight: 500;
+  font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  background-color: #007bff;
+  background-color: #fbbf24;
   border: none;
-  color: white;
+  color: #000;
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .btn-login:hover {
-  background-color: #0069d9;
+  background-color: #facc15;
   transform: translateY(-2px);
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
 .btn-login:active {
   transform: translateY(1px);
+  background-color: #eab308;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* CSS cho các nút đăng nhập xã hội */
 .social-login-container {
   display: flex;
   justify-content: center;
@@ -130,7 +118,6 @@
   background-color: #166fe5;
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(24, 119, 242, 0.3);
-  color: white;
 }
 
 .btn-facebook:active {
@@ -156,7 +143,6 @@
   transform: translateY(1px) scale(1.12);
 }
 
-/* Thêm hiệu ứng ripple khi click */
 @keyframes ripple {
   to {
     transform: scale(2);
@@ -177,7 +163,6 @@
   animation: ripple 0.6s linear;
 }
 
-/* Cải thiện divider */
 .divider-section {
   margin: 30px 0;
   position: relative;
@@ -185,8 +170,8 @@
 }
 
 .social-divider {
-  background-color: rgba(33, 37, 41, 0.9);
-  color: rgba(255, 255, 255, 0.8);
+  background-color: #fff !important;
+  color: #666 !important;
   display: inline-block;
   padding: 0 20px;
   font-size: 14px;
@@ -203,11 +188,10 @@
   top: 50%;
   width: 100px;
   height: 1px;
-  background: linear-gradient(90deg, 
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.3) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  background: linear-gradient(90deg,
+  rgba(0, 0, 0, 0) 0%,
+  rgba(0, 0, 0, 0.3) 50%,
+  rgba(0, 0, 0, 0) 100%);
 }
 
 .social-divider::before {
@@ -218,36 +202,41 @@
   left: 100%;
 }
 
-/* Ẩn nút Facebook gốc */
 .facebook-login-btn {
   display: none;
 }
 
-.text-muted {
-  color: rgba(255, 255, 255, 0.6) !important;
+.text-muted,
+.register-link,
+.text-white-50,
+.social-divider,
+.card-body,
+.card-body * {
+  color: #000 !important;
 }
 
 .register-link {
-  color: rgba(255, 255, 255, 0.7) !important;
   font-weight: 600;
   transition: all 0.3s ease;
 }
 
-.register-link:hover {
-  color: white !important;
-  text-decoration: none !important;
+.register-link:hover,
+.login-links a:hover {
+  color: #000 !important;
+  text-decoration: underline !important;
 }
 
-/* Animation */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.card {
-  animation: fadeIn 0.6s ease-out;
-    }
-/* Brand heading phía trên form */
 .brand-title {
   font-size: 28px;
   font-weight: 700;
@@ -259,7 +248,10 @@
   font-weight: 300;
 }
 
-/* Nền trắng */
-.gradient-custom {
-  background: linear-gradient(to right, #f2f2f2, #e6e6e6);
+.card {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  backdrop-filter: none !important;
 }
