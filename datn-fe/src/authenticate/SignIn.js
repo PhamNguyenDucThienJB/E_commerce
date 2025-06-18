@@ -81,10 +81,11 @@ const SignIn = (props) => {
             <div className="col-12 col-md-8 col-lg-6 col-xl-5">
               <div className="card">
                 <div className="card-body p-5 text-center">
+                  <h1 className="brand-title text-white">ART <span>Doodle</span></h1>
                   <h2 className="fw-bold mb-4 text-uppercase text-white">Đăng nhập</h2>
                   <form className="needs-validation" onSubmit={handleSubmit(signInHandler)}>
-                      <div className="form-outline form-white mb-4">
-                        <input
+                    <div className="form-outline form-white mb-4">
+                      <input
                           type="text"
                           id="typeEmailX"
                           className="form-control form-control-lg"
@@ -93,68 +94,68 @@ const SignIn = (props) => {
                             required: true,
                             pattern: /^\s*\S+.*/,
                           })}
-                        />
-                        <label className="form-label" htmlFor="typeEmailX">
-                          Tài khoản
-                        </label>
-                        {errors.username && (
-                        <div className="alert alert-danger mt-2" role="alert">
+                      />
+                      <label className="form-label" htmlFor="typeEmailX">
+                        Tài khoản
+                      </label>
+                      {errors.username && (
+                          <div className="alert alert-danger mt-2" role="alert">
                             Tài khoản không hợp lệ!
                           </div>
-                        )}
-                      </div>
-                      <div className="form-outline form-white mb-4">
-                        <input
+                      )}
+                    </div>
+                    <div className="form-outline form-white mb-4">
+                      <input
                           type="password"
                           id="typePasswordX"
                           className="form-control form-control-lg"
-                        placeholder=" "
+                          placeholder=" "
                           {...register("password", {
                             required: true,
                             pattern: /^\s*\S+.*/,
                           })}
-                        />
-                        <label className="form-label" htmlFor="typePasswordX">
-                          Mật khẩu
-                        </label>
-                        {errors.password && (
-                        <div className="alert alert-danger mt-2" role="alert">
+                      />
+                      <label className="form-label" htmlFor="typePasswordX">
+                        Mật khẩu
+                      </label>
+                      {errors.password && (
+                          <div className="alert alert-danger mt-2" role="alert">
                             Mật khẩu không hợp lệ!
                           </div>
-                        )}
-                      </div>
+                      )}
+                    </div>
                     <div className="text-end mb-4">
                       <NavLink to="/forgot-password" className="text-white-50 small">
-                          Quên mật khẩu?
+                        Quên mật khẩu?
                       </NavLink>
                     </div>
-                      <button
+                    <button
                         type="submit"
-                      className="btn btn-login"
-                      disabled={loadingLogin}
+                        className="btn btn-login"
+                        disabled={loadingLogin}
                     >
                       {loadingLogin ? (
-                        <div className="spinner-border text-light" role="status">
-                          <span className="visually-hidden">Loading...</span>
-                        </div>
+                          <div className="spinner-border text-light" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
                       ) : (
-                        "Đăng nhập"
+                          "Đăng nhập"
                       )}
-                      </button>
-                    </form>
+                    </button>
+                  </form>
                   <div className="divider-section">
                     <div className="social-divider">hoặc</div>
                   </div>
                   <div className="social-login-container">
-                    <FacebookLoginButton userHandler={props.userHandler} />
+                    <FacebookLoginButton userHandler={props.userHandler}/>
                     <div className="google-btn-container">
                       <GoogleLogin
-                        onSuccess={handleGoogleSuccess}
-                        onError={handleGoogleFailure}
-                        useOneTap
-                        type="icon"
-                        shape="circle"
-                        theme="filled_blue"
+                          onSuccess={handleGoogleSuccess}
+                          onError={handleGoogleFailure}
+                          useOneTap
+                          type="icon"
+                          shape="circle"
+                          theme="filled_blue"
                       />
                     </div>
                   </div>
