@@ -617,9 +617,18 @@ const Order = () => {
                                         className="form-check-input"
                                         type="radio"
                                         name={`status-${item.id}`}
-                                        checked={item.orderStatus.id === 6 ||
-                                                item.description?.toLowerCase().includes("hoàn trả")}
+                                        checked={item.orderStatus.id === 6}
                                         value="6"
+                                        readOnly
+                                      />
+                                    </div>
+                                    <div className="form-check" data-status="Đã từ chối">
+                                      <input
+                                        className="form-check-input"
+                                        type="radio"
+                                        name={`status-${item.id}`}
+                                        checked={item.orderStatus.id === 8}
+                                        value="8"
                                         readOnly
                                       />
                                     </div>

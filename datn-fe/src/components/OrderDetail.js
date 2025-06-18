@@ -829,6 +829,22 @@ const OrderDetail = (props) => {
             </div>
 
           </div>
+          {/* Show rejection reason if order was rejected */}
+          {order?.orderStatus?.id === 8 && (
+            <div className="row mb-5">
+              <div className="col text ">
+                <p
+                  className="display-4 text-primary"
+                  style={{ fontSize: "24px" }}
+                >
+                  Lý do từ chối
+                </p>
+                <p className="text-danger" style={{ fontWeight: "bolder" }}>
+                  {order.description || "Không có lý do"}
+                </p>
+              </div>
+            </div>
+          )}
           <div className="row">
              <div className="col text ">
               <p

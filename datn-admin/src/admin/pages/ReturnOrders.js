@@ -61,38 +61,25 @@ const ReturnOrders = () => {
   }, [page]);
 
   const loadReturnOrders = () => {
-    // Load all orders with status 7 (Waiting for return confirmation)
-    getAllOrderAndPagination(7, page, 20)
+    // Load all orders and filter return-related statuses (waiting, returned, rejected)
+    getAllOrderAndPagination(0, 1, 1000)
       .then((res) => {
-        console.log("Returned orders:", res.data.content);
-        
-        // Thêm logic để lọc các đơn hàng hoàn trả dựa trên mô tả
         const allOrders = res.data.content || [];
-        
-        // Lọc tất cả đơn hàng có description chứa từ "hoàn trả" nếu không có trạng thái là 7
-        getAllOrderAndPagination(0, 1, 100)
-          .then((allRes) => {
-            const allOrdersData = allRes.data.content || [];
-            const returnedOrdersWithDescription = allOrdersData.filter(
-              order => order.description && 
-                      order.description.toLowerCase().includes("hoàn trả") &&
-                      (!order.orderStatus || order.orderStatus.id !== 7)
-            );
-            
-            // Kết hợp cả hai kết quả
-            const combinedOrders = [...allOrders, ...returnedOrdersWithDescription];
-            
-            setOrders(combinedOrders);
-            setTotal(Math.max(res.data.totalPages, 1));
-          })
-          .catch(error => {
-            console.log("Error loading all orders:", error);
-            setOrders(allOrders);
-            setTotal(res.data.totalPages);
-          });
+        // Keep orders with status ID 7 (waiting), 6 (returned), or 8 (rejected)
+        const returnOrders = allOrders.filter(
+          (order) =>
+            order.orderStatus && [6, 7, 8].includes(order.orderStatus.id)
+        );
+        // Paginate client-side
+        const pageSize = 20;
+        const totalPages = Math.max(Math.ceil(returnOrders.length / pageSize), 1);
+        setTotal(totalPages);
+        const startIdx = (page - 1) * pageSize;
+        const pageSlice = returnOrders.slice(startIdx, startIdx + pageSize);
+        setOrders(pageSlice);
       })
       .catch((error) => {
-        console.log("Error loading returned orders:", error);
+        console.error("Error loading return orders:", error);
         toast.error("Lỗi tải đơn hàng hoàn trả");
       });
   };
@@ -254,6 +241,7 @@ const ReturnOrders = () => {
                       <th scope="col">Thanh toán</th>
                       <th scope="col">Tổng tiền</th>
                       <th scope="col">Lý do hoàn trả</th>
+                      <th scope="col">Trạng thái</th>
                       <th scope="col">Thao tác</th>
                     </tr>
                   </thead>
@@ -281,6 +269,16 @@ const ReturnOrders = () => {
                           </th>
                           <th>{item && item.total ? item.total.toLocaleString() : 0} ₫</th>
                           <th>{item && item.description ? item.description : "Không có lý do"}</th>
+                          {/* Trạng thái badge */}
+                          <th>
+                            {item.orderStatus && (
+                              <Badge
+                                type={{ 6: 'success', 7: 'warning', 8: 'danger' }[item.orderStatus.id]}
+                                content={{ 6: 'Đã hoàn trả', 7: 'Chờ xác nhận', 8: 'Đã từ chối' }[item.orderStatus.id]}
+                              />
+                            )}
+                          </th>
+                          {/* Nút chi tiết */}
                           <th>
                             <button
                               className="btn btn-primary"
