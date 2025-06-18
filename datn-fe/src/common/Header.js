@@ -1,4 +1,5 @@
 import React ,{ useState } from "react";
+import "../static/css/search.css";
 import "../static/css/style.css";
 import logo from "../static/images/logo.jpg";
 import { NavLink, useHistory } from "react-router-dom";
