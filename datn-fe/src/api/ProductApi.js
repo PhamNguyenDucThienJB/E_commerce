@@ -39,3 +39,6 @@ export const getBestSellingProducts = (page, size) =>{
     const url = `/api/site/product/best-sellers?page=${page}&size=${size}`;
     return Instance.get(url);
 };
+export const filterAdvancedProducts = (data) => {
+  return Instance.post("/api/site/product/filter-advanced", data);
+};

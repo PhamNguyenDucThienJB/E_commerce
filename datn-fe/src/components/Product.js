@@ -4,6 +4,13 @@ import { getProductRatingStatistics } from "../api/RatingApi";
 import { NavLink } from "react-router-dom";
 import "./sidebar/sidebar.css";
 import "./Home.css";
+import {
+  filterAdvancedProducts,
+  getBestSellingProducts,
+  getMostViewedProducts,
+} from "../api/ProductApi";
+
+
 
 const brands = [
   {
@@ -21,26 +28,7 @@ const brands = [
     value: "3",
     icon: "bx bx-category-alt",
   },
-  // {
-  //   display_name: "ADIDAS",
-  //   value: "4",
-  //   icon: "bx bx-category-alt",
-  // },
-  // {
-  //   display_name: "FILA",
-  //   value: "5",
-  //   icon: "bx bx-category-alt",
-  // },
-  // {
-  //   display_name: "CONVERSE",
-  //   value: "6",
-  //   icon: "bx bx-category-alt",
-  // },
-  // {
-  //   display_name: "LI-NING",
-  //   value: "7",
-  //   icon: "bx bx-category-alt",
-  // },
+
 ];
 const categories = [
   {
@@ -58,38 +46,13 @@ const categories = [
     value: "3",
     icon: "bx bx-category-alt",
   },
-  // {
-  //   display_name: "Giày đá bóng",
-  //   value: "4",
-  //   icon: "bx bx-category-alt",
-  // },
-  // {
-  //   display_name: "Giày thời trang",
-  //   value: "5",
-  //   icon: "bx bx-category-alt",
-  // },
-  // {
-  //   display_name: "Giày bóng rổ",
-  //   value: "6",
-  //   icon: "bx bx-category-alt",
-  // },
-  // {
-  //   display_name: "Giày chạy bộ",
-  //   value: "7",
-  //   icon: "bx bx-category-alt",
-  // },
+
 ];
 
 const prices = [
-  // {
-  //   display_name: "Dưới 1 triệu",
-  //   value: "0",
-  //   icon: "bx bx-category-alt",
-  //   min: 0,
-  //   max: 1000000,
-  // },
+
   {
-    display_name: "5000.000- 1.000.000",
+    display_name: "500.000- 1.000.000",
     value: "0",
     icon: "bx bx-category-alt",
     min: 500000,
@@ -123,6 +86,9 @@ const defaultBrand = [1, 2, 3, 4, 5, 6, 7];
 const defaultCategory = [1, 2, 3, 4, 5, 6, 7];
 
 const Product = (props) => {
+  const [sortField, setSortField] = useState("modifyDate");
+  const [sortDirection, setSortDirection] = useState("DESC");
+
   const [products, setProducts] = useState([]);
   const [ratingsStats, setRatingsStats] = useState({});
   const [page, setPage] = useState(1);
@@ -133,7 +99,15 @@ const Product = (props) => {
   const [price, setPrice] = useState([]);
   const [min, setMin] = useState(0);
   const [max, setMax] = useState(10000000);
+  const [mostViewedProducts, setMostViewedProducts] = useState([]);
+  const [bestSellingProducts, setBestSellingProducts] = useState([]);
+  const [mostViewedPage, setMostViewedPage] = useState(1);
+  const [mostViewedTotal, setMostViewedTotal] = useState(0);
+  const [bestSellingPage, setBestSellingPage] = useState(1);
+  const [bestSellingTotal, setBestSellingTotal] = useState(0);
+  const [filteredProducts, setFilteredProducts] = useState([]);
 
+ 
   var rows = new Array(total).fill(0).map((zero, index) => (
     <li
       className={page === index + 1 ? "page-item active" : "page-item"}
@@ -145,30 +119,100 @@ const Product = (props) => {
     </li>
   ));
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    if (category.length === 0 && brand.length === 0 && price.length === 0) {
-      getAllProducts(page, count, true).then((response) => {
-        setProducts(response.data.content);
-        setTotal(response.data.totalPages);
-      });
-    } else {
-      console.log(false);
+useEffect(() => {
+  window.scrollTo(0, 0);
+  const size = count;
+
+  const fetchProducts = async () => {
+    let response;
+
+    // Có lọc? → Luôn dùng filterProducts
+    const hasFilter = category.length > 0 || brand.length > 0 || price.length > 0;
+
+    if (hasFilter) {
       const data = {
-        page: page,
-        count: count,
+        page,
+        count: size,
         category: category.length > 0 ? category : defaultCategory,
         brand: brand.length > 0 ? brand : defaultBrand,
-        min: min,
-        max: max,
+        min,
+        max,
+        sortField,
+        sortDirection,
+        
       };
-      filterProducts(data).then((resp) => {
-        setProducts(resp.data.content);
-        setTotal(resp.data.totalPages);
-      });
+
+      // Dùng field sort riêng cho filter
+      switch (sortField) {
+        case "price-asc":
+          data.sort = "price,ASC";
+          break;
+        case "discount":
+          data.sort = "discount,DESC";
+          break;
+        case "latest":
+        default:
+          data.sort = "modifyDate,DESC";
+          break;
+      }
+
+      response = await filterProducts(data);
+    } else {
+      // Không lọc → Gọi API tương ứng
+      switch (sortField) {
+        case "best-seller":
+          response = await getBestSellingProducts(page, size, "DESC");
+          break;
+        case "most-viewed":
+          response = await getMostViewedProducts(page, size);
+          break;
+        case "price-asc":
+          response = await getAllProducts(page, size, true, "price", "DESC");
+          break;
+        case "discount":
+          response = await getAllProducts(page, size, true, "discount", "DESC");
+          break;
+        case "rating":
+          const dataRating = {
+            page,
+            count: size,
+            category: category.length > 0 ? category : defaultCategory,
+            brand: brand.length > 0 ? brand : defaultBrand,
+            min,
+            max,
+            sortField: "avgRating", // chính xác tên field trong entity Java
+            sortDirection: "DESC",  // hoặc "ASC" nếu muốn
+          };
+          response = await filterAdvancedProducts(dataRating);
+          break;
+           case "salerating":
+          const datasale = {
+            page,
+            count: size,
+            category: category.length > 0 ? category : defaultCategory,
+            brand: brand.length > 0 ? brand : defaultBrand,
+            min,
+            max,
+            sortField: "sale", // chính xác tên field trong entity Java
+            sortDirection: "DESC",  // hoặc "ASC" nếu muốn
+          };
+          response = await filterAdvancedProducts(datasale);
+          break;
+        case "latest":
+        default:
+          response = await getAllProducts(page, size, true, "modifyDate", "DESC");
+          break;
+      }
     }
+
+    setProducts(response.data.content);
+    setTotal(response.data.totalPages);
     props.changeHeaderHandler(2);
-  }, [page, category, brand, price]);
+  };
+
+  fetchProducts();
+}, [page, category, brand, price, sortField]);
+
 
   useEffect(() => {
     if (products.length > 0) {
@@ -192,46 +236,42 @@ const Product = (props) => {
     setPage(page);
   };
 
-  const chooseCategoryHandler = (value) => {
-    const index = category.indexOf(value);
-    if (index > -1) {
-      setCategory(category.filter((i) => i !== value));
-    } else {
-      setCategory([...category, value]);
-    }
-    onChangePage(1);
-  };
+ const chooseCategoryHandler = (value) => {
+  if (category.includes(value)) {
+    // Nếu đang chọn rồi, bỏ chọn
+    setCategory([]);
+  } else {
+    // Chọn 1 giá trị duy nhất
+    setCategory([value]);
+  }
+  onChangePage(1);
+};
 
-  const chooseBrandHandler = (value) => {
-    const index = brand.indexOf(value);
-    if (index > -1) {
-      setBrand(brand.filter((i) => i !== value));
-    } else {
-      setBrand([...brand, value]);
-    }
-    onChangePage(1);
-  };
+const chooseBrandHandler = (value) => {
+  if (brand.includes(value)) {
+    setBrand([]);
+  } else {
+    setBrand([value]);
+  }
+  onChangePage(1);
+};
 
-  const choosePriceHandler = (value) => {
-    const index = price.indexOf(value);
-    let temp = [];
-    if (index > -1) {
-      temp = price.filter((i) => i !== value);
-      setPrice(price.filter((i) => i !== value));
-    } else {
-      temp = [...price, value];
-      setPrice([...price, value]);
-    }
-    if (temp.length > 0) {
-      temp.sort();
-      setMin(prices[temp[0]].min);
-      setMax(prices[temp[temp.length - 1]].max);
-    } else {
-      setMin(0);
-      setMax(10000000);
-    }
-    onChangePage(1);
-  };
+const choosePriceHandler = (value) => {
+  let temp = [];
+  if (price.includes(value)) {
+    temp = [];
+    setPrice([]);
+    setMin(0);
+    setMax(10000000);
+  } else {
+    temp = [value];
+    setPrice([value]);
+    setMin(prices[value].min);
+    setMax(prices[value].max);
+  }
+  onChangePage(1);
+};
+
 
   return (
     <div className="container-fluid py-4">
@@ -295,8 +335,27 @@ const Product = (props) => {
           <div className="product-section bg-white p-4 rounded">
             <div className="row mb-4">
               <div className="col-12">
-                <h2 className="section-title">Sản phẩm của chúng tôi</h2>
+             <div className="d-flex justify-content-between align-items-center">
+                <h2 className="section-title mb-0">Sản phẩm của chúng tôi</h2>
+               <select
+                  className="form-select w-auto mb-3"
+                  value={sortField}
+                  onChange={(e) => {
+                    setSortField(e.target.value);
+                    setPage(1); // reset trang
+                  }}
+                >
+                  <option value="latest">Mới nhất</option>
+                  <option value="best-seller">Bán chạy</option>
+                  <option value="most-viewed">Xem nhiều</option>
+                  <option value="salerating">Giảm giá nhiều</option>
+                  <option value="rating">Đánh Giá</option>
+                </select>
+
               </div>
+
+              </div>
+              
             </div>
             <div className="row d-flex flex-wrap">
               {products && products.map((item, index) => (
