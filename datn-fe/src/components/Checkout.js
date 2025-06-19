@@ -29,6 +29,7 @@ const Checkout = (props) => {
   const [paypalPaid, setPaypalPaid] = useState(false);
   const exchangeRate = 25000;
   const amountUSD = amount ? (amount / exchangeRate).toFixed(2) : 0;
+  const [processingPayment, setProcessingPayment] = useState(false);
 
 
 
@@ -265,6 +266,11 @@ const Checkout = (props) => {
             <span className="badge bg-primary rounded-pill">{cart.length}</span>
           </h4>
           <ul className="list-group mb-3">
+             <li className="list-group-item d-flex justify-content-between lh-sm bg-light fw-bold">
+                <div style={{ flex: 2 }}>Sản phẩm (Tên - Size)</div>
+                <div style={{ flex: 1, textAlign: "center" }}>Thành tiền</div>
+                <div style={{ flex: 1, textAlign: "center" }}>Hình ảnh</div>
+              </li>
             {cart &&
               cart.map((item, index) => (
                 <li
@@ -272,6 +278,7 @@ const Checkout = (props) => {
                   key={index}
                 >
                   <div>
+                   
                     <h6 className="my-0">
                       {item.name} - {item.size}
                     </h6>
@@ -282,6 +289,11 @@ const Checkout = (props) => {
                   <strong>
                     {(item.lastPrice * item.quantity).toLocaleString()}
                   </strong>
+                   <img style={{height: 150}}
+                        src={`http://localhost:8080/uploads/${item.image}`}
+                        alt={item.name}
+                        className="product-image"
+                      />
                 </li>
               ))}
             <li className="list-group-item d-flex justify-content-between bg-light">
@@ -550,7 +562,12 @@ const Checkout = (props) => {
         </div>
       </div>
               
-
+              {processingPayment && (
+                <>
+                  <div className="blur-overlay"></div>
+                  <div className="loading-message">Đang xử lý thanh toán...</div>
+                </>
+              )}
           <Modal show={showFirst} onHide={handleCloseFirst}>
             <Modal.Header closeButton>
               <Modal.Title style={{ textAlign: "center" }}>
@@ -560,7 +577,9 @@ const Checkout = (props) => {
             <Modal.Body>
               {obj.payment === "paypal" ? (
                 <PayPalScriptProvider options={{ "client-id": "AeZ36kQifDQpEoJVWEME3Qp6y01B0niaqboOYJBg3JN3IQUcKpAmfcfcEALa-A9OwHxYT873i-2M6enl" }}>
+                  
                   <PayPalButtons
+                  
                     createOrder={(data, actions) => {
                       return actions.order.create({
                         purchase_units: [
@@ -573,7 +592,9 @@ const Checkout = (props) => {
                         ],
                       });
                     }}
+                    
                     onApprove={async (data, actions) => {
+                      setProcessingPayment(true);
                       try {
                         const details = await actions.order.capture();
                         toast.success("Thanh toán PayPal thành công!");
@@ -606,9 +627,11 @@ const Checkout = (props) => {
                         history.push(`/order/detail/${resp.data.encodeUrl}`);
 
                       } catch (error) {
-                        toast.error("Lỗi khi tạo đơn hàng!");
-                        console.error(error);
-                      }
+                          toast.error("Lỗi khi tạo đơn hàng!");
+                          console.error(error);
+                        } finally {
+                          setProcessingPayment(false); // tắt overlay
+                        }
                     }}
                   />
                 </PayPalScriptProvider>
@@ -645,6 +668,7 @@ const Checkout = (props) => {
     </div>
   );
 };
+
 
 export default Checkout;
 

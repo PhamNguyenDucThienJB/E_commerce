@@ -44,7 +44,7 @@ const Search = (props) => {
                   </div>
                   <NavLink to={`/product-detail/${item.id}`}>
                     <img
-                      src={require(`../static/images/${item.image}`)}
+                     src={`http://localhost:8080/uploads/${item.image}`}
                       style={{ width: 150, height: 150 }}
                       alt="Product"
                       className="mini-card"

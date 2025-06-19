@@ -79,7 +79,7 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
     @Query("SELECT new com.poly.datn.be.domain.dto.ResponseProductDto(p.id, p.name, p.code, p.description, p.view, a.price, i.imageLink, p.brand.name, p.sale.discount, p.isActive) FROM Product p " +
             "join p.attributes a " +
             "join p.images i " +
-            "where a.size = :size and i.name = :name and p.isActive = true " +
+            "where a.size = :size and i.name = :name and p.isActive = true AND p.view >= 100 " +
             "order by p.view desc")
     Page<ResponseProductDto> getMostViewedProducts(@Param("size") String size,
                                                    @Param("name") String name,
@@ -96,4 +96,6 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
     Page<ResponseProductDto> getBestSellingProducts(@Param("size") String size,
                                                     @Param("name") String name,
                                                     Pageable pageable);
+
+
 }

@@ -369,7 +369,7 @@ const choosePriceHandler = (value) => {
                         </span>
                       )}
                       <img
-                        src={require(`../static/images/${item.image}`)}
+                        src={`http://localhost:8080/uploads/${item.image}`}
                         alt={item.name}
                         className="product-image"
                       />

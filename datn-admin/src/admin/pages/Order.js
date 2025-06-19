@@ -49,6 +49,8 @@ const Order = () => {
   const [description, setDescription] = useState(null);
   const [reason, setReason] = useState(null);
   const [shipDate, setShipDate] = useState(null);
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 2018 + 3 }, (_, i) => 2019 + i);
 
   const shipmentHandler = (value) => {
     console.log(value);
@@ -425,18 +427,17 @@ const Order = () => {
             </select>
           </div>
           <div className="col-sm-4 mt-2">
-            <select
+           <select
               className="form-control"
               onChange={(e) => changeYearHandler(e.target.value)}
               value={year}
             >
-              <option value="">
-                Chọn năm
-              </option>
-              <option value="2019">2019</option>
-              <option value="2021">2021</option>
-              <option value="2022">2022</option>
+              <option value="">Chọn năm</option>
+              {years.map((y) => (
+                <option key={y} value={y}>{y}</option>
+              ))}
             </select>
+
           </div>
           <div className="col-sm-4 mt-2">
             <select
@@ -459,6 +460,7 @@ const Order = () => {
           </div>
         </div>
         <div className="row">
+          <h3 style={{marginTop: 10}}>Từ: </h3>
           <div className="col-sm-4 mt-2">
             <input
               type="date"
@@ -469,8 +471,9 @@ const Order = () => {
               value={from}
             />
           </div>
-
+          <h3 style={{marginTop: 10}}>Đến: </h3>
           <div className="col-sm-4 mt-2">
+            
             <input
               type="date"
               name=""
