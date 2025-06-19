@@ -26,38 +26,37 @@ const Footer = () => {
             </div>
           </div>
         </div>
-        <footer>
-          <div className="container-fluid padding bg-light text-dark">
-            <div className="row text-center">
-              <div className="col-md-4">
-                <hr className="light" />
-                <p>Tư vấn mua hàng (Miễn phí)</p>
-                <p>1800 6601 (Nhánh 1)</p>
-                <p>Hỗ trợ kỹ thuật</p>
-                <p>1800 6601 (Nhánh 2)</p>
-              </div>
-              <div className="col-md-4">
-                <hr className="light" />
-                <h5>Giờ làm việc</h5>
-                <hr className="light" />
-                <p>Thứ hai-Chủ nhật: 8:00 - 21:00</p>
-              </div>
-              <div className="col-md-4">
-                <hr className="light" />
-                <h5>Hệ thống cửa hàng</h5>
-                <hr className="light" />
-                <p>Chính sách đổi trả</p>
-                <p>Chính sách trả góp</p>
-                <p>Hướng dẫn mua trả góp</p>
-              </div>
-              <div className="col-12">
-                <hr className="light-100" />
-                <h5>© 2024 - 2025 S&A (Sustainable fashion) </h5>
-              </div>
+      <footer>
+        <div className="container-fluid padding bg-light text-dark">
+          <div className="row text-center">
+            <div className="col-md-4">
+              <hr className="light"/>
+              <p>Tư vấn mua hàng (Miễn phí)</p>
+              <p>1800 6601 (Nhánh 1)</p>
+              <p>Hỗ trợ kỹ thuật</p>
+              <p>1800 6601 (Nhánh 2)</p>
+            </div>
+            <div className="col-md-4">
+              <hr className="light"/>
+              <h5>Giờ làm việc</h5>
+              <hr className="light"/>
+              <p>Thứ hai-Chủ nhật: 8:00 - 21:00</p>
+            </div>
+            <div className="col-md-4">
+              <hr className="light"/>
+              <h5>Hệ thống cửa hàng</h5>
+              <hr className="light"/>
+              <p>Chính sách đổi trả</p>
+              <p>Chính sách trả góp</p>
+              <p>Hướng dẫn mua trả góp</p>
             </div>
           </div>
-        </footer>
-      </div>
+        </div>
+        <div className="col-12 bg-dark text-white py-2 text-center">
+          <h5 className="mb-0">© 2024 - 2025 S&A (Sustainable fashion)</h5>
+        </div>
+      </footer>
+    </div>
   )
 }
 

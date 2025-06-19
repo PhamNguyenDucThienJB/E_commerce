@@ -267,3 +267,21 @@ hr.light {
   background-color: #333;
   margin: 15px auto 0;
 }
+.mini-card {
+  background-color: #fff9c4 !important; /* vàng nhạt */
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1); /* đổ bóng nhẹ */
+  border-radius: 6px;
+  padding: 5px 10px;
+}
+footer .container-fluid {
+  background-color: #fff9c4 !important; /* Màu vàng nhạt */
+  color: #333 !important;               /* Chữ đậm dễ đọc */
+  padding: 30px 10px;
+  border-top: 1px solid #e0e0e0;
+}
+footer h5 {
+  font-weight: bold;
+}
+footer hr.light, footer hr.light-100 {
+  border-top: 1px solid #ccc;
+}
