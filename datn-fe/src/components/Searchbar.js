@@ -27,7 +27,7 @@ const SearchBar = () => {
 
     const handleSelect = () => {
         setShowDropdown(false);
-        setKeyword(""); // hoặc giữ nguyên nếu muốn
+        setKeyword("");
     };
 
     return (
