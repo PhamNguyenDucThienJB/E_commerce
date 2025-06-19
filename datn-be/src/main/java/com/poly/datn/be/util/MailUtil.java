@@ -190,5 +190,46 @@ public class MailUtil {
         Transport.send(msg);
     }
 
+    public static void sendEmailChangeOTP(String toEmail, String otp, String type) throws MessagingException {
+        Properties props = new Properties();
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+
+        Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication("thienpham0712@gmail.com", "neoa yxdj dsme xzbf");
+            }
+        });
+
+        Message msg = new MimeMessage(session);
+        msg.setFrom(new InternetAddress("thienpham0712@gmail.com", false));
+        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+        
+        String title = type.equals("old") ? "Xác thực email hiện tại" : "Xác thực email mới";
+        String description = type.equals("old") ? 
+            "Bạn đang thực hiện đổi email. Vui lòng nhập mã OTP này để xác thực email hiện tại:" :
+            "Vui lòng nhập mã OTP này để xác thực email mới:";
+            
+        msg.setSubject("🔐 " + title + " - S&A Fashion");
+
+        String content = "<div style='font-family: Arial, sans-serif; max-width: 500px; padding: 20px; border: 1px solid #ddd; border-radius: 8px;'>"
+                + "<h3 style='text-align: center; color: #4CAF50;'>🔐 " + title + "</h3>"
+                + "<p>Xin chào,</p>"
+                + "<p>" + description + "</p>"
+                + "<div style='text-align: center; margin: 20px 0;'>"
+                + "    <span style='display: inline-block; background-color: #f0f0f0; padding: 15px 25px; font-size: 24px; color: #333; border-radius: 5px; letter-spacing: 3px; font-weight: bold;'>" + otp + "</span>"
+                + "</div>"
+                + "<p style='color: red; font-weight: bold; text-align: center;'>⚠️ Mã OTP có hiệu lực trong 10 phút</p>"
+                + "<p style='font-size: 14px; color: gray;'>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.</p>"
+                + "<hr style='border: none; border-top: 1px solid #eee;'/>"
+                + "<p style='font-size: 12px; color: #888;'>Email này được gửi tự động. Vui lòng không trả lời.</p>"
+                + "</div>";
+
+        msg.setContent(content, "text/html; charset=utf-8");
+        msg.setSentDate(new Date());
+        Transport.send(msg);
+    }
 
 }

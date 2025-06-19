@@ -25,6 +25,7 @@ import Chat from "../components/chat/Chat";
 import ForgotPassword from "../authenticate/ForgotPassword";
 import Profile from "../authenticate/Profile";
 import { getCartItemByAccountId } from "../api/CartApi";
+import { getMe } from "../api/AccountApi";
 
 import VerifyEmail from "../authenticate/VerifyEmail"; 
 import VerifyPage from "../authenticate/VerifyPage";
@@ -44,6 +45,23 @@ const UserLayOut = () => {
   const [keyword, setKeyword] = useState("");
   const [header, setHeader] = useState(1);
   const [user, setUser] = useState(null);
+
+  // Khôi phục user từ localStorage khi component mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token && !user) {
+      getMe(token)
+        .then((res) => {
+          setUser(res.data);
+        })
+        .catch((error) => {
+          console.log("Token không hợp lệ, xóa khỏi localStorage:", error);
+          localStorage.removeItem("token");
+          localStorage.removeItem("username");
+          localStorage.removeItem("password");
+        });
+    }
+  }, [user]);
 
   useEffect(() => {
     setCartItem([]);
