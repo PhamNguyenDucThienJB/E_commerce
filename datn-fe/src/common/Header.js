@@ -6,6 +6,8 @@ import { NavLink, useHistory } from "react-router-dom";
 import user_image from "../static/images/default.png";
 import Dropdown from "../admin/dropdown/Dropdown";
 import { toast } from "react-toastify";
+import SearchBar from "../components/Searchbar";
+
 
 const user_menu = [
   {
@@ -95,86 +97,71 @@ const handleCartUpdate = (items) => {
         <div className="collapse navbar-collapse col">
           <ul className="navbar-nav mini-ul">
             <li
-              className={
-                props.header === 1
-                  ? "nav-item mr-2  mini-item active"
-                  : "nav-item mr-2  mini-item"
-              }
+                className={
+                  props.header === 1
+                      ? "nav-item mr-2  mini-item active"
+                      : "nav-item mr-2  mini-item"
+                }
             >
               <NavLink className="nav-link" to="/" exact>
                 Trang chủ
               </NavLink>
             </li>
             <li
-              className={
-                props.header === 2
-                  ? "nav-item mr-2  mini-item active"
-                  : "nav-item mr-2  mini-item"
-              }
+                className={
+                  props.header === 2
+                      ? "nav-item mr-2  mini-item active"
+                      : "nav-item mr-2  mini-item"
+                }
             >
               <NavLink className="nav-link" to="/store" exact>
                 Sản phẩm
               </NavLink>
             </li>
-          
-           
+
+
             {props.user && (
-              <li
-                className={
-                  props.header === 5
-                    ? "nav-item mr-2  mini-item active"
-                    : "nav-item mr-2  mini-item"
-                }
-              >
-                <NavLink className="nav-link" to="/order" exact>
-                  Đơn hàng
-                </NavLink>
-              </li>
+                <li
+                    className={
+                      props.header === 5
+                          ? "nav-item mr-2  mini-item active"
+                          : "nav-item mr-2  mini-item"
+                    }
+                >
+                  <NavLink className="nav-link" to="/order" exact>
+                    Đơn hàng
+                  </NavLink>
+                </li>
             )}
             <li
-              className={
-                props.header === 4
-                  ? "nav-item mr-2  mini-item active"
-                  : "nav-item mr-2  mini-item"
-              }
+                className={
+                  props.header === 4
+                      ? "nav-item mr-2  mini-item active"
+                      : "nav-item mr-2  mini-item"
+                }
             >
               <NavLink className="nav-link" to="/blog" exact>
                 Chính sách
               </NavLink>
             </li>
             {props.user && (
-              <li
-              className={
-                props.header === 6
-                  ? "nav-item mr-2  mini-item active"
-                  : "nav-item mr-2  mini-item"
-              }
-            >
-              {/* <NavLink className="nav-link" to="/chat" exact>
+                <li
+                    className={
+                      props.header === 6
+                          ? "nav-item mr-2  mini-item active"
+                          : "nav-item mr-2  mini-item"
+                    }
+                >
+                  {/* <NavLink className="nav-link" to="/chat" exact>
                 Hỏi đáp
               </NavLink> */}
-            </li>
+                </li>
             )}
-            
+
           </ul>
-          <form
-            className="form-inline my-2 my-lg-0 mr-3"
-            onSubmit={(e) => submitHandler(e)}
-          >
-            <input
-              className="form-control mr-sm-2"
-              type="search"
-              aria-label="Search"
-              name="keyword"
-            />
-            <button>
-              <i
-                className="fa fa-search ml-1"
-                aria-hidden="true"
-                style={{ fontSize: "24px" }}
-              ></i>
-            </button>
-          </form>
+          <div className="form-inline my-2 my-lg-0 mr-3">
+            <SearchBar/>
+          </div>
           {/* {props.user && (
             <Dropdown
               customToggle={() => renderUserToggle(curr_user)}
@@ -189,31 +176,31 @@ const handleCartUpdate = (items) => {
               renderItems={(item, index) => renderUserMenu(item, index)}
             />
           )} */}
-          {props.user ?  <Dropdown
+          {props.user ? <Dropdown
               customToggle={() => renderUserToggle(curr_user)}
               contentData={user_menu}
               renderItems={(item, index) => renderUserMenu(item, index)}
-            /> :  <Dropdown
+          /> : <Dropdown
               customToggle={() => renderUserToggle(curr_user)}
               contentData={not_menu}
               renderItems={(item, index) => renderUserMenu(item, index)}
-            />}
-            <li
+          />}
+          <li
               className={
                 props.header === 3
-                  ? "nav-item mr-2 mini-item active position-relative"
-                  : "nav-item mr-2 mini-item position-relative"
+                    ? "nav-item mr-2 mini-item active position-relative"
+                    : "nav-item mr-2 mini-item position-relative"
               }
-            >
-              <NavLink className="nav-link position-relative" to="/cart" exact>
-                <i className="fa fa-shopping-cart fa-lg"></i>
-                {props.cartItems && props.cartItems.length > 0 && (
+          >
+            <NavLink className="nav-link position-relative" to="/cart" exact>
+              <i className="fa fa-shopping-cart fa-lg"></i>
+              {props.cartItems && props.cartItems.length > 0 && (
                   <span className="cart-badge">{props.cartItems.length}</span>
-                )}
-              </NavLink>
-            </li>      
+              )}
+            </NavLink>
+          </li>
         </div>
-            
+
       </nav>
     </div>
   );

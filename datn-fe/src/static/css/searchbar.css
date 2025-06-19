@@ -1,0 +1,41 @@
+/* Wrapper bao quanh ô tìm kiếm */
+.search-wrapper {
+    position: relative;
+    width: 250px;
+}
+
+/* Ô input tìm kiếm */
+.search-wrapper input {
+    background-color: white;
+    color: black;
+    font-size: 16px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+/* Dropdown danh sách gợi ý */
+.search-wrapper .list-group {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Item trong dropdown */
+.search-wrapper .list-group-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.search-wrapper .list-group-item:hover {
+    background-color: #f0f0f0;
+}
