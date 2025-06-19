@@ -185,7 +185,7 @@ const ProductDetail = (props) => {
         .forEach((imgName) => {
           const img = new Image();
           // require may return a module with default
-          const src = require(`../static/images/${imgName}`);
+          const src = `http://localhost:8080/uploads/${item.image}`;
           img.src = src.default || src;
           img.crossOrigin = 'Anonymous';
           img.onload = () => {
@@ -497,11 +497,12 @@ const ProductDetail = (props) => {
               <div className="row g-0">
                 <div className="col-md-5">
                   <img
-                    src={require(`../static/images/${displayImage || item.main}`)}
-                    className="img-fluid"
-                    style={{ width: "100%", height: "auto", objectFit: "contain" }}
-                    alt=""
-                  />
+                      src={`http://localhost:8080/uploads/${displayImage || item.main}`}
+                      className="img-fluid"
+                      style={{ width: "100%", height: "auto", objectFit: "contain" }}
+                      alt=""
+                    />
+
                 </div>
                 <div className="col-md-7">
                   <div className="ps-md-5">
@@ -549,7 +550,7 @@ const ProductDetail = (props) => {
                       </div>
                     </div>
                     <div className="mb-4 py-2">
-                      <label className="fw-bold mb-2 d-block">Màu sắc</label>
+                     <span className="fw-bold mb-2 d-block">Màu sắc</span>
                       <div className="d-flex mb-4">
                         {uniqueSwatches.map(({ imgName, color }, idx) => (
                           <div
@@ -682,7 +683,7 @@ const ProductDetail = (props) => {
                   .map((img, index) => (
                   <div className="col-md-2 col-4" key={index}>
                     <img
-                      src={require(`../static/images/${img}`)}
+                       src={`http://localhost:8080/uploads/${img}`}
                       alt="..."
                       className="img-thumbnail border-1"
                       style={{ width: "100%", height: "auto", objectFit: "cover", cursor: "pointer" }}
@@ -703,7 +704,7 @@ const ProductDetail = (props) => {
                         <div className="product-image" style={{ aspectRatio: '3/4' }}>
                           <NavLink to={`/product-detail/${item.id}`}>
                             <img
-                              src={require(`../static/images/${item.image}`)}
+                               src={`http://localhost:8080/uploads/${item.image}`}
                               alt={item.name}
                               className="hover-zoom"
                             />
