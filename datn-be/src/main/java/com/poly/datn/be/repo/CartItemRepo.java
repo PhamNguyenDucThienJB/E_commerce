@@ -2,9 +2,11 @@ package com.poly.datn.be.repo;
 
 import com.poly.datn.be.entity.CartItem;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,4 +21,8 @@ public interface CartItemRepo extends JpaRepository<CartItem, Long> {
                                                    @Param("attributeId") Long attributeId);
 
     List<CartItem> findCartItemByAccount_IdAndIsActiveEquals(Long id, Boolean isActive);
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM CartItem ci WHERE ci.attribute.product.id = :productId")
+    void deleteByProductId(@Param("productId") Long productId);
 }

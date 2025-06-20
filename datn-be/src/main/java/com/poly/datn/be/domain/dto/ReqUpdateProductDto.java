@@ -18,4 +18,5 @@ public class ReqUpdateProductDto {
     private Long saleId;
     private Long[] categoryId;
     private ReqAttributeDto[] attribute;
+    private String[] imageUrl;
 }

@@ -3,7 +3,9 @@ package com.poly.datn.be.api;
 import com.poly.datn.be.domain.constant.AppConst;
 import com.poly.datn.be.domain.constant.ProductConst;
 import com.poly.datn.be.domain.dto.*;
+import com.poly.datn.be.entity.Image;
 import com.poly.datn.be.entity.Product;
+import com.poly.datn.be.service.ImageService;
 import com.poly.datn.be.service.ProductService;
 import com.poly.datn.be.service.RatingService;
 import com.poly.datn.be.util.ConvertUtil;
@@ -28,7 +30,8 @@ public class ProductApi {
 
     @Autowired
     RatingService ratingService;
-
+    @Autowired
+    private ImageService imageService;
     @GetMapping(ProductConst.API_PRODUCT_GET_ALL)
     public ResponseEntity<?> getAllProductPagination(@RequestParam("page") Optional<Integer> page,
                                                      @RequestParam("size") Optional<Integer> size,
@@ -138,4 +141,28 @@ public class ProductApi {
         Pageable pageable = PageRequest.of(page.orElse(1) - 1, size.orElse(8));
         return new ResponseEntity<>(productService.getBestSellingProducts(pageable), HttpStatus.OK);
     }
+    @DeleteMapping("/api/admin/product/delete/{id}")
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
+        try {
+            productService.deleteProductById(id);
+            return ResponseEntity.ok().body("Xóa thành công");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Xóa thất bại: " + e.getMessage());
+        }
+    }
+    @DeleteMapping("/api/admin/productEdit/delete/{id}")
+    public ResponseEntity<?> deleteImage(@PathVariable Long id) {
+        try {
+            imageService.deleteImageById(id);
+            return ResponseEntity.ok().body("Xóa ảnh thành công");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Xóa ảnh thất bại: " + e.getMessage());
+        }
+    }
+    @GetMapping("/api/admin/productImage/{productId}")
+    public ResponseEntity<List<Image>> getImagesByProductId(@PathVariable Long productId) {
+        List<Image> images = imageService.getImagesByProductId(productId);
+        return ResponseEntity.ok(images);
+    }
+
 }

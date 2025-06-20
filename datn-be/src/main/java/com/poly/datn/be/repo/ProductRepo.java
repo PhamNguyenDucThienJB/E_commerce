@@ -6,9 +6,11 @@ import com.poly.datn.be.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -97,5 +99,53 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
                                                     @Param("name") String name,
                                                     Pageable pageable);
 
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE cart_item FROM cart_item " +
+            "JOIN attribute ON cart_item.attribute_id = attribute.id " +
+            "WHERE attribute.product_id = :productId", nativeQuery = true)
+    void deleteCartItemByProductId(@Param("productId") Long productId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE order_detail FROM order_detail " +
+            "JOIN attribute ON order_detail.attribute_id = attribute.id " +
+            "WHERE attribute.product_id = :productId", nativeQuery = true)
+    void deleteOrderDetailByProductId(@Param("productId") Long productId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM attribute WHERE product_id = :productId", nativeQuery = true)
+    void deleteAttributeByProductId(@Param("productId") Long productId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM images WHERE product_id = :productId", nativeQuery = true)
+    void deleteImageByProductId(@Param("productId") Long productId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM notifications WHERE product_id = :productId", nativeQuery = true)
+    void deleteNotificationByProductId(@Param("productId") Long productId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM ratings WHERE product_id = :productId", nativeQuery = true)
+    void deleteRatingByProductId(@Param("productId") Long productId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM comments WHERE product_id = :productId", nativeQuery = true)
+    void deleteCommentByProductId(@Param("productId") Long productId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM product_category WHERE product_id = :productId", nativeQuery = true)
+    void deleteProductCategoryByProductId(@Param("productId") Long productId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM products WHERE id = :productId", nativeQuery = true)
+    void deleteProductById(@Param("productId") Long productId);
 
 }

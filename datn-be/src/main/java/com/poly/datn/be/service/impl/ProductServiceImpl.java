@@ -6,7 +6,7 @@ import com.poly.datn.be.domain.constant.ProductConst;
 import com.poly.datn.be.domain.dto.*;
 import com.poly.datn.be.domain.exception.AppException;
 import com.poly.datn.be.entity.*;
-import com.poly.datn.be.repo.ProductRepo;
+import com.poly.datn.be.repo.*;
 import com.poly.datn.be.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,12 +18,28 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
     @Autowired
     ProductRepo productRepo;
+    @Autowired
+    NotificationRepo notificationRepo;
+    @Autowired
+    private CommentRepo commentRepo;
 
+    @Autowired
+    private RatingRepo ratingRepo;
+    @Autowired
+    ImageRepo imageRepo;
+    @Autowired
+    CartItemRepo cartItemRepo;
+    @Autowired
+    AttributeRepo attributeRepo;
+    @Autowired
+    ProductCategoryRepo productCategoryRepo;
     @Autowired
     BrandService brandService;
 
@@ -219,6 +235,32 @@ public class ProductServiceImpl implements ProductService {
                attributeService.save(attribute);
            }
         }
+        /*Update images - chỉ thêm ảnh mới, không xóa ảnh cũ*/
+        List<Image> oldImages = imageService.getImagesByProductId(product.getId());
+        Set<String> oldImageLinks = oldImages.stream()
+                .map(Image::getImageLink)
+                .collect(Collectors.toSet());
+
+        String[] imageUrl = reqUpdateProductDto.getImageUrl();
+        for (int i = 0; i < imageUrl.length; i++) {
+            String newImageLink = imageUrl[i];
+            // Nếu ảnh chưa tồn tại thì thêm mới
+            if (!oldImageLinks.contains(newImageLink)) {
+                Image image = new Image();
+                if (i == 0) {
+                    image.setName(ProductConst.PRODUCT_MAIN_IMAGE);
+                } else {
+                    image.setName(ProductConst.PRODUCT_OTHER_IMAGE);
+                }
+                image.setImageLink(newImageLink);
+                image.setCreateDate(LocalDate.now());
+                image.setModifyDate(LocalDate.now());
+                image.setIsActive(AppConst.CONST_ACTIVE);
+                image.setProduct(product);
+                imageService.createImage(image);
+            }
+        }
+
         return productRepo.save(product);
     }
 
@@ -246,5 +288,29 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<ResponseProductDto> getBestSellingProducts(Pageable pageable) {
         return productRepo.getBestSellingProducts(ProductConst.PRODUCT_AVG_SIZE, ProductConst.PRODUCT_MAIN_IMAGE, pageable);
+    }
+
+    @Override
+    @Transactional
+    public void deleteProductById(Long productId) {
+//        imageRepo.deleteByProductId(id);
+//        attributeRepo.deleteByProductId(id);
+//        notificationRepo.deleteByProductId(id);
+//        productCategoryRepo.deleteByProductId(id);
+//
+//        cartItemRepo.deleteByProductId(id);
+//
+//        // Sau khi xóa hết, mới được xóa Product
+//        productRepo.deleteById(id);
+        productRepo.deleteCartItemByProductId(productId);
+        productRepo.deleteOrderDetailByProductId(productId);
+        productRepo.deleteAttributeByProductId(productId);
+        productRepo.deleteImageByProductId(productId);
+        productRepo.deleteNotificationByProductId(productId);
+        productRepo.deleteRatingByProductId(productId);
+        productRepo.deleteCommentByProductId(productId);
+        productRepo.deleteProductCategoryByProductId(productId);
+        productRepo.deleteProductById(productId);
+
     }
 }

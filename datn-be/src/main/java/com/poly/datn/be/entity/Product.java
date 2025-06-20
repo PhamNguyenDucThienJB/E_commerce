@@ -50,7 +50,8 @@ public class Product {
     private Collection<ProductCategory> productCategories;
     @OneToMany(mappedBy = "product")
     private Collection<Image> images;
-    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @JsonIgnore
     private Collection<Attribute> attributes;
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     @JsonIgnore
