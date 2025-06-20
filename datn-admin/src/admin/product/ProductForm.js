@@ -22,7 +22,9 @@ const ProductForm = () => {
   const [image, setImage] = useState([]);
 
   const history = useHistory();
-
+  const goBack=()=>{
+history.goBack();
+  };
   useEffect(() => {
     getBrands(1, 20).then((resp) => setBrand(resp.data.content)).catch(console.log);
     getSale(1, 8).then((resp) => setSale(resp.data.content)).catch(console.log);
@@ -46,6 +48,11 @@ const ProductForm = () => {
   setImage((prev) => [...prev, ...selectedFiles]);
 };
 
+  const handleRemoveNewImage = (index) => {
+  const updatedImages = [...image];
+  updatedImages.splice(index, 1); // Xóa ảnh tại index
+  setImage(updatedImages);
+};
 
   const submitHandler = (data) => {
     if (image.length < 2) {
@@ -91,10 +98,18 @@ const ProductForm = () => {
 
   return (
     <div className="pb-3 container-fluid card">
+      
       <div className="col-10 offset-1 text-center">
         <h1 className="text-danger">Sản phẩm</h1>
       </div>
       <div className="row card">
+         <button style={{ width: 60 }} onClick={() => goBack()}>
+        <i
+          className="fa fa-arrow-left"
+          style={{ fontSize: 18 }}
+          aria-hidden="true"
+        ></i>
+      </button>
         <form
           className="needs-validation pro-form"
           onSubmit={handleSubmit(submitHandler)}
@@ -223,24 +238,52 @@ const ProductForm = () => {
           </div>
 
     <div className="col-12 col-md-8 d-flex flex-wrap">
-      {image &&
-        image.map((item, index) => (
-          <div key={index} className="position-relative m-2">
-            <img
-              src={URL.createObjectURL(item)}
-              alt={`Ảnh ${index}`}
-              className="rounded border"
-              style={{ width: 100, height: 100, objectFit: "cover" }}
-            />
-            <span
-              className={`badge position-absolute top-0 start-0 ${index === 0 ? "bg-primary" : "bg-secondary"}`}
-              style={{ fontSize: "0.75rem" }}
-            >
-              {index === 0 ? "Main" : "Other"}
-            </span>
-          </div>
-        ))}
-    </div>
+          {image &&
+            image.map((item, index) => (
+              <div key={index} className="position-relative m-2 shadow rounded" style={{ width: 100, height: 100 }}>
+                <img
+                  src={URL.createObjectURL(item)}
+                  alt={`Ảnh ${index}`}
+                  className="rounded border"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+                <span
+                  className={`badge position-absolute ${index === 0 ? "bg-primary" : "bg-secondary"}`}
+                  style={{
+                    top: 5,
+                    left: 5,
+                    fontSize: "0.75rem",
+                    borderRadius: "8px",
+                    zIndex: 1,
+                  }}
+                >
+                  {index === 0 ? "Main" : "Other"}
+                </span>
+
+                {/* Nút xóa ảnh mới */}
+                <button
+                  type="button"
+                  className="btn btn-sm btn-light border position-absolute shadow-sm"
+                  style={{
+                    top: -15,
+                    right: -10,
+                    zIndex: 2,
+                    width: 24,
+                    height: 24,
+                    padding: 0,
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  onClick={() => handleRemoveNewImage(index)}
+                >
+                  <i className="fas fa-times text-danger" style={{ fontSize: 12 }}></i>
+                </button>
+              </div>
+            ))}
+        </div>
+
   </div>
 </div>
 

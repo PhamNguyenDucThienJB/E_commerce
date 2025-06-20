@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { Button, Form } from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
-import { getAllProductsByBrand } from "../../api/ProductApi";
+import { getAllProductsByBrand,deleteProduct } from "../../api/ProductApi";
 import { NavLink } from "react-router-dom";
 import { getBrands } from "../../api/BrandApi";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 const Product = () => {
+  const [deleteId, setDeleteId] = useState(null);
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState({});
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const [brand, setBrand] = useState([]);
-
+  const history = useHistory();
+  const  goBack =() => {
+      history.goBack();
+  };
   useEffect(() => {
+  
     let isMounted = true;
     // Fetch products for current page
     getAllProductsByBrand(0, page, 10, true)
@@ -77,7 +83,9 @@ const Product = () => {
     }
   };
   return (
+    
     <div className="col-12">
+      
       <div className="card">
         <div className="card__header">
           <NavLink
@@ -117,6 +125,8 @@ const Product = () => {
                     <th scope="col">Mô tả</th>
                     <th scope="col">Trạng thái</th>
                     <th scope="col">Cập nhật</th>
+                    <th scope="col">Xóa</th>
+
                   </tr>
                 </thead>
                 <tbody>
@@ -124,9 +134,9 @@ const Product = () => {
                     products.map((item, index) => (
                       <tr key={index}>
                         <th scope="row">
-                          <NavLink to={`/product-view/${item.id}`} exact>
-                            #{index + 1}
-                          </NavLink>
+                           <NavLink to={`/product-view/${item.id}`} exact>
+                              #{(page - 1) * 10 + index + 1}
+                            </NavLink>
                         </th>
                         <th>{item.name}</th>
                         <th>{item.code}</th>
@@ -148,6 +158,18 @@ const Product = () => {
                             ></i>
                           </NavLink>
                         </th>
+                        <th>
+                          <button
+                            className="btn btn-danger"
+                            onClick={() => {
+                              setDeleteId(item.id);
+                              setShow(true);
+                            }}
+                          >
+                            Xóa
+                          </button>
+                        </th>
+
                       </tr>
                     ))}
                 </tbody>
@@ -179,23 +201,54 @@ const Product = () => {
           </ul>
         </nav>
       </div>
-      <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Xác nhận cập nhật?</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Modal.Footer>
-              <Button variant="danger" onClick={handleClose}>
-                Xác nhận
-              </Button>
-              <Button variant="primary" onClick={handleClose}>
-                Đóng
-              </Button>
-            </Modal.Footer>
-          </Form>
-        </Modal.Body>
-      </Modal>
+  <Modal show={show} onHide={handleClose} centered>
+  <Modal.Header>
+    <Modal.Title>Xác nhận xóa sản phẩm</Modal.Title>
+    <button
+      onClick={handleClose}
+      style={{
+      backgroundColor: "#dc3545",
+      color: "white",
+      border: "none",
+      borderRadius: "50%",
+      width: "30px",
+      height: "30px",
+      fontWeight: "bold",
+      display: "flex",          // Thêm dòng này
+      alignItems: "center",     // Căn giữa theo chiều dọc
+      justifyContent: "center", // Căn giữa theo chiều ngang
+      cursor: "pointer",        // Con trỏ khi hover
+      marginLeft: "auto"  
+      }}
+    >
+      ×
+    </button>
+  </Modal.Header>
+  <Modal.Body>
+    Bạn có chắc chắn muốn xóa sản phẩm này không? <br />
+    <strong>ID sản phẩm:</strong> {deleteId}
+  </Modal.Body>
+  <Modal.Footer>
+    <Button
+      variant="danger"
+      onClick={() => {
+        deleteProduct(deleteId)
+          .then(() => {
+            setProducts(products.filter((product) => product.id !== deleteId));
+            setShow(false);
+          })
+          .catch((err) => console.log(err));
+      }}
+    >
+      Xác nhận
+    </Button>
+    <Button variant="secondary" onClick={handleClose}>
+      Hủy
+    </Button>
+  </Modal.Footer>
+</Modal>
+
+      
     </div>
   );
 };

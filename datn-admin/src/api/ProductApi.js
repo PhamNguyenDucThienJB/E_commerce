@@ -1,5 +1,5 @@
 import Instance from '../axios/Instance'
-
+import axios from "axios";
 export const getAllProducts = (page, size, active) =>{
     const url = `/api/site/product/get-all?page=${page}&size=${size}&active=${active}`;
     return Instance.get(url);
@@ -32,3 +32,14 @@ export const modifyProduct = (data) =>{
     const url = `/api/admin/product/modify`;
     return Instance.post(url, data);
 }
+export const deleteImage = (id) =>{
+    const url = `/api/admin/productEdit/delete/${id}`;
+    return Instance.delete(url);
+}
+export const getImagesByProductId =(productId)=>{
+    const url = `/api/admin/productImage/${productId}`;
+    return Instance.get(url);
+}
+export const deleteProduct = (id) => {
+  return Instance.delete(`/api/admin/product/delete/${id}`);
+};

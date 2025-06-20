@@ -13,6 +13,7 @@ const Detail = () => {
     const [flag, setFlag] = useState();
     const history = useHistory();
 
+   
     useEffect(() => {
       onLoad();
     }, [id]);
@@ -74,6 +75,7 @@ const Detail = () => {
     
     return (
       <div>
+        
         {item && (
           <div className="col-12 mt-5">
             <div>
