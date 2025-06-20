@@ -30,6 +30,7 @@ const EditAccount = () => {
   }, []);
 
   const onSubmitHandler = (data) => {
+    console.log("Form data:", data);
     const result = {
       id: data.id,
       isActive: data.isActive,
@@ -41,10 +42,11 @@ const EditAccount = () => {
       address: data.address,
       birthDate: data.birthDate
     }
+    console.log("Sending to API:", result);
     updateAccount(result)
     .then(() => {
         toast.success("Cập nhật thành công.");
-        history.push('/accounts');
+        history.push('/account');
     })
     .catch((error) => toast.error(error.response.data.Errors));
   };
@@ -59,6 +61,7 @@ const EditAccount = () => {
           className="needs-validation"
           onSubmit={handleSubmit(onSubmitHandler)}
         >
+          <input type="hidden" {...register("id")} />
           <div className="row g-3">
             <div className="col-sm-6 mt-5">
               <label className="form-label">Họ tên</label>

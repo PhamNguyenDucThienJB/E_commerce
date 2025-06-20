@@ -33,6 +33,7 @@ public class AccountDetailServiceImpl implements AccountDetailService {
         accountDetail.setEmail(reqUpdateAccountDetailDto.getEmail());
         accountDetail.setAddress(reqUpdateAccountDetailDto.getAddress());
         accountDetail.setGender(reqUpdateAccountDetailDto.getGender());
+        accountDetail.setBirthDate(reqUpdateAccountDetailDto.getBirthDate());
         return accountDetailRepo.save(accountDetail);
     }
 

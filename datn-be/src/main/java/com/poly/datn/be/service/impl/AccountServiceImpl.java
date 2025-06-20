@@ -113,8 +113,15 @@ public class AccountServiceImpl implements AccountService {
             }
             account = ConvertUtil.ReqUpdateAccountDtoToAccount(account, reqUpdateAccountDto);
             account = this.accountRepo.save(account);
-            AccountDetail accountDetail = ConvertUtil.ReqAccountDtoToAccountDetail(reqUpdateAccountDto);
-            this.accountDetailService.update(accountDetail);
+            ReqUpdateAccountDetailDto detailDto = new ReqUpdateAccountDetailDto();
+            detailDto.setId(ad.getId());
+            detailDto.setFullname(reqUpdateAccountDto.getFullName());
+            detailDto.setGender(reqUpdateAccountDto.getGender());
+            detailDto.setPhone(reqUpdateAccountDto.getPhone());
+            detailDto.setEmail(reqUpdateAccountDto.getEmail());
+            detailDto.setAddress(reqUpdateAccountDto.getAddress());
+            detailDto.setBirthDate(reqUpdateAccountDto.getBirthDate());
+            this.accountDetailService.update(detailDto);
             return account;
         }
     }
@@ -152,115 +159,63 @@ public class AccountServiceImpl implements AccountService {
         return this.accountRepo.findAccountByRoleName(roleName, pageable);
     }
 
-//    @Transactional
-//    @Modifying
-//    @Override
-//    public RespAccountDto register(ReqRegisterAccountDto reqRegisterAccountDto) {
-//        if (this.accountRepo.findAccountByUsername(reqRegisterAccountDto.getUsername()) != null) {
-//            throw new AppException("Username đã tồn tại");
-//        }
-//        if (this.accountDetailService.findAccountDetailByEmail(reqRegisterAccountDto.getEmail()) != null){
-//            throw new AppException("Email đã tồn tại");
-//        }
-//
-//        Account account = ConvertUtil.ReqCreateAccountDtoToAccount(reqRegisterAccountDto);
-//        account.setPassword(passwordEncoder.encode(account.getPassword()));
-//
-//        Role role = roleService.findById(3L);
-//        account.setRole(role);
-//
-//        account.setIsActive(false); // Tài khoản chưa active ban đầu
-//        account = this.accountRepo.save(account);
-//
-//        AccountDetail accountDetail = ConvertUtil.ReqAccountDtoToAccountDetail(reqRegisterAccountDto);
-//        accountDetail.setAccount(account);
-//        accountDetail = this.accountDetailService.save(accountDetail);
-//
-//        // Tạo token xác minh và gửi email
-//        createVerificationToken(account, reqRegisterAccountDto.getEmail());
-//
-//        RespAccountDto respAccountDto = ConvertUtil.accountToRespAccountDto(account, accountDetail);
-//        return respAccountDto;
-//    }
-        @Transactional
-        @Modifying
-        @Override
-        public RespAccountDto register(ReqRegisterAccountDto reqRegisterAccountDto) {
-            if (this.accountRepo.findAccountByUsername(reqRegisterAccountDto.getUsername()) != null) {
-                throw new AppException("Username đã tồn tại");
-            }
-
-            if (this.accountDetailService.findAccountDetailByEmail(reqRegisterAccountDto.getEmail()) != null) {
-                throw new AppException("Email đã tồn tại");
-            }
-
-            // ✅ Kiểm tra xác minh email
-            Optional<VerificationToken> tokenOpt = verificationTokenRepository
-                    .findByPreEmailAndIsClickTrue(reqRegisterAccountDto.getEmail());
-
-            VerificationToken token = tokenOpt.orElseThrow(() -> new AppException("Email chưa được xác minh"));
-
-
-
-            Account account = ConvertUtil.ReqCreateAccountDtoToAccount(reqRegisterAccountDto);
-            account.setPassword(passwordEncoder.encode(account.getPassword()));
-            Role role = roleService.findById(3L);
-            account.setRole(role);
-            account = this.accountRepo.save(account);
-
-            AccountDetail accountDetail = ConvertUtil.ReqAccountDtoToAccountDetail(reqRegisterAccountDto);
-            accountDetail.setAccount(account);
-            accountDetail = this.accountDetailService.save(accountDetail);
-
-            RespAccountDto respAccountDto = ConvertUtil.accountToRespAccountDto(account, accountDetail);
-            return respAccountDto;
+    @Transactional
+    @Modifying
+    @Override
+    public RespAccountDto register(ReqRegisterAccountDto reqRegisterAccountDto) {
+        if (this.accountRepo.findAccountByUsername(reqRegisterAccountDto.getUsername()) != null) {
+            throw new AppException("Username đã tồn tại");
         }
+
+        if (this.accountDetailService.findAccountDetailByEmail(reqRegisterAccountDto.getEmail()) != null) {
+            throw new AppException("Email đã tồn tại");
+        }
+
+        // ✅ Kiểm tra xác minh email
+        Optional<VerificationToken> tokenOpt = verificationTokenRepository
+                .findByPreEmailAndIsClickTrue(reqRegisterAccountDto.getEmail());
+
+        VerificationToken token = tokenOpt.orElseThrow(() -> new AppException("Email chưa được xác minh"));
+
+        Account account = ConvertUtil.ReqCreateAccountDtoToAccount(reqRegisterAccountDto);
+        account.setPassword(passwordEncoder.encode(account.getPassword()));
+        Role role = roleService.findById(3L);
+        account.setRole(role);
+        account = this.accountRepo.save(account);
+
+        AccountDetail accountDetail = ConvertUtil.ReqAccountDtoToAccountDetail(reqRegisterAccountDto);
+        accountDetail.setAccount(account);
+        accountDetail = this.accountDetailService.save(accountDetail);
+
+        RespAccountDto respAccountDto = ConvertUtil.accountToRespAccountDto(account, accountDetail);
+        return respAccountDto;
+    }
 
     @Override
     public Integer countAccount() {
         return accountRepo.findAll().size();
     }
 
-//    @Override
-//    public void changePassword(ReqChangePasswordDto reqChangePasswordDto) {
-//        Account account = this.accountRepo.findAccountByUsername(reqChangePasswordDto.getUsername());
-//        if (account == null){
-//            throw new AppException("Tài khoản không tồn tại");
-//        }
-//        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-//        if (!passwordEncoder.matches(account.getPassword(), reqChangePasswordDto.getPassword())) {
-//            throw new AppException("Password cũ không đúng!");
-//        } else if (!reqChangePasswordDto.getNewPassword().equals(reqChangePasswordDto.getNewPasswordSecond())) {
-//            throw new AppException("Password mới không giống nhau");
-//        }else {
-//            account.setPassword(passwordEncoder.encode(reqChangePasswordDto.getNewPassword().trim()));
-//            this.accountRepo.save(account);
-//        }
-//    }
-        @Override
-        @Transactional
-        public void createVerificationToken(String email) {
-            // Xóa token cũ (nếu có)
-            tokenRepository.deleteByPreEmail(email);
+    @Override
+    @Transactional
+    public void createVerificationToken(String email) {
+        // Xóa token cũ (nếu có)
+        tokenRepository.deleteByPreEmail(email);
 
-            String token = UUID.randomUUID().toString();
-            VerificationToken verificationToken = new VerificationToken();
-            verificationToken.setToken(token);
-            verificationToken.setExpiryDate(LocalDateTime.now().plusMinutes(30));
-            verificationToken.setPreEmail(email);
+        String token = UUID.randomUUID().toString();
+        VerificationToken verificationToken = new VerificationToken();
+        verificationToken.setToken(token);
+        verificationToken.setExpiryDate(LocalDateTime.now().plusMinutes(30));
+        verificationToken.setPreEmail(email);
 
-            tokenRepository.save(verificationToken);
+        tokenRepository.save(verificationToken);
 
-
-
-            try {
-                MailUtil.sendVerificationEmail(email, token);
-            } catch (MessagingException e) {
-                throw new AppException("Lỗi gửi email: " + e.getMessage());
-            }
+        try {
+            MailUtil.sendVerificationEmail(email, token);
+        } catch (MessagingException e) {
+            throw new AppException("Lỗi gửi email: " + e.getMessage());
         }
-
-
+    }
 
     @Transactional
     @Override
@@ -298,10 +253,16 @@ public class AccountServiceImpl implements AccountService {
         return password.toString();
     }
 
-
     @Override
     public AccountDetail update(ReqUpdateAccountDetailDto reqUpdateAccountDetailDto) {
+        System.out.println("=== SITE UPDATE DEBUG ===");
+        System.out.println("Input DTO ID: " + reqUpdateAccountDetailDto.getId());
+        System.out.println("Input DTO birthDate: " + reqUpdateAccountDetailDto.getBirthDate());
+        
         AccountDetail accountDetail = accountDetailService.findAccountDetail(reqUpdateAccountDetailDto.getId());
+        System.out.println("Found AccountDetail ID: " + accountDetail.getId());
+        System.out.println("Current birthDate in DB: " + accountDetail.getBirthDate());
+        
         if(!accountDetail.getEmail().equals(reqUpdateAccountDetailDto.getEmail())){
             if (this.accountDetailService.findAccountDetailByEmail(reqUpdateAccountDetailDto.getEmail()) != null){
                 throw new AppException("Email đã tồn tại");
@@ -312,7 +273,14 @@ public class AccountServiceImpl implements AccountService {
         accountDetail.setEmail(reqUpdateAccountDetailDto.getEmail());
         accountDetail.setAddress(reqUpdateAccountDetailDto.getAddress());
         accountDetail.setGender(reqUpdateAccountDetailDto.getGender());
-        return accountDetailService.save(accountDetail);
+        accountDetail.setBirthDate(reqUpdateAccountDetailDto.getBirthDate());
+        
+        System.out.println("About to save birthDate: " + accountDetail.getBirthDate());
+        AccountDetail saved = accountDetailService.save(accountDetail);
+        System.out.println("Saved birthDate: " + saved.getBirthDate());
+        System.out.println("=== END SITE UPDATE DEBUG ===");
+        
+        return saved;
     }
 
     @Override
@@ -320,69 +288,24 @@ public class AccountServiceImpl implements AccountService {
         AccountDetail detail = accountDetailService.findAccountDetailByEmail(email);
         return detail != null ? detail.getAccount().getUsername() : null;
     }
-//
-//    @Override
-//    public Account findAccountByEmail(String email) {
-//        return null;
-//    }
 
+    @Transactional
+    public void verifyTokenAndReturnEmail(String token) {
+        VerificationToken verificationToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new AppException("Token không hợp lệ hoặc đã hết hạn"));
 
-    //    public void sendOtpToEmail(String email) throws MessagingException {
-//        // Tạo mã OTP 6 số ngẫu nhiên
-//        String otp = String.valueOf((int)(Math.random() * 900000) + 100000);
-//
-//        // Đặt thời gian hết hạn OTP (ví dụ 5 phút)
-//        LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(5);
-//
-//        // Lưu OTP vào Map
-//        otpStorage.put(email, new OtpEntry(otp, expiredAt));
-//
-//        // Gửi OTP qua email
-//        MailUtil.sendOtpEmail(email, otp);
-        //    }
-@Transactional
-public void verifyTokenAndReturnEmail(String token) {
-    VerificationToken verificationToken = tokenRepository.findByToken(token)
-            .orElseThrow(() -> new AppException("Token không hợp lệ hoặc đã hết hạn"));
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            tokenRepository.delete(verificationToken);
+            throw new AppException("Token đã hết hạn");
+        }
 
-    if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-        tokenRepository.delete(verificationToken);
-        throw new AppException("Token đã hết hạn");
+        if (verificationToken.isClick()) {
+            throw new AppException("Token đã được xác minh trước đó");
+        }
+
+        verificationToken.setClick(true);
+        tokenRepository.save(verificationToken);
+
+        System.out.println("✅ Token đã xác minh thành công cho email: " + verificationToken.getPreEmail());
     }
-
-    if (verificationToken.isClick()) {
-        throw new AppException("Token đã được xác minh trước đó");
-    }
-
-    verificationToken.setClick(true);
-    tokenRepository.save(verificationToken);
-
-    System.out.println("✅ Token đã xác minh thành công cho email: " + verificationToken.getPreEmail());
 }
-
-
-//    @Override
-//    public Account verifyEmailToken(String token) {
-//        VerificationToken verificationToken = tokenRepository.findByToken(token)
-//                .orElseThrow(() -> new AppException("Token không hợp lệ hoặc đã hết hạn"));
-//
-//        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-//            tokenRepository.delete(verificationToken);
-//            throw new AppException("Token đã hết hạn");
-//        }
-//
-//        Account account = verificationToken;
-//
-//        // KHÔNG setActive tại đây nữa
-//        // => Trả về account (hoặc ID) để frontend cho phép tiếp tục bước nhập mật khẩu
-//
-//        tokenRepository.delete(verificationToken); // Vẫn xóa token sau khi xác minh
-//
-//        return account;
-//    }
-}
-
-//    public void cleanupExpiredOtps() {
-//        otpStorage.entrySet().removeIf(entry -> entry.getValue().isExpired());
-//    }
-//}

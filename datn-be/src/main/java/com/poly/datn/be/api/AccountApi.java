@@ -72,6 +72,8 @@ public class AccountApi {
 
     @PostMapping(AccountConst.API_ACCOUNT_UPDATE)
     public ResponseEntity<?> update(@RequestBody @Valid ReqUpdateAccountDto reqUpdateAccountDto) {
+        System.out.println("Received update request: " + reqUpdateAccountDto);
+        System.out.println("BirthDate in request: " + reqUpdateAccountDto.getBirthDate());
         return new ResponseEntity<>(this.accountService.update(reqUpdateAccountDto), HttpStatus.OK);
     }
 

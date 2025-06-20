@@ -194,7 +194,7 @@ public class ConvertUtil {
         accountDetail.setPhone(ReqUpdateAccountDto.getPhone());
         accountDetail.setEmail(ReqUpdateAccountDto.getEmail());
         accountDetail.setAddress(ReqUpdateAccountDto.getAddress());
-        accountDetail.setBirthDate(LocalDate.now());
+        accountDetail.setBirthDate(ReqUpdateAccountDto.getBirthDate());
         return accountDetail;
     }
 }
