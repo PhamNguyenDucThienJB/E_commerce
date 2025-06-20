@@ -42,3 +42,9 @@ export const getBestSellingProducts = (page, size) =>{
 export const filterAdvancedProducts = (data) => {
   return Instance.post("/api/site/product/filter-advanced", data);
 };
+// Fetch newest products
+export const getNewestProducts = (page, size) => {
+    const url = `/api/product/newest?page=${page}&size=${size}`;
+    return Instance.get(url);
+};
+

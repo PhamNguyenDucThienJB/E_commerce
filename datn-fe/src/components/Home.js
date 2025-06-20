@@ -30,21 +30,22 @@ if (!jwtToken) {
 }
 
 
-  var rows = new Array(total).fill(0).map((zero, index) => (
-    <li
-      className={page === index + 1 ? "page-item active" : "page-item"}
-      key={index}
+var rows = new Array(Math.min(total, 2)).fill(0).map((zero, index) => (
+  <li
+    className={page === index + 1 ? "page-item active" : "page-item"}
+    key={index}
+  >
+    <button
+      className="page-link"
+      style={{ borderRadius: 50 }}
+      onMouseDown={e => e.preventDefault()}
+      onClick={() => onChangePage(index + 1)}
     >
-      <button
-        className="page-link"
-        style={{ borderRadius: 50 }}
-        onMouseDown={e => e.preventDefault()}
-        onClick={() => onChangePage(index + 1)}
-      >
-        {index + 1}
-      </button>
-    </li>
-  ));
+      {index + 1}
+    </button>
+  </li>
+));
+
 
   // Pagination for Most Viewed
   const mostViewedRows = new Array(mostViewedTotal).fill(0).map((_, index) => (
