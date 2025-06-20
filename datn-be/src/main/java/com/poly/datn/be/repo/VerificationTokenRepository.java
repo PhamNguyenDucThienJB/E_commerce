@@ -9,4 +9,7 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
     Optional<VerificationToken> findByToken(String token);
     void deleteByPreEmail(String preEmail);
     Optional<VerificationToken> findByPreEmailAndIsClickTrue(String email);
+    // 👉 Thêm method này để tìm token chưa xác minh theo email
+    Optional<VerificationToken> findByPreEmailAndIsClickFalse(String email);
+
 }

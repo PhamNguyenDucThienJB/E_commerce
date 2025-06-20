@@ -5,6 +5,7 @@ import com.poly.datn.be.domain.dto.*;
 import com.poly.datn.be.domain.exception.AppException;
 import com.poly.datn.be.entity.Account;
 import com.poly.datn.be.entity.VerificationToken;
+import com.poly.datn.be.repo.VerificationTokenRepository;
 import com.poly.datn.be.service.AccountDetailService;
 import com.poly.datn.be.service.AccountService;
 import com.poly.datn.be.util.ConvertUtil;
@@ -31,6 +32,9 @@ public class AccountApi {
 
     @Autowired
     private AccountDetailService accountDetailService;
+
+    @Autowired
+    private VerificationTokenRepository tokenRepository;
 
 
     @GetMapping(AccountConst.API_ACCOUNT_FIND_ALL)
@@ -86,18 +90,18 @@ public class AccountApi {
     public ResponseEntity<?> getAccountByRoleName(@RequestParam("roleName") String roleName,
                                                   @RequestParam("page") Optional<Integer> page,
                                                   @RequestParam("size") Optional<Integer> size
-                                                  ){
+    ) {
         Pageable pageable = PageRequest.of(page.orElse(1) - 1, size.orElse(9), Sort.Direction.DESC, "modifyDate");
         return new ResponseEntity<>(this.accountService.findAccountByRoleName(roleName, pageable), HttpStatus.OK);
     }
 
     @PostMapping(AccountConst.API_ACCOUNT_REGISTER)
-    public ResponseEntity<?> register(@RequestBody @Valid ReqRegisterAccountDto reqRegisterAccountDto){
+    public ResponseEntity<?> register(@RequestBody @Valid ReqRegisterAccountDto reqRegisterAccountDto) {
         return new ResponseEntity<>(this.accountService.register(reqRegisterAccountDto), HttpStatus.OK);
     }
 
     @GetMapping(AccountConst.API_ACCOUNT_COUNT)
-    public ResponseEntity<?> countAccount(){
+    public ResponseEntity<?> countAccount() {
         return new ResponseEntity<>(accountService.countAccount(), HttpStatus.OK);
     }
 //    @GetMapping(AccountConst.API_ACCOUNT_VERIFY_EMAIL)
@@ -106,23 +110,40 @@ public class AccountApi {
 //    }
 
 
+    //    Test
+    @PostMapping(AccountConst.API_ACCOUNT_VERIFY_EMAIL)
+    public ResponseEntity<?> sendVerifyEmail(@RequestBody Map<String, String> req) {
+        String email = req.get("email");
 
-//    Test
-@PostMapping(AccountConst.API_ACCOUNT_VERIFY_EMAIL)
-public ResponseEntity<?> sendVerifyEmail(@RequestBody Map<String, String> req) {
-    String email = req.get("email");
+        if (email == null || email.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Email không được để trống");
+        }
 
-    if (email == null || email.trim().isEmpty()) {
-        return ResponseEntity.badRequest().body("Email không được để trống");
+        // Kiểm tra email đã tồn tại tài khoản hay chưa
+        if (this.accountDetailService.findAccountDetailByEmail(email) != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email đã tồn tại trong hệ thống");
+        }
+        // Tìm token theo email chưa xác minh
+        Optional<VerificationToken> optionalToken = tokenRepository.findByPreEmailAndIsClickFalse(email);
+
+        if (optionalToken.isPresent()) {
+            VerificationToken existingToken = optionalToken.get();
+
+            if (existingToken.getExpiryDate().isAfter(LocalDateTime.now())) {
+                // Token còn hạn, không cho gửi tiếp
+                return ResponseEntity.badRequest().body("Email xác minh đã được gửi. Vui lòng kiểm tra hộp thư.");
+            } else {
+                // Token hết hạn, xóa token cũ
+                tokenRepository.delete(existingToken);
+            }
+        }
+
+        // Gửi email xác minh mới
+        accountService.createVerificationToken(email);
+
+        return ResponseEntity.ok("Email xác minh đã được gửi");
     }
 
-    if (this.accountDetailService.findAccountDetailByEmail(email) != null) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("Email đã tồn tại trong hệ thống");
-    }
-
-    accountService.createVerificationToken(email);
-    return ResponseEntity.ok("Email xác minh đã được gửi");
-}
 
 //    @GetMapping("/api/site/verify")
 //    public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
