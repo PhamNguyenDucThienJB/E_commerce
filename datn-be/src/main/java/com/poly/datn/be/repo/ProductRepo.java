@@ -81,11 +81,21 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
     @Query("SELECT new com.poly.datn.be.domain.dto.ResponseProductDto(p.id, p.name, p.code, p.description, p.view, a.price, i.imageLink, p.brand.name, p.sale.discount, p.isActive) FROM Product p " +
             "join p.attributes a " +
             "join p.images i " +
-            "where a.size = :size and i.name = :name and p.isActive = true AND p.view >= 100 " +
+            "where a.size = :size and i.name = :name and p.isActive = true " +
             "order by p.view desc")
     Page<ResponseProductDto> getMostViewedProducts(@Param("size") String size,
                                                    @Param("name") String name,
                                                    Pageable pageable);
+
+    @Query("SELECT new com.poly.datn.be.domain.dto.ResponseProductDto(p.id, p.name, p.code, p.description, p.view, a.price, i.imageLink, p.brand.name, p.sale.discount, p.isActive) " +
+            "FROM Product p " +
+            "JOIN p.attributes a " +
+            "JOIN p.images i " +
+            "WHERE a.size = :size AND i.name = :name AND p.isActive = true " +
+            "ORDER BY p.modifyDate DESC")
+    Page<ResponseProductDto> getNewestProducts(@Param("size") String size,
+                                               @Param("name") String name,
+                                               Pageable pageable);
 
     // Repository methods for best-selling products
     @Query("SELECT new com.poly.datn.be.domain.dto.ResponseProductDto(p.id, p.name, p.code, p.description, p.view, a.price, i.imageLink, p.brand.name, p.sale.discount, p.isActive) FROM OrderDetail od " +

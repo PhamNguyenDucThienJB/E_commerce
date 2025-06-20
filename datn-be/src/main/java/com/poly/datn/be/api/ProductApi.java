@@ -141,6 +141,24 @@ public class ProductApi {
         Pageable pageable = PageRequest.of(page.orElse(1) - 1, size.orElse(8));
         return new ResponseEntity<>(productService.getBestSellingProducts(pageable), HttpStatus.OK);
     }
+    @GetMapping(ProductConst.API_PRODUCT_NEWEST)
+    public ResponseEntity<?> getNewestProducts(@RequestParam("page") Optional<Integer> page) {
+        int currentPage = page.orElse(1); // Mặc định trang 1
+        int pageSize;
+
+        if (currentPage == 1) {
+            pageSize = 8;
+        } else if (currentPage == 2) {
+            pageSize = 2;
+        } else {
+            return new ResponseEntity<>("Không còn sản phẩm mới!", HttpStatus.OK);
+        }
+
+        Pageable pageable = PageRequest.of(currentPage - 1, pageSize, Sort.by(Sort.Direction.DESC, "modifiedDate"));
+        return new ResponseEntity<>(productService.getNewestProducts(pageable), HttpStatus.OK);
+    }
+
+
     @DeleteMapping("/api/admin/product/delete/{id}")
     public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
         try {

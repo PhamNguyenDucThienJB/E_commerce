@@ -31,7 +31,7 @@ public interface ProductService {
     // Service methods for most-viewed and best-selling products
     Page<ResponseProductDto> getMostViewedProducts(Pageable pageable);
     Page<ResponseProductDto> getBestSellingProducts(Pageable pageable);
-
+    Page<ResponseProductDto> getNewestProducts(Pageable pageable);
     void deleteProductById(Long id);
 
 }

@@ -10,6 +10,7 @@ import com.poly.datn.be.repo.*;
 import com.poly.datn.be.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -282,12 +283,35 @@ public class ProductServiceImpl implements ProductService {
     // Service methods for most-viewed and best-selling products
     @Override
     public Page<ResponseProductDto> getMostViewedProducts(Pageable pageable) {
-        return productRepo.getMostViewedProducts(ProductConst.PRODUCT_AVG_SIZE, ProductConst.PRODUCT_MAIN_IMAGE, pageable);
+        Page<ResponseProductDto> resultPage = productRepo.getMostViewedProducts(ProductConst.PRODUCT_AVG_SIZE, ProductConst.PRODUCT_MAIN_IMAGE, pageable);
+
+        // Giới hạn tổng tối đa 10 sản phẩm
+        long totalLimit = Math.min(resultPage.getTotalElements(), 10);
+
+        // Nếu số sản phẩm của trang hiện tại vượt quá 10 thì chỉ lấy đến sản phẩm thứ 10
+        List<ResponseProductDto> limitedList = resultPage.getContent().stream()
+                .limit(10)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(limitedList, pageable, totalLimit);
     }
 
     @Override
     public Page<ResponseProductDto> getBestSellingProducts(Pageable pageable) {
         return productRepo.getBestSellingProducts(ProductConst.PRODUCT_AVG_SIZE, ProductConst.PRODUCT_MAIN_IMAGE, pageable);
+    }
+
+    @Override
+    public Page<ResponseProductDto> getNewestProducts(Pageable pageable) {
+        Page<ResponseProductDto> resultPage = productRepo.getNewestProducts(
+                ProductConst.PRODUCT_AVG_SIZE, ProductConst.PRODUCT_MAIN_IMAGE, pageable);
+
+        long totalLimit = Math.min(resultPage.getTotalElements(), 10);
+        List<ResponseProductDto> limitedList = resultPage.getContent().stream()
+                .limit(10)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(limitedList, pageable, totalLimit);
     }
 
     @Override

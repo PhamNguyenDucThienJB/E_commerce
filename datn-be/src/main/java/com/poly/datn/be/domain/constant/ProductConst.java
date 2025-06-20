@@ -15,11 +15,12 @@ public class ProductConst {
     public static final String API_PRODUCT_TOTAL_PAGE = "/api/site/product/total-page";
     public static final String API_PRODUCT_MOST_VIEWED = "/api/site/product/most-viewed";
     public static final String API_PRODUCT_BEST_SELLERS = "/api/site/product/best-sellers";
-
+    public static final String API_PRODUCT_NEWEST = "/api/site/product/newest";
     /* Product Constant */
     public static final String PRODUCT_AVG_SIZE = "S";
     public static final String PRODUCT_MAIN_IMAGE = "main";
     public static final String PRODUCT_OTHER_IMAGE = "other";
     public static final String PRODUCT_MSG_ERROR_NOT_EXIST = "Mã sản phẩm không tồn tại!";
     public static final String PRODUCT_MSG_CODE_EXIST = "Code đã tồn tại!";
+
 }
