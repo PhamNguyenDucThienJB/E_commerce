@@ -29,8 +29,9 @@ if (!jwtToken) {
   console.error("JWT Token không tồn tại!");
 }
 
+var pageCount = Math.min(total || 0, 2); // đảm bảo total không undefined
 
-var rows = new Array(Math.min(total, 2)).fill(0).map((zero, index) => (
+var rows = pageCount > 0 ? new Array(pageCount).fill(0).map((zero, index) => (
   <li
     className={page === index + 1 ? "page-item active" : "page-item"}
     key={index}
@@ -44,7 +45,8 @@ var rows = new Array(Math.min(total, 2)).fill(0).map((zero, index) => (
       {index + 1}
     </button>
   </li>
-));
+)) : null;
+
 
 
   // Pagination for Most Viewed
@@ -218,25 +220,25 @@ var rows = new Array(Math.min(total, 2)).fill(0).map((zero, index) => (
       <nav aria-label="Sản phẩm mới page navigation">
         <ul className="pagination justify-content-center mt-3 mb-0">
           <li className={page === 1 ? "page-item disabled" : "page-item"}>
-            <button
+            {/* <button
               className="page-link"
               disabled={page === 1}
               onMouseDown={e => e.preventDefault()}
               onClick={() => onChangePage(page - 1)}
             >
               <i className="fa fa-chevron-left"></i>
-            </button>
+            </button> */}
           </li>
           {rows}
           <li className={page === total ? "page-item disabled" : "page-item"}>
-            <button
+            {/* <button
               className="page-link"
               disabled={page === total}
               onMouseDown={e => e.preventDefault()}
               onClick={() => onChangePage(page + 1)}
             >
               <i className="fa fa-chevron-right"></i>
-            </button>
+            </button> */}
           </li>
         </ul>
       </nav>
