@@ -86,7 +86,10 @@ const SignIn = (props) => {
                   <h2 className="fw-bold mb-4 text-uppercase text-white">Đăng nhập</h2>
                   <form className="needs-validation" onSubmit={handleSubmit(signInHandler)}>
                       <div className="form-outline form-white mb-4">
-                        <input
+                        
+                         <label className="form-label" htmlFor="typeEmailX">
+                          Tài khoản
+                        </label><input
                           type="text"
                           id="typeEmailX"
                           className="form-control form-control-lg"
@@ -96,9 +99,7 @@ const SignIn = (props) => {
                               pattern: /^\s*\S+.*/, // không để trống hoặc toàn dấu cách
                             })}
                           />
-                        <label className="form-label" htmlFor="typeEmailX">
-                          Tài khoản
-                        </label>
+                       
                         {errors.account && (
                         <div className="alert alert-danger mt-2" role="alert">
                             Tài khoản không hợp lệ!
@@ -106,6 +107,9 @@ const SignIn = (props) => {
                         )}
                       </div>
                       <div className="form-outline form-white mb-4">
+                          {/* <label className="form-label" htmlFor="typePasswordX">
+                          Mật khẩu
+                        </label> */}
                         <input
                           type="password"
                           id="typePasswordX"
@@ -116,9 +120,7 @@ const SignIn = (props) => {
                             pattern: /^\s*\S+.*/,
                           })}
                         />
-                        <label className="form-label" htmlFor="typePasswordX">
-                          Mật khẩu
-                        </label>
+                      
                         {errors.password && (
                         <div className="alert alert-danger mt-2" role="alert">
                             Mật khẩu không hợp lệ!

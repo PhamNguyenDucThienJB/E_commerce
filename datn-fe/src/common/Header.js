@@ -85,7 +85,10 @@ const handleCartUpdate = (items) => {
 };
 
   return (
-    <div className="mini-card">
+    <div className="mini-card"
+    style={{display:'flex',
+      justifyContent:'space-around'
+    }}>
       {/* Navigation */}
       <nav className="navbar navbar-expand-md col-12">
         <div className="navbar-brand ml-1 col">
@@ -138,7 +141,7 @@ const handleCartUpdate = (items) => {
               }
             >
               <NavLink className="nav-link" to="/blog" exact>
-                Chính sách
+                Liên Hệ
               </NavLink>
             </li>
             {props.user && (
@@ -156,11 +159,18 @@ const handleCartUpdate = (items) => {
             )}
             
           </ul>
-          <form
+          <form 
             className="form-inline my-2 my-lg-0 mr-3"
             onSubmit={(e) => submitHandler(e)}
           >
             <input
+              style={{
+                color:"black",
+                marginTop: 'auto',
+                marginBottom: 'auto',
+                border: '2px solid #000', // viền đen 2px
+                borderRadius: '4px' // bo góc nhẹ
+              }}
               className="form-control mr-sm-2"
               type="search"
               aria-label="Search"

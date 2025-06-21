@@ -72,6 +72,9 @@ useEffect(() => {
                     <div className="row">
                       <div className="col-md-6 mb-4">
                         <div className="form-outline">
+                            <label className="form-label" htmlFor="firstName">
+                            Username
+                          </label>
                           <input
                             type="text"
                             id="firstName"
@@ -81,9 +84,7 @@ useEffect(() => {
                               pattern: /^\s*\S+.*/,
                             })}
                           />
-                          <label className="form-label" htmlFor="firstName">
-                            Username
-                          </label>
+                       
                           {errors.username && (
                             <div className="alert alert-danger" role="alert">
                               Tài khoản không hợp lệ!
@@ -93,6 +94,9 @@ useEffect(() => {
                       </div>
                       <div className="col-md-6 mb-4">
                         <div className="form-outline">
+                             <label className="form-label" htmlFor="lastName">
+                            Password
+                          </label>
                           <input
                             type="password"
                             id="lastName"
@@ -102,9 +106,7 @@ useEffect(() => {
                               pattern: /^\s*\S+.*/,
                             })}
                           />
-                          <label className="form-label" htmlFor="lastName">
-                            Password
-                          </label>
+                       
                           {errors.password && (
                             <div className="alert alert-danger" role="alert">
                               Mật khẩu không hợp lệ!
@@ -116,6 +118,9 @@ useEffect(() => {
                     <div className="row">
                       <div className="col-md-6 mb-4 d-flex align-items-center">
                         <div className="form-outline datepicker w-100">
+                              <label htmlFor="birthdayDate" className="form-label">
+                            Họ tên
+                          </label>
                           <input
                             type="text"
                             className="form-control form-control-lg"
@@ -125,9 +130,7 @@ useEffect(() => {
                               pattern: /^\s*\S+.*/,
                             })}
                           />
-                          <label htmlFor="birthdayDate" className="form-label">
-                            Họ tên
-                          </label>
+                      
                           {errors.fullName && (
                             <div className="alert alert-danger" role="alert">
                               Họ tên không hợp lệ!
@@ -179,6 +182,9 @@ useEffect(() => {
                     <div className="row">
                       <div className="col-md-6 mb-4 pb-2">
                         <div className="form-outline">
+                            <label className="form-label" htmlFor="emailAddress">
+                            Email
+                          </label>
                           <input
                                 type="text"
                                 id="emailAddress"
@@ -189,9 +195,7 @@ useEffect(() => {
                                   pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                                 })}
                               />
-                          <label className="form-label" htmlFor="emailAddress">
-                            Email
-                          </label>
+                        
                           {errors.email && (
                             <div className="alert alert-danger" role="alert">
                               Email không hợp lệ!
@@ -201,6 +205,9 @@ useEffect(() => {
                       </div>
                       <div className="col-md-6 mb-4 pb-2">
                         <div className="form-outline">
+                             <label className="form-label" htmlFor="phoneNumber">
+                            Số điện thoại
+                          </label>
                           <input
                             type="tel"
                             id="phoneNumber"
@@ -210,9 +217,7 @@ useEffect(() => {
                               pattern: /^0[0-9]{9}$/,
                             })}
                           />
-                          <label className="form-label" htmlFor="phoneNumber">
-                            Số điện thoại
-                          </label>
+                       
                           {errors.phone && (
                             <div className="alert alert-danger" role="alert">
                               Số điện thoại không hợp lệ!
@@ -223,6 +228,9 @@ useEffect(() => {
                     </div>
 
                     <div className="row">
+                        <label className="form-label select-label">
+                          Địa chỉ
+                        </label>
                       <div className="col-12">
                         <textarea
                           name=""
@@ -231,17 +239,14 @@ useEffect(() => {
                           rows="5"
                           {...register("address", { required: false })}
                         ></textarea>
-                        <label className="form-label select-label">
-                          Địa chỉ
-                        </label>
                       </div>
                     </div>
-                    <div className="mt-4 pt-2 mb-3">
+                    <div className="mt-4 pt-2 mb-3" style={{marginLeft:200,marginRight:200}}>
                       <button className="btn btn-primary btn-lg" type="submit">
                         Đăng kí
                       </button>
                     </div>
-                    <div>
+                    <div style={{marginLeft:120}}>
                       <p className="mb-0">
                         Đã có tài khoản?{" "}
                         <NavLink

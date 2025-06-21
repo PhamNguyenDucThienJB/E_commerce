@@ -8,7 +8,14 @@ const Blog = (props) => {
   }, [props]);
 
   return (
-    <div className="col-10 offset-1 card">
+    <div className="col-10 offset-1"
+        style={{
+        padding: '30px',
+        marginBottom: '30px',
+        backgroundColor: 'var(--main-bg)',
+        boxShadow: 'var(--box-shadow)',
+        borderRadius: 'var(--border-radius)',
+    }}>
       <h4 className="text-uppercase text-primary">Cam kết sản phẩm</h4>
       <p>1. Tất cả sản phẩm áo thun mang thương hiệu <strong>S&A (Sustainable Fashion)</strong> cam kết 100% chất liệu hữu cơ, thân thiện với môi trường và không gây hại cho sức khỏe người sử dụng.</p>
       <p>2. Sản phẩm được sản xuất tại Việt Nam với quy trình kiểm định nghiêm ngặt, đạt các tiêu chuẩn quốc tế về thời trang bền vững.</p>

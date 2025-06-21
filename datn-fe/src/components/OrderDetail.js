@@ -135,6 +135,7 @@ const OrderDetail = (props) => {
   const orderId = getOrderIdFromUrl();
 
   useEffect(() => {
+     window.scrollTo(0, 0);
     if (orderId) {
       // Preload attribute-product mappings
       preloadAttributeProductMappings();

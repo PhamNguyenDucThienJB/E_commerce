@@ -24,7 +24,7 @@ const VerifyPage = () => {
     axios
       .get(`http://localhost:8080/api/site/verify?token=${token}`)
       .then((res) => {
-        setMessage(res.data || "✅ Xác minh thành công!");
+        setMessage(res.data || "✅ Xác minh thành công! Vui lòng đợi server truyển trang! Còn một bước nữa là thành công rồi nè ");
         setStatus("success");
         setTimeout(() => history.push("/register"), 3000);
       })

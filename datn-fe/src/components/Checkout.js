@@ -542,22 +542,32 @@ const Checkout = (props) => {
                 </div>
               )}
             </div>
-            <div className="form-check">
-            <input
-                  className="form-check-input"
-                  type="radio"
-                  value="paypal"
-                  {...register("payment", { required: true })}
-                  onChange={() => textHandler("paypal")}
-                />
-                <label className="form-check-label">Thanh toán qua PayPal</label>
+          <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="radio"
+                    value="paypal"
+                    {...register("payment", { required: true })}
+                    onChange={(e) => textHandler(e.target.value)} // Viết theo chuẩn để thống nhất với các radio khác
+                  />
+                  <label className="form-check-label">Thanh toán qua PayPal</label>
 
-            </div>
+                  {text === "paypal" && (
+                    <div className="alert alert-dark mt-2">
+                      <p>Bạn sẽ được chuyển hướng sang cổng Popup PayPal để hoàn tất thanh toán.</p>
+                      <p style={{ color: "red", fontWeight: "bold" }}>
+                        Lưu ý: Vì đây là bên thứ ba thực hiện giao dịch. Nên Khi thanh toán qua PayPal, bạn sẽ chịu thêm phí giao dịch 4.4% + 7.000 VND.
+                      </p>
+                      <p>Sau khi thanh toán thành công, đơn hàng sẽ được xử lý ngay lập tức.</p>
+                    </div>
+                  )}
+              </div>
+
                   <div className="d-flex justify-content-center mt-5 mb-5">
                     <button className="btn btn-primary btn-lg" type="submit">
               Đặt hàng
             </button>
-                  </div>
+            </div>
           </form>
         </div>
       </div>

@@ -136,6 +136,9 @@ const Profile = (props) => {
                     <div className="row">
                       <div className="col-md-12 mb-4 d-flex align-items-center">
                         <div className="form-outline datepicker w-100">
+                           <label htmlFor="birthdayDate" className="form-label">
+                            Họ tên
+                          </label>
                           <input
                             type="text"
                             className="form-control form-control-lg"
@@ -145,9 +148,7 @@ const Profile = (props) => {
                               pattern: /^\s*\S+.*/,
                             })}
                           />
-                          <label htmlFor="birthdayDate" className="form-label">
-                            Họ tên
-                          </label>
+                        
                           {errors.fullName && (
                             <div className="alert alert-danger" role="alert">
                               Họ tên không hợp lệ!
@@ -218,6 +219,10 @@ const Profile = (props) => {
                     <div className="row">
                       <div className="col-md-12 mb-4 pb-2">
                         <div className="form-outline d-flex align-items-center">
+                         
+                          <label className="form-label" htmlFor="emailAddress">
+                          Email
+                          </label> 
                           <input
                             type="text"
                             id="emailAddress"
@@ -237,9 +242,7 @@ const Profile = (props) => {
                             <i className="fas fa-edit"></i> Đổi
                           </button>
                         </div>
-                        <label className="form-label" htmlFor="emailAddress">
-                          Email
-                        </label>
+                       
                         {errors.email && (
                           <div className="alert alert-danger" role="alert">
                             Email không hợp lệ!
@@ -248,6 +251,9 @@ const Profile = (props) => {
                       </div>
                       <div className="col-md-12 mb-4 pb-2">
                         <div className="form-outline">
+                              <label className="form-label" htmlFor="phoneNumber">
+                            Số điện thoại
+                          </label>
                           <input
                             type="tel"
                             id="phoneNumber"
@@ -257,9 +263,7 @@ const Profile = (props) => {
                               pattern: /^0[0-9]{9}$/,
                             })}
                           />
-                          <label className="form-label" htmlFor="phoneNumber">
-                            Số điện thoại
-                          </label>
+                     
                           {errors.phone && (
                             <div className="alert alert-danger" role="alert">
                               Số điện thoại không hợp lệ!
@@ -271,6 +275,9 @@ const Profile = (props) => {
 
                     <div className="row">
                       <div className="col-12">
+                   <label className="form-label select-label">
+                          Địa chỉ
+                        </label>
                         <textarea
                           name=""
                           id=""
@@ -278,9 +285,7 @@ const Profile = (props) => {
                           rows="5"
                           {...register("address", { required: false })}
                         ></textarea>
-                        <label className="form-label select-label">
-                          Địa chỉ
-                        </label>
+
                       </div>
                     </div>
                     <div className="mt-4 pt-2 mb-3">

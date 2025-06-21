@@ -6,6 +6,7 @@ import { Button, Form } from "react-bootstrap";
 import Modal from "react-bootstrap/Modal";
 import { toast } from "react-toastify";
 import Alert from "react-bootstrap/Alert";
+import '../static/css/styleforScoll.css';
 
 const Order = (props) => {
   const [order, setOrder] = useState([]);
@@ -58,6 +59,11 @@ const Order = (props) => {
   };
 
   const confirmUpdateCancel = () => {
+     // Nếu là hủy đơn và chưa nhập mô tả thì báo lỗi
+      if (obj.statusId !== RETURN_STATUS_ID && (!reason  || description.trim() === '')) {
+        toast.error("Vui lòng nhập mô tả lý do hủy đơn hàng.");
+        return;
+      }
     const data = {
       id: obj.orderId,
       description: reason || "Hoàn trả đơn hàng"
@@ -188,40 +194,44 @@ const Order = (props) => {
               </p>
             </div>
             <div className="row col-12 mb-5">
-              <div className="col-12 mb-3 mt-3 mini-card">
-                <div className="form-check form-check-inline mr-5">
-                  <input
+              <div className="row col-12 mb-5">
+                <div className="col-12 mb-3 mt-3 mini-card" 
+                    style={{ overflowX: 'auto', whiteSpace: 'nowrap', padding: '10px' }}>
+                  <div className="form-check form-check-inline mr-5" style={{ display: 'inline-block' }}>
+                    <input
                       className="form-check-input"
                       type="radio"
                       name="inlineRadioOptions"
                       value="0"
                       onChange={(event) => getAllOrderByStatus(event.target.value)}
                       checked={status == 0}
-                  />
-                  <label className="form-check-label">Tất cả</label>
-                </div>
-                {orderStatus &&
+                    />
+                    <label className="form-check-label">Tất cả</label>
+                  </div>
+
+                  {orderStatus &&
                     orderStatus.map((item, index) => (
-                        <div
-                            className="form-check form-check-inline mr-5 ml-5"
-                            key={index}
-                        >
-                          <input
-                              className="form-check-input"
-                              type="radio"
-                              name="inlineRadioOptions"
-                              value={item.id}
-                              onChange={(event) =>
-                                  getAllOrderByStatus(event.target.value)
-                              }
-                              checked={status == item.id}
-                          />
-                          <label className="form-check-label" htmlFor="inlineRadio2">
-                            {item.name}
-                          </label>
-                        </div>
+                      <div
+                        className="form-check form-check-inline mr-5 ml-5"
+                        key={index}
+                        style={{ display: 'inline-block' }}
+                      >
+                        <input
+                          className="form-check-input"
+                          type="radio"
+                          name="inlineRadioOptions"
+                          value={item.id}
+                          onChange={(event) => getAllOrderByStatus(event.target.value)}
+                          checked={status == item.id}
+                        />
+                        <label className="form-check-label" htmlFor="inlineRadio2">
+                          {item.name}
+                        </label>
+                      </div>
                     ))}
+                </div>
               </div>
+
               <table className="table table-striped table-bordered mt-2 text-center">
                 <thead>
                 <tr>
@@ -368,10 +378,11 @@ const Order = (props) => {
               </Form.Select>
               {obj.statusId !== RETURN_STATUS_ID && (
                   <Form>
-                    <Form.Label style={{ marginRight: 30, marginBottom: 10 }}>
+                    <Form.Label style={{ marginRight: 30, marginBottom: 10  }}>
                       Mô tả
                     </Form.Label>
                     <Form.Control
+                        style={{background:'white',color:"black"}}
                         as="textarea"
                         rows={3}
                         onChange={(e) => descriptionHandler(e.target.value)}
