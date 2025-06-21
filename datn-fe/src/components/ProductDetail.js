@@ -176,19 +176,44 @@ const ProductDetail = (props) => {
   // extract a representative pixel color from each image
   useEffect(() => {
     if (item && item.images) {
+      console.log("Processing images for color swatches:", item.images);
       const results = [];
-      item.images
+      const filteredImages = item.images
         .filter(imgName => 
           // Filter out cloth_04 image and any black images specifically for Doodle Backpack
           !(item.code === "GV7412" && (imgName.includes("cloth_04") || imgName === "black.jpg" || imgName === "black.png"))
-        )
-        .forEach((imgName) => {
-          const img = new Image();
-          // require may return a module with default
-          const src = `http://localhost:8080/uploads/${item.image}`;
-          img.src = src.default || src;
-          img.crossOrigin = 'Anonymous';
-          img.onload = () => {
+        );
+      
+      console.log("Filtered images:", filteredImages);
+      
+      if (filteredImages.length === 0) {
+        console.log("No valid images found for color extraction");
+        setSwatches([]);
+        return;
+      }
+      
+      filteredImages.forEach((imgName, index) => {
+        const img = new Image();
+        const src = `http://localhost:8080/uploads/${imgName}`;
+        img.src = src;
+        img.crossOrigin = 'Anonymous';
+        
+        // Set timeout for image loading
+        const timeout = setTimeout(() => {
+          console.warn(`Image loading timeout for ${imgName}, using default color`);
+          const defaultColors = ['#000000', '#808080', '#ffffff', '#ff0000', '#0000ff'];
+          const defaultColor = defaultColors[index % defaultColors.length];
+          results.push({ imgName, color: defaultColor });
+          
+          if (results.length === filteredImages.length) {
+            console.log("Setting swatches with timeout defaults:", results);
+            setSwatches(results);
+          }
+        }, 5000); // 5 second timeout
+        
+        img.onload = () => {
+          clearTimeout(timeout);
+          try {
             const canvas = document.createElement('canvas');
             canvas.width = img.naturalWidth;
             canvas.height = img.naturalHeight;
@@ -199,14 +224,43 @@ const ProductDetail = (props) => {
             const y = Math.floor(img.naturalHeight / 2);
             const [r, g, b] = ctx.getImageData(x, y, 1, 1).data;
             const hex = '#' + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
+            console.log(`Color extracted from ${imgName}: ${hex}`);
             results.push({ imgName, color: hex });
-            if (results.length === item.images.filter(img => 
-              !(item.code === "GV7412" && (img.includes("cloth_04") || img === "black.jpg" || img === "black.png"))
-            ).length) {
+            
+            if (results.length === filteredImages.length) {
+              console.log("All colors extracted, setting swatches:", results);
               setSwatches(results);
             }
-          };
-        });
+          } catch (error) {
+            console.error(`Error extracting color from ${imgName}:`, error);
+            const defaultColors = ['#000000', '#808080', '#ffffff', '#ff0000', '#0000ff'];
+            const defaultColor = defaultColors[index % defaultColors.length];
+            results.push({ imgName, color: defaultColor });
+            
+            if (results.length === filteredImages.length) {
+              console.log("Setting swatches after extraction error:", results);
+              setSwatches(results);
+            }
+          }
+        };
+        
+        img.onerror = (error) => {
+          clearTimeout(timeout);
+          console.error(`Failed to load image ${imgName}:`, error);
+          // Add a default color for failed images
+          const defaultColors = ['#000000', '#808080', '#ffffff', '#ff0000', '#0000ff'];
+          const defaultColor = defaultColors[index % defaultColors.length];
+          results.push({ imgName, color: defaultColor });
+          
+          if (results.length === filteredImages.length) {
+            console.log("Setting swatches with some defaults:", results);
+            setSwatches(results);
+          }
+        };
+      });
+    } else {
+      console.log("No item or images found");
+      setSwatches([]);
     }
   }, [item]);
 
@@ -552,22 +606,30 @@ const ProductDetail = (props) => {
                     <div className="mb-4 py-2">
                      <span className="fw-bold mb-2 d-block">Màu sắc</span>
                       <div className="d-flex mb-4">
-                        {uniqueSwatches.map(({ imgName, color }, idx) => (
-                          <div
-                            key={idx}
-                            className={displayImage === imgName ? 'active' : ''}
-                            style={{
-                              width: '36px',
-                              height: '36px',
-                              backgroundColor: color,
-                              borderRadius: '50%',
-                              border: displayImage === imgName ? '2px solid #000' : '1px solid #ddd',
-                              cursor: 'pointer',
-                              marginRight: '8px'
-                            }}
-                            onClick={() => setDisplayImage(imgName)}
-                          ></div>
-                        ))}
+                        {uniqueSwatches.length > 0 ? (
+                          uniqueSwatches.map(({ imgName, color }, idx) => (
+                            <div
+                              key={idx}
+                              className={displayImage === imgName ? 'active' : ''}
+                              style={{
+                                width: '36px',
+                                height: '36px',
+                                backgroundColor: color,
+                                borderRadius: '50%',
+                                border: displayImage === imgName ? '2px solid #000' : '1px solid #ddd',
+                                cursor: 'pointer',
+                                marginRight: '8px'
+                              }}
+                              onClick={() => setDisplayImage(imgName)}
+                              title={`Màu từ ${imgName}`}
+                            ></div>
+                          ))
+                        ) : (
+                          <div className="text-muted">
+                            <i className="fa fa-info-circle me-2"></i>
+                            Đang tải màu sắc...
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="mb-4 py-2">
