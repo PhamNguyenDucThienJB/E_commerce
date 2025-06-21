@@ -32,8 +32,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/api/payment/**",
             "/api/site/pay/**",
             "/api/verify-email/**",
-            "/uploads/**"
+            "/uploads/**",
 //            "api/site/product/get-all/**"
+            "/api/ratings/product/**"
     };
     private static final String[] PRIVATE_ADMIN = {
             "/api/admin/**"
