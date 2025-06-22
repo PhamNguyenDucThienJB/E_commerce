@@ -164,7 +164,17 @@ useEffect(() => {
           response = await getBestSellingProducts(page, size, "DESC");
           break;
         case "most-viewed":
-          response = await getMostViewedProducts(page, size);
+         const dataViewed = {
+            page,
+            count: size,
+            category: category.length > 0 ? category : defaultCategory,
+            brand: brand.length > 0 ? brand : defaultBrand,
+            min,
+            max,
+            sortField: "view", // chính xác tên field trong entity Java
+            sortDirection: "DESC",  // hoặc "ASC" nếu muốn
+          };
+          response = await filterAdvancedProducts(dataViewed);
           break;
         case "price-asc":
           response = await getAllProducts(page, size, true, "price", "DESC");
@@ -200,7 +210,17 @@ useEffect(() => {
           break;
         case "latest":
         default:
-          response = await getAllProducts(page, size, true, "modifyDate", "DESC");
+          const dataDate = {
+            page,
+            count: size,
+            category: category.length > 0 ? category : defaultCategory,
+            brand: brand.length > 0 ? brand : defaultBrand,
+            min,
+            max,
+            sortField: "modifyDate", // chính xác tên field trong entity Java
+            sortDirection: "DESC",  // hoặc "ASC" nếu muốn
+          };
+          response = await filterAdvancedProducts(dataDate);
           break;
       }
     }
