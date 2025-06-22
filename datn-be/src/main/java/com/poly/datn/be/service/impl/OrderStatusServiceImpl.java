@@ -27,4 +27,9 @@ public class OrderStatusServiceImpl implements OrderStatusService {
     public List<OrderStatus> getAllOrderStatus() {
         return orderStatusRepo.findAll();
     }
+
+    @Override
+    public OrderStatus save(OrderStatus orderStatus) {
+        return orderStatusRepo.save(orderStatus);
+    }
 }

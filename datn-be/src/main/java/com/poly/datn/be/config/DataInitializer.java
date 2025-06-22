@@ -3,9 +3,11 @@ package com.poly.datn.be.config;
 import com.poly.datn.be.entity.Account;
 import com.poly.datn.be.entity.AccountDetail;
 import com.poly.datn.be.entity.Role;
+import com.poly.datn.be.entity.OrderStatus;
 import com.poly.datn.be.repo.AccountRepo;
 import com.poly.datn.be.service.AccountDetailService;
 import com.poly.datn.be.service.RoleService;
+import com.poly.datn.be.service.OrderStatusService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -28,11 +30,18 @@ public class DataInitializer implements CommandLineRunner {
     private RoleService roleService;
 
     @Autowired
+    private OrderStatusService orderStatusService;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
         System.out.println("[DataInitializer] Running data initializer...");
+        
+        // Initialize Order Statuses first
+        initializeOrderStatuses();
+        
         // Retrieve admin role
         Role adminRole = roleService.findById(1L);
         // Check existing account with username 'admin'
@@ -87,6 +96,57 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("[DataInitializer] Updated existing user to admin: username=admin, password=Admin@123");
         } else {
             System.out.println("[DataInitializer] 'admin' user with admin role exists; skipping.");
+        }
+    }
+
+    private void initializeOrderStatuses() {
+        System.out.println("[DataInitializer] Initializing Order Statuses...");
+        
+        // Define order statuses
+        String[][] orderStatuses = {
+            {"1", "Chờ xác nhận", "Đơn hàng đang chờ xác nhận từ người bán"},
+            {"2", "Đã xác nhận", "Đơn hàng đã được xác nhận và đang chuẩn bị"},
+            {"3", "Đang vận chuyển", "Đơn hàng đang được vận chuyển"},
+            {"4", "Đã giao", "Đơn hàng đã được giao thành công"},
+            {"5", "Đã hủy", "Đơn hàng đã bị hủy"},
+            {"6", "Đã hoàn trả", "Đơn hàng đã được chấp nhận hoàn trả"},
+            {"7", "Chờ xác nhận hoàn trả", "Đang chờ người bán xác nhận yêu cầu hoàn trả"},
+            {"8", "Từ chối hoàn trả", "Yêu cầu hoàn trả đã bị từ chối"}
+        };
+
+        for (String[] statusData : orderStatuses) {
+            Long statusId = Long.parseLong(statusData[0]);
+            try {
+                // Check if order status already exists
+                OrderStatus existingStatus = orderStatusService.getById(statusId);
+                if (existingStatus == null) {
+                    // Create new order status
+                    OrderStatus orderStatus = new OrderStatus();
+                    orderStatus.setId(statusId);
+                    orderStatus.setName(statusData[1]);
+                    orderStatus.setDescription(statusData[2]);
+                    orderStatus.setCreateDate(LocalDate.now());
+                    orderStatus.setUpdateDate(LocalDate.now());
+                    orderStatusService.save(orderStatus);
+                    System.out.println("[DataInitializer] Created OrderStatus: " + statusData[1]);
+                } else {
+                    System.out.println("[DataInitializer] OrderStatus already exists: " + statusData[1]);
+                }
+            } catch (Exception e) {
+                // If getById throws exception when not found, create new status
+                OrderStatus orderStatus = new OrderStatus();
+                orderStatus.setId(statusId);
+                orderStatus.setName(statusData[1]);
+                orderStatus.setDescription(statusData[2]);
+                orderStatus.setCreateDate(LocalDate.now());
+                orderStatus.setUpdateDate(LocalDate.now());
+                try {
+                    orderStatusService.save(orderStatus);
+                    System.out.println("[DataInitializer] Created OrderStatus: " + statusData[1]);
+                } catch (Exception ex) {
+                    System.out.println("[DataInitializer] Could not create OrderStatus: " + statusData[1] + " - " + ex.getMessage());
+                }
+            }
         }
     }
 } 

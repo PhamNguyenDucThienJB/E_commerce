@@ -19,7 +19,7 @@ const Order = (props) => {
   const [showFouth, setShowFouth] = useState(false);
   const [description, setDescription] = useState(null);
   const [reason, setReason] = useState(null);
-  const RETURN_STATUS_ID = 6;
+  // Removed RETURN_STATUS_ID constant, now using status ID 7 directly for return requests
   const history = useHistory();
 
   const handleCloseFouth = () => {
@@ -60,21 +60,22 @@ const Order = (props) => {
 
   const confirmUpdateCancel = () => {
      // Nếu là hủy đơn và chưa nhập mô tả thì báo lỗi
-      if (obj.statusId !== RETURN_STATUS_ID && (!reason  || description.trim() === '')) {
+      if (obj.statusId !== 7 && (!reason  || description.trim() === '')) {
         toast.error("Vui lòng nhập mô tả lý do hủy đơn hàng.");
         return;
       }
     const data = {
       id: obj.orderId,
-      description: reason || "Hoàn trả đơn hàng"
+      description: reason || "Hoàn trả đơn hàng",
+      isApproved: obj.statusId === 7 ? null : undefined // null indicates customer return request
     };
 
-    console.log("Sending data:", data, "Status:", obj.statusId === RETURN_STATUS_ID ? "Return" : "Cancel");
+    console.log("Sending data:", data, "Status:", obj.statusId === 7 ? "Return" : "Cancel");
 
-    const action = obj.statusId === RETURN_STATUS_ID ? returnOrder : cancelOrder;
+    const action = obj.statusId === 7 ? returnOrder : cancelOrder;
     action(data)
         .then(() => {
-          const successMessage = obj.statusId === RETURN_STATUS_ID
+          const successMessage = obj.statusId === 7
               ? "Đơn hàng đã được đánh dấu hoàn trả thành công. Vui lòng đợi xác nhận từ cửa hàng."
               : "Hủy đơn hàng thành công.";
 
@@ -82,9 +83,9 @@ const Order = (props) => {
 
           // Reload trang sau khi hủy/hoàn trả để hiển thị đúng trạng thái
           setTimeout(() => {
-            setStatus(obj.statusId === RETURN_STATUS_ID ? 0 : obj.statusId);
+            setStatus(obj.statusId === 7 ? 0 : obj.statusId);
             setPage(1);
-            getAllOrderByStatus(obj.statusId === RETURN_STATUS_ID ? 0 : obj.statusId)
+            getAllOrderByStatus(obj.statusId === 7 ? 0 : obj.statusId)
                 .then((res) => {
                   setOrder(res.data.content);
                   setTotal(res.data.totalPages);
@@ -179,9 +180,10 @@ const Order = (props) => {
     }
   };
 
-  // Placeholder for return functionality when order is delivered
+  // Handle return functionality when order is delivered
   const handleReturnOrder = (orderId) => {
-    handleShowFouth(orderId, RETURN_STATUS_ID);
+    // Use status 7 (WAITING_RETURN) for customer return requests
+    handleShowFouth(orderId, 7);
   };
 
   return (
@@ -349,18 +351,18 @@ const Order = (props) => {
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <Alert variant={obj.statusId === RETURN_STATUS_ID ? "primary" : "danger"}>
-              <Alert.Heading>{obj.statusId === RETURN_STATUS_ID ? "Hoàn trả đơn hàng" : "Hủy đơn hàng"}</Alert.Heading>
+            <Alert variant={obj.statusId === 7 ? "primary" : "danger"}>
+              <Alert.Heading>{obj.statusId === 7 ? "Hoàn trả đơn hàng" : "Hủy đơn hàng"}</Alert.Heading>
               <hr />
               <Form.Label style={{ marginRight: 30, marginBottom: 10 }}>
-                {obj.statusId === RETURN_STATUS_ID ? "Lí do hoàn trả" : "Lí do hủy đơn"}
+                {obj.statusId === 7 ? "Lí do hoàn trả" : "Lí do hủy đơn"}
               </Form.Label>
               <Form.Select
                   style={{ height: 40, width: 420, marginBottom: 20 }}
                   onChange={(e) => reasonHandler(e.target.value)}
               >
                 <option value="">Chọn lý do</option>
-                {obj.statusId === RETURN_STATUS_ID ? (
+                {obj.statusId === 7 ? (
                     <>
                       <option value="Sản phẩm bị lỗi">Sản phẩm bị lỗi</option>
                       <option value="Sản phẩm không đúng mô tả">Sản phẩm không đúng mô tả</option>
@@ -376,7 +378,7 @@ const Order = (props) => {
                     </>
                 )}
               </Form.Select>
-              {obj.statusId !== RETURN_STATUS_ID && (
+              {obj.statusId !== 7 && (
                   <Form>
                     <Form.Label style={{ marginRight: 30, marginBottom: 10  }}>
                       Mô tả
@@ -395,7 +397,7 @@ const Order = (props) => {
             <Button
                 variant="danger"
                 onClick={confirmUpdateCancel}
-                disabled={obj.statusId === RETURN_STATUS_ID ? !reason : (!reason || !description)}
+                disabled={obj.statusId === 7 ? !reason : (!reason || !description)}
             >
               Xác nhận
             </Button>
