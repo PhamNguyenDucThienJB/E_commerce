@@ -32,7 +32,8 @@ public class OrderApi {
                                        @RequestParam("status") Optional<Long> status,
                                        @RequestParam("page")Optional<Integer> page,
                                        @RequestParam("size")Optional<Integer> size){
-        Sort sort = Sort.by(Sort.Direction.DESC,"modifyDate");
+        Sort sort = Sort.by(Sort.Direction.DESC,"modifyDate")
+                            .and(Sort.by(Sort.Direction.DESC, "id"));
         Pageable pageable = PageRequest.of(page.orElse(1) - 1, size.orElse(8),sort);
         return new ResponseEntity<>(orderService.findOrderByAccountIdAndOrderStatusId(id, status.orElse(0L), pageable), HttpStatus.OK);
     }
