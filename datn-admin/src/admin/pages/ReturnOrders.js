@@ -107,13 +107,22 @@ const ReturnOrders = () => {
     setMonth(value);
     setFrom("");
     setTo("");
-    getOrderByOrderStatusAndYearAndMonth(7, year, value, page, 20)
-      .then((res) => {
-        console.log("Orders by year/month:", res.data);
-        setOrders(res.data.content);
-        setTotal(res.data.totalPages);
-      })
-      .catch((error) => console.log(error));
+            // Filter all orders by status 7 (waiting return) for the selected year/month
+        getAllOrderAndPagination(0, 1, 1000)
+          .then((res) => {
+            const allOrders = res.data.content || [];
+            const filteredOrders = allOrders.filter(
+              (order) => order.orderStatus && order.orderStatus.id === 7 &&
+              order.createDate && order.createDate.includes(`${year}-${value.toString().padStart(2, '0')}`)
+            );
+            const pageSize = 20;
+            const totalPages = Math.max(Math.ceil(filteredOrders.length / pageSize), 1);
+            setTotal(totalPages);
+            const startIdx = (page - 1) * pageSize;
+            const pageSlice = filteredOrders.slice(startIdx, startIdx + pageSize);
+            setOrders(pageSlice);
+          })
+          .catch((error) => console.log(error));
   };
 
   const changeYearHandler = (value) => {
@@ -131,10 +140,20 @@ const ReturnOrders = () => {
         let strFrom = a[2] + "-" + a[1] + "-" + a[0];
         let b = to.split("-");
         let strTo = b[2] + "-" + b[1] + "-" + b[0];
-        getOrderByOrderStatusBetweenDate(7, strFrom, strTo, page, 20)
+        // Filter all orders by status 7 (waiting return) for the date range
+        getAllOrderAndPagination(0, 1, 1000)
           .then((res) => {
-            setOrders(res.data.content);
-            setTotal(res.data.totalPages);
+            const allOrders = res.data.content || [];
+            const filteredOrders = allOrders.filter(
+              (order) => order.orderStatus && order.orderStatus.id === 7 &&
+              order.createDate && order.createDate >= from && order.createDate <= to
+            );
+            const pageSize = 20;
+            const totalPages = Math.max(Math.ceil(filteredOrders.length / pageSize), 1);
+            setTotal(totalPages);
+            const startIdx = (page - 1) * pageSize;
+            const pageSlice = filteredOrders.slice(startIdx, startIdx + pageSize);
+            setOrders(pageSlice);
           })
           .catch((error) => console.log(error));
       }
