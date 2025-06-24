@@ -41,3 +41,6 @@ Dự án xây dựng một website thương mại điện tử hỗ trợ ngư�
     Tool: VScode
     Notejs
     npm start
+## 📝 Kinh Nghiệm;
+- [x] Nên làm rõ yêu cầu người tiều
+- [x] Phân tích Database rõ ràng và Phù hợp hơn
