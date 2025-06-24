@@ -42,5 +42,5 @@ Dự án xây dựng một website thương mại điện tử hỗ trợ ngư�
     Notejs
     npm start
 ## 📝 Kinh Nghiệm;
-- [x] Nên làm rõ yêu cầu người tiều
+- [x] Nên làm rõ yêu cầu người tiêu dùng
 - [x] Phân tích Database rõ ràng và Phù hợp hơn
