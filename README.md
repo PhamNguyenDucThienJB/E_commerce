@@ -43,4 +43,5 @@ Dự án xây dựng một website thương mại điện tử hỗ trợ ngư�
     npm start
 ## 📝 Kinh Nghiệm;
 - [x] Nên làm rõ yêu cầu người tiêu dùng
-- [x] Phân tích Database rõ ràng và Phù hợp hơn
+- [x] Phân tích Database rõ ràng và tường minh hơn
+- [x] Bày tỏ quan điểm rõ ràng về chức năng hơn 
